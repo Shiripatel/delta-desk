@@ -19,14 +19,14 @@ DOMAINS: dict[str, str] = {
     # banks and financials
     "BANKBARODA": "bankofbaroda.in", "PNB": "pnbindia.in", "FEDERALBNK": "federalbank.co.in", "AUBANK": "aubank.in",
     "IDFCFIRSTB": "idfcfirstbank.com", "CANBK": "canarabank.com", "CHOLAFIN": "cholamandalam.com", "ICICIGI": "icicilombard.com",
-    "HDFCAMC": "hdfcfund.com", "MUTHOOTFIN": "muthootfinance.com", "SBICARD": "sbicard.com", "PFC": "pfcindia.com", "RECLTD": "recindia.nic.in",
-    "ICICIPRULI": "iciciprulife.com", "LICHSGFIN": "lichousing.com", "LICI": "licindia.in", "IRFC": "irfc.co.in", "SUNDARMFIN": "sundaramfinance.in",
+    "HDFCAMC": "hdfcfund.com", "MUTHOOTFIN": "muthootfinance.com", "SBICARD": "sbicard.com", "PFC": "pfcindia.com", "RECLTD": "recindia.nic.in",  # noqa: E501
+    "ICICIPRULI": "iciciprulife.com", "LICHSGFIN": "lichousing.com", "LICI": "licindia.in", "IRFC": "irfc.co.in", "SUNDARMFIN": "sundaramfinance.in",  # noqa: E501
     "BAJAJHLDNG": "bajajholdings.com",
     # midcap select
     "PERSISTENT": "persistent.com", "MAXHEALTH": "maxhealthcare.in", "DIXON": "dixoninfo.com", "INDHOTEL": "ihcltata.com",
-    "LUPIN": "lupin.com", "AUROPHARMA": "aurobindo.com", "CUMMINSIND": "cummins.com", "VOLTAS": "voltas.com", "ASHOKLEY": "ashokleyland.com",
+    "LUPIN": "lupin.com", "AUROPHARMA": "aurobindo.com", "CUMMINSIND": "cummins.com", "VOLTAS": "voltas.com", "ASHOKLEY": "ashokleyland.com",  # noqa: E501
     "MPHASIS": "mphasis.com", "COFORGE": "coforge.com", "GODREJPROP": "godrejproperties.com", "ASTRAL": "astralpipes.com", "SRF": "srf.com",
-    "UPL": "upl-ltd.com", "CONCOR": "concorindia.co.in", "PIIND": "piindustries.com", "BHARATFORG": "bharatforge.com", "POLYCAB": "polycab.com",
+    "UPL": "upl-ltd.com", "CONCOR": "concorindia.co.in", "PIIND": "piindustries.com", "BHARATFORG": "bharatforge.com", "POLYCAB": "polycab.com",  # noqa: E501
     "OBEROIRLTY": "oberoirealty.com", "JUBLFOOD": "jubilantfoodworks.com",
     # next 50
     "HAL": "hal-india.co.in", "DLF": "dlf.in", "VBL": "varunbeverages.com", "DIVISLAB": "divislabs.com", "PIDILITIND": "pidilite.com",
@@ -35,7 +35,7 @@ DOMAINS: dict[str, str] = {
     "IOC": "iocl.com", "GAIL": "gailonline.com", "ADANIGREEN": "adanigreenenergy.com", "ADANIPOWER": "adanipower.com",
     "TATAPOWER": "tatapower.com", "JSWENERGY": "jsw.in", "ZOMATO": "zomato.com", "NAUKRI": "infoedge.in", "DMART": "dmartindia.com",
     "HAVELLS": "havells.com", "BOSCHLTD": "bosch.in", "MOTHERSON": "motherson.com", "INDIGO": "goindigo.in", "BHEL": "bhel.com",
-    "CGPOWER": "cgglobal.com", "ATGL": "adanigas.com", "BRITANNIA": "britannia.co.in", "DABUR": "dabur.com", "COLPAL": "colgatepalmolive.co.in",
+    "CGPOWER": "cgglobal.com", "ATGL": "adanigas.com", "BRITANNIA": "britannia.co.in", "DABUR": "dabur.com", "COLPAL": "colgatepalmolive.co.in",  # noqa: E501
     "MARICO": "marico.com", "UNITDSPR": "diageoindia.com", "LTIM": "ltimindtree.com", "HINDPETRO": "hindustanpetroleum.com",
     "JINDALSTEL": "jindalsteelpower.com",
     # ETFs (fund houses)
