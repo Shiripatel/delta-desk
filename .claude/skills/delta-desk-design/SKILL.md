@@ -16,7 +16,8 @@ new shared thing, add it to `design.css` and use it from every page.
 |---|---|---|
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
 | `/markets` | `markets.html` | Markets |
-| `/desk` | `agents.html` | Agents |
+| `/desk` | `agents.html` | Agents (the agent council: stock + horizon → verdict) |
+| `/sniper` | `sniper.html` | (F&O sniper desk, linked from the Agents page) |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is the segmented control in the header, same three items on every page, `aria-current="page"`

@@ -20,7 +20,11 @@ def test_pages_and_assets():
         home = c.get("/").text
         assert "AI RADAR" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
         desk = c.get("/desk").text
-        assert "agent pipeline" in desk and 'id="pipe"' in desk and "/static/design.css" in desk and "wlPane" not in desk
+        assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk
+        sn = c.get("/sniper").text
+        assert "agent pipeline" in sn and 'id="pipe"' in sn
+        cn = c.get("/markets/council?symbol=HDFCBANK&horizon=1h").json()
+        assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
         mk = c.get("/markets").text
         assert "DDAI.radar(" in mk and "DDAI.ranking(" in mk and "/static/ai.css" in mk and "wlPane" not in mk
         assert 'data-ix="SENSEX"' in home and "limit=10" in home

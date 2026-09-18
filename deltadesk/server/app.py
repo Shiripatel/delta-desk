@@ -45,6 +45,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def desk():
         return FileResponse(ROOT / "agents.html")
 
+    @app.get("/sniper")
+    async def sniper():
+        return FileResponse(ROOT / "sniper.html")
+
     @app.get("/prototype")
     async def prototype():
         return FileResponse(ROOT / "prototype" / "index.html")
@@ -152,6 +156,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/ai")
     async def m_ai(index: str | None = None, limit: int = 50):
         return JSONResponse(await asyncio.to_thread(markets.ai_rank, index, limit))
+
+    @app.get("/markets/council")
+    async def m_council(symbol: str = "HDFCBANK", horizon: str = "1d"):
+        return JSONResponse(await asyncio.to_thread(markets.council_run, symbol, horizon))
 
     @app.get("/markets/radar")
     async def m_radar(index: str | None = None, days: int = 5):

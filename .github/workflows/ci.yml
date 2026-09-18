@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 - <<'EOF'
           import re, io
-          for f in ("home.html", "markets.html", "agents.html"):
+          for f in ("home.html", "markets.html", "agents.html", "sniper.html"):
               s = io.open(f, encoding="utf-8").read()
               for i, b in enumerate(re.findall(r"<script>(.*?)</script>", s, re.S)):
                   io.open(f"/tmp/{f}.{i}.js", "w", encoding="utf-8").write(b)
