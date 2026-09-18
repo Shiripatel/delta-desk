@@ -19,9 +19,9 @@ import os
 import re
 import threading
 import time
-import uuid
 import urllib.parse
 import urllib.request
+import uuid
 from pathlib import Path
 
 DATA = Path("data")
