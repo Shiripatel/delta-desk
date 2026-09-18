@@ -45,6 +45,9 @@
   document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();q.focus();q.select()}});
   var tg=document.getElementById('wlToggle');if(tg)tg.addEventListener('click',function(){pane.dataset.open=pane.dataset.open==='1'?'0':'1'});
 
+  window.DDWL={has:function(k){return !!(data&&(data.lists[name()]||[]).some(function(r){return r.key===k}))},
+    name:name,add:function(k){return send('POST','/markets/watchlist/'+encodeURIComponent(name())+'/'+encodeURIComponent(k)).then(render)},
+    remove:function(k){return send('DELETE','/markets/watchlist/'+encodeURIComponent(name())+'/'+encodeURIComponent(k)).then(render)}};
   load();setInterval(function(){if(!document.hidden)load()},3000);
   get('/markets/source').then(function(s){var c=$('#wlCnt');c.title=s.note||'';if(s.delay_min)c.textContent+=' · '+s.delay_min+'m delayed'}).catch(function(){});
 })();

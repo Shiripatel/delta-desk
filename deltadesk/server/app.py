@@ -38,7 +38,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     # ---- pages ----------------------------------------------------------------------------
     @app.get("/")
-    async def index():
+    async def home():
+        return FileResponse(ROOT / "home.html")
+
+    @app.get("/desk")
+    async def desk():
         return FileResponse(ROOT / "index.html")
 
     @app.get("/markets")

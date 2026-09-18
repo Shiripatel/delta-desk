@@ -1,0 +1,41 @@
+/* Shared AI ranking + radar components (used by / and /markets). Requires the page's design tokens. */
+.ring{display:inline-grid;place-items:center;width:34px;height:34px;position:relative}
+.ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.ring b{font-weight:500;font-size:12px;position:relative}
+.ring circle{fill:none;stroke-width:3}
+.ring .bg{stroke:var(--fill-2)}
+.ring.g .fg{stroke:var(--good)}.ring.a .fg{stroke:var(--warn)}.ring.r .fg{stroke:var(--bad)}
+table.ai td{vertical-align:middle}
+table.ai .co b{font-weight:500}
+table.ai .co em{display:block;font-style:normal;font-size:11px;color:var(--ink-3)}
+table.ai th button[data-dir]::after{content:" ↓";color:var(--ink)}
+table.ai th button[data-dir="asc"]::after{content:" ↑"}
+.spark{display:block;width:84px;height:28px}
+.spark path.l{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark path.a{fill:var(--s1);opacity:.12}
+.star{color:var(--ink-3);padding:0 4px;background:none;border:0;cursor:pointer;font:inherit}
+.star[aria-pressed="true"]{color:var(--accent-deep)}
+/* radar */
+.radar{position:relative;padding:12px 16px}
+.radar svg{width:100%;height:auto;display:block;margin:0 auto;font:300 10.5px var(--mono)}
+.radar .ring-r{fill:none;stroke:var(--line);stroke-width:1}
+.radar .ring-r.buy{fill:var(--up1);stroke:var(--up2)}
+.radar .ring-r.sell{stroke:var(--dn2)}
+.radar .spoke{stroke:var(--line);stroke-width:1}
+.radar text{fill:var(--ink-3)}
+.radar .lbl{fill:var(--ink-2);font-size:10px}
+.radar .zone{fill:var(--ink-3);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase}
+.radar .trail{fill:none;stroke:var(--ink-3);stroke-width:1;opacity:.35;stroke-dasharray:2 2}
+.radar .pt{transition:transform .7s cubic-bezier(.4,0,.2,1);cursor:pointer}
+.radar .pt circle{stroke:var(--bg);stroke-width:1.5}
+.radar .pt.g circle{fill:var(--good)}.radar .pt.a circle{fill:var(--warn)}.radar .pt.r circle{fill:var(--bad)}
+.radar .pt.wl circle{stroke:var(--accent-deep);stroke-width:2.5}
+.radar .pt text{fill:var(--ink);font-size:9.5px;pointer-events:none}
+.radar .tip{position:absolute;z-index:9;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 8px;font-size:11px;border-radius:2px;white-space:nowrap;display:none}
+.rd-ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 16px 12px;font-size:11.5px;color:var(--ink-2)}
+.rd-ctl button{padding:6px 12px;border:1px solid var(--line-2);border-radius:2px;font:inherit;font-size:11px;color:inherit;background:var(--bg);cursor:pointer}
+.rd-ctl button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rd-ctl input[type=range]{width:180px}
+.rd-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11.5px;color:var(--ink-2)}
+.rd-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:-1px}
+.rd-legend i.g{background:var(--good)}.rd-legend i.a{background:var(--warn)}.rd-legend i.r{background:var(--bad)}.rd-legend i.w{background:var(--ink-3);width:14px;height:14px}.rd-legend i.wl{background:none;border:2px solid var(--accent-deep)}

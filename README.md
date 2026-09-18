@@ -23,7 +23,7 @@ opportunity zones, and fires one typed, risk-checked decision when the market re
 uv sync                                     # installs Python 3.12 and dependencies
 uv run deltadesk run --fast --auto-approve  # one synthetic range day, paper fills, typed decisions
 uv run deltadesk run --scenario trend_up --fast --auto-approve -v
-uv run deltadesk serve --speed 120          # HTTP + WebSocket on :8000, index.html at /
+uv run deltadesk serve --speed 120          # :8000 → / AI radar + ranking, /markets, /desk (agents), WS /stream
 uv run pytest
 ```
 
