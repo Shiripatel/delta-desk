@@ -118,7 +118,6 @@
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">F&amp;O SNIPER</span></div>
   <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/desk">Agents</a><a href="/sniper" aria-current="page">Sniper</a></nav>
   <div class="status">
-    <span class="seg" id="mode"><button id="mPaper" aria-pressed="true">PAPER</button><button id="mLive" class="live" aria-pressed="false">LIVE</button></span>
     <span class="clock num" id="clock">—</span>
     <button class="kill" id="kill" title="Flatten every position and disarm all zones">✕ kill switch</button>
   </div>
@@ -253,9 +252,8 @@
     var exec=dlist().filter(function(d){return d.state==='executed'});var margin=exec.reduce(function(a,d){return a+(d.risk.margin||0)},0);
     $('#risk').innerHTML='<div><div class="r"><span>day P&L</span></div><div class="pnl num '+cls(pnl)+'" style="font:600 20px/1.1 var(--sans);margin-top:4px">'+(pnl>=0?'+':'−')+rupee(Math.abs(pnl))+'</div><div class="r"><span>realised '+rupee(o.realised)+' · unrealised '+rupee(o.unrealised)+'</span></div></div>'+meter('margin used',margin,L.margin_cap||0,rupee)+meter('daily drawdown',Math.max(0,-pnl),L.daily_drawdown||0,rupee)+meter('open structures',exec.length,L.max_open_structures||0,function(v){return String(v)});
     $('#posBody').innerHTML=o.positions.length?o.positions.map(function(q){var pl=(q.ltp-q.avg)*q.qty;return '<tr><td>'+esc(q.symbol)+' · '+(q.qty>0?'long':'short')+'</td><td class="num">'+(q.qty>0?'+':'')+q.qty+'</td><td class="num">'+fmt(q.avg)+'</td><td class="num">'+fmt(q.ltp)+'</td><td class="num">'+q.delta.toFixed(2)+'</td><td class="num">'+fmt(Math.round(q.theta_day*q.qty),0)+'</td><td class="num pnl '+cls(pl)+'">'+(pl>=0?'+':'')+fmt(Math.round(pl),0)+'</td></tr>'}).join(''):'<tr><td colspan="7" class="muted">no open positions</td></tr>';
-    $('#mPaper').setAttribute('aria-pressed',String(o.mode==='paper'));$('#mLive').setAttribute('aria-pressed',String(o.mode==='live'));stage()}
+    stage()}
   $('#kill').addEventListener('click',function(){if(!confirm('Flatten all positions and disarm every zone?'))return;post('/kill').then(function(d){if(d&&d.positions)renderOrders(d);log('risk','KILL SWITCH sent')})});
-  $('#mLive').addEventListener('click',function(){log('exec','live routing is not enabled in this build (paper only)')});
   var handlers={log:function(m){var a=/^(planner|sniper|feed|regime|chain|strategy|risk|exec)\b/.exec(m);log(a?a[1]:(/^S-\d+/.test(m)?'exec':'desk'),String(m).replace(/^([a-z]+): /,''))},
     plan:function(pl){plan=pl;renderPlan();renderTargets();renderChart();stage()},snapshot:function(s){snap=s;$('#und').textContent=s.underlying;renderScope();renderChart();renderChain();renderTargets();stage()},
     regime:function(r){regime=r;renderScope()},chain:function(c){stats=c;renderScope();renderTargets()},trigger:function(t){log('sniper',t.zone.id+' fired · q='+t.quality.toFixed(2)+' · '+t.why);if(plan)renderTargets()},
