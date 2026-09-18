@@ -26,8 +26,24 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .filters .seg button{padding:5px 12px;border-right:1px solid var(--line);font-size:11px}
 .filters .seg button:last-child{border-right:0}
 .filters .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.issue{font-weight:500}
-.issue em{display:block;font-style:normal;font-size:11px;color:var(--ink-3)}
+.issue{font:500 13.5px/1.25 var(--sans);letter-spacing:-.01em}
+.issue em{display:block;font:300 11px/1.3 var(--mono);color:var(--ink-3);margin-top:2px}
+table.ipo th{background:var(--fill);color:var(--ink-2);padding:10px 12px}
+table.ipo td{padding:11px 12px;vertical-align:middle;border-bottom:1px solid var(--line)}
+table.ipo tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--fill) 55%,transparent)}
+table.ipo .money{font-size:12.5px;color:var(--ink)}
+table.ipo .date{white-space:nowrap}
+table.ipo .date small{color:var(--ink-3);margin-left:4px}
+.pill{display:inline-block;padding:3px 8px;border-radius:3px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line-2);color:var(--ink-2)}
+.pill.open{background:var(--good);border-color:var(--good);color:#fff}
+.pill.upcoming{background:var(--warn);border-color:var(--warn);color:#1E1E1E}
+.pill.closed{background:var(--fill-2);border-color:var(--fill-2)}
+.pill.listed{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.pill.sme{border-color:var(--s2);color:var(--s2)}.pill.main{border-color:var(--s1);color:var(--s1)}
+.sec-head.open{background:color-mix(in srgb,var(--good) 9%,transparent)}
+.sec-head.upcoming{background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.sec-head.done{background:var(--fill)}
+.gain.up{color:var(--good);font-weight:500}.gain.dn{color:var(--bad);font-weight:500}
 .days{font-size:11px;color:var(--ink-3)}
 .bar{display:inline-block;width:80px;height:6px;background:var(--fill-2);border-radius:1px;position:relative;vertical-align:middle;margin-right:6px}
 .bar i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:1px}
@@ -43,7 +59,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">IPO</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo" aria-current="page">IPO</a><a href="/desk">Agents</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo" aria-current="page">IPO</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
@@ -73,18 +89,18 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section>
   <div class="filters"><span>segment</span><span class="seg" id="seg"><button data-seg="" aria-pressed="true">all</button><button data-seg="Mainboard">mainboard</button><button data-seg="SME">SME</button></span><span style="margin-left:auto" id="meta">—</span></div>
-  <div class="sec-head"><h2><i>[02]</i>open now</h2><span class="meta">bidding window is live</span></div>
-  <div class="tbl-wrap"><table>
+  <div class="sec-head open"><h2><i>[02]</i>open now</h2><span class="meta">bidding window is live</span></div>
+  <div class="tbl-wrap"><table class="ipo">
     <thead><tr><th>issue</th><th>segment</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th><th class="num">subscribed</th><th>listing</th></tr></thead>
     <tbody id="ipoOpen"></tbody>
   </table></div>
-  <div class="sec-head"><h2><i>[03]</i>upcoming</h2><span class="meta">opens in the coming days</span></div>
-  <div class="tbl-wrap"><table>
+  <div class="sec-head upcoming"><h2><i>[03]</i>upcoming</h2><span class="meta">opens in the coming days</span></div>
+  <div class="tbl-wrap"><table class="ipo">
     <thead><tr><th>issue</th><th>segment</th><th>opens</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th></tr></thead>
     <tbody id="ipoUp"></tbody>
   </table></div>
-  <div class="sec-head"><h2><i>[04]</i>closed &amp; listed</h2><span class="meta">most recent first</span></div>
-  <div class="tbl-wrap"><table>
+  <div class="sec-head done"><h2><i>[04]</i>closed &amp; listed</h2><span class="meta">most recent first</span></div>
+  <div class="tbl-wrap"><table class="ipo">
     <thead><tr><th>issue</th><th>segment</th><th>closed</th><th>listing</th><th class="num">price band</th><th class="num">subscribed</th><th class="num">listing gain</th><th>status</th></tr></thead>
     <tbody id="ipoDone"></tbody>
   </table></div>
@@ -121,18 +137,21 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   var data=null,seg='';
   var DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   function dow(iso){var d=new Date(iso+'T00:00:00');return isNaN(d)?'':DAY[d.getDay()]}
-  function dstr(iso){return iso?esc(iso)+' <span class="days">'+dow(iso)+'</span>':'—'}
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dstr(iso){if(!iso)return '—';var d=new Date(iso+'T00:00:00');if(isNaN(d))return esc(iso);return '<span class="date">'+d.getDate()+' '+MON[d.getMonth()]+'<small>'+DAY[d.getDay()]+'</small></span>'}
   function tag(e){return e.example?' <span class="tag">example data</span>':''}
-  function band(e){return '₹'+fmt(e.price_lo,0)+' – '+fmt(e.price_hi,0)}
+  function seg(e){return '<span class="pill '+(e.segment==='SME'?'sme':'main')+'">'+esc(e.segment)+'</span>'}
+  function band(e){return '<span class="money">₹'+fmt(e.price_lo,0)+'–'+fmt(e.price_hi,0)+'</span>'}
+  function money(v){return '<span class="money">₹'+fmt(v,0)+'</span>'}
   function sub(e){return e.subscribed_x!=null?'<span class="bar"><i style="width:'+Math.min(100,e.subscribed_x*10)+'%"></i></span>'+fmt(e.subscribed_x,1)+'×':'<span class="muted">—</span>'}
   function render(){if(!data)return;var rows=data.entries.filter(function(e){return !seg||e.segment===seg});
     var n=function(s){return rows.filter(function(e){return e.status===s})};
     $('#cOpen').textContent=n('open').length;$('#cUp').textContent=n('upcoming').length;$('#cClosed').textContent=n('closed').length;$('#cListed').textContent=n('listed').length;
     $('#src').textContent='source: '+data.source;$('#meta').textContent=rows.length+' issues';
-    $('#ipoOpen').innerHTML=n('open').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+fmt(e.lot*e.price_hi,0)+'</td><td class="num">'+fmt(e.issue_size_cr,0)+'</td><td class="num">'+sub(e)+'</td><td class="num">'+dstr(e.listing)+'</td></tr>'}).join('')||'<tr><td colspan="9" class="muted">nothing open right now</td></tr>';
-    $('#ipoUp').innerHTML=n('upcoming').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.open)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+fmt(e.lot*e.price_hi,0)+'</td><td class="num">'+fmt(e.issue_size_cr,0)+'</td></tr>'}).join('')||'<tr><td colspan="8" class="muted">nothing announced · add entries to data/ipo.json</td></tr>';
+    $('#ipoOpen').innerHTML=n('open').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+money(e.lot*e.price_hi)+'</td><td class="num">'+money(e.issue_size_cr)+' cr</td><td class="num">'+sub(e)+'</td><td class="num">'+dstr(e.listing)+'</td></tr>'}).join('')||'<tr><td colspan="9" class="muted">nothing open right now</td></tr>';
+    $('#ipoUp').innerHTML=n('upcoming').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.open)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+money(e.lot*e.price_hi)+'</td><td class="num">'+money(e.issue_size_cr)+' cr</td></tr>'}).join('')||'<tr><td colspan="8" class="muted">nothing announced · add entries to data/ipo.json</td></tr>';
     var done=n('closed').concat(n('listed')).sort(function(a,b){return (b.close||'').localeCompare(a.close||'')});
-    $('#ipoDone').innerHTML=done.map(function(e){var g=e.listing_price!=null&&e.price_hi?((e.listing_price/e.price_hi-1)*100):null;return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td class="num">'+sub(e)+'</td><td class="num '+(g!=null?cls(g):'')+'">'+(g!=null?pct(g):'—')+'</td><td><span class="state '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="8" class="muted">no recent listings</td></tr>';
+    $('#ipoDone').innerHTML=done.map(function(e){var g=e.listing_price!=null&&e.price_hi?((e.listing_price/e.price_hi-1)*100):null;return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td class="num">'+sub(e)+'</td><td class="num gain '+(g!=null?cls(g):'')+'">'+(g!=null?pct(g):'—')+'</td><td><span class="pill '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="8" class="muted">no recent listings</td></tr>';
     $('#note').textContent='Status is computed from the dates each day. '+(data.entries.some(function(e){return e.example})?'Example rows are placeholders until data/ipo.json exists.':'')}
   $('#seg').addEventListener('click',function(e){var b=e.target.closest('button[data-seg]');if(!b)return;seg=b.dataset.seg;Array.prototype.forEach.call(document.querySelectorAll('#seg button'),function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
   function load(){get('/markets/ipo').then(function(d){data=d;render()}).catch(function(e){$('#meta').textContent='failed: '+e})}

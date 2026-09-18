@@ -81,6 +81,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def state():
         return JSONResponse({k: _dump(v) for k, v in pipeline.bus.latest.items()})
 
+    @app.get("/limits")
+    async def limits():
+        return JSONResponse(pipeline.s.limits.model_dump())
+
     @app.get("/decisions")
     async def decisions():
         return JSONResponse([_dump(d) for d in pipeline.decisions.values()])

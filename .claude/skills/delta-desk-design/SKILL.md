@@ -20,10 +20,10 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/chart` | `chart.html` | (chart for any symbol: `/chart#SYMBOL/3m`; every stock name links here) |
 | `/markets` | `markets.html` | (full market-analysis surface, not in the nav for now) |
 | `/desk` | `agents.html` | Agents (the agent council: stock + horizon → verdict) |
-| `/sniper` | `sniper.html` | (F&O sniper desk, linked from the Agents page) |
+| `/sniper` | `sniper.html` | Sniper (F&O desk: scope, range with zones, chain, targets, the shot, risk) |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
-Navigation is four text links in the header (Home · News · IPO · Agents), the current one underlined in accent.
+Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
 The header is a quiet band (`--head`, slightly off the ground per theme); status items on the right are borderless text. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
@@ -40,7 +40,7 @@ The header is a quiet band (`--head`, slightly off the ground per theme); status
 
 `<header class="top"><div class="wrap">` with three zones in one 56px row:
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
-2. `.nav` text links (Home · News · IPO · Agents),
+2. `.nav` text links (Home · News · IPO · Agents · Sniper),
 3. `.status` borderless items: theme select (injected by nav.js), colour-safe toggle, clock; the Sniper page adds the paper/live `.seg` switch and the `.kill` button. The data source is shown in the ticker strip, not the header.
 
 The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
