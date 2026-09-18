@@ -12,6 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from deltadesk.beta import Alerts, Waitlist
 from deltadesk.markets import universe
 from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
@@ -26,20 +27,54 @@ class ChatIn(BaseModel):
     news_id: str | None = None
 
 
+class WaitlistIn(BaseModel):
+    name: str = ""
+    email: str = ""
+    phone: str = ""
+    interests: list[str] = []
+    experience: str = ""
+    whatsapp_ok: bool = False
+
+
+class AlertIn(BaseModel):
+    contact: str = ""
+    symbol: str = ""
+    kind: str = "price_move"
+    value: float | None = None
+    horizon: str = "1d"
+
+
+class ContactIn(BaseModel):
+    contact: str = ""
+
+
 def _dump(x):
     if hasattr(x, "model_dump"):
         return x.model_dump(mode="json")
     return x
 
 
-def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None) -> FastAPI:
+def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None,
+               waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0) -> FastAPI:
     markets = markets or MarketsService()
+    waitlist = waitlist or Waitlist()
+    alerts = alerts or Alerts(markets)
+
+    async def alert_loop():
+        while True:
+            await asyncio.sleep(alert_interval)
+            try:
+                await asyncio.to_thread(alerts.evaluate)
+            except Exception:  # noqa: BLE001 - never let the loop die
+                pass
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         task = asyncio.create_task(pipeline.run(cycles))
+        loop = asyncio.create_task(alert_loop())
         yield
         task.cancel()
+        loop.cancel()
 
     app = FastAPI(title="Delta Desk", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
@@ -60,6 +95,54 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/chart")
     async def chart_page():
         return FileResponse(ROOT / "chart.html")
+
+    @app.get("/beta")
+    async def beta_page():
+        return FileResponse(ROOT / "beta.html")
+
+    @app.get("/legal")
+    async def legal_page():
+        return FileResponse(ROOT / "legal.html")
+
+    @app.post("/waitlist")
+    async def waitlist_join(body: WaitlistIn):
+        return JSONResponse(waitlist.join(body.name, body.email, body.phone, body.interests, body.experience, body.whatsapp_ok))
+
+    @app.get("/waitlist/stats")
+    async def waitlist_stats():
+        return JSONResponse(waitlist.stats())
+
+    @app.get("/alerts")
+    async def alerts_list(contact: str = ""):
+        return JSONResponse(alerts.for_contact(contact) if contact else [])
+
+    @app.post("/alerts")
+    async def alerts_add(body: AlertIn):
+        return JSONResponse(alerts.add(body.contact, body.kind, body.symbol, body.value, body.horizon))
+
+    @app.delete("/alerts/{rule_id}")
+    async def alerts_remove(rule_id: str):
+        return JSONResponse({"ok": alerts.remove(rule_id)})
+
+    @app.get("/alerts/log")
+    async def alerts_log():
+        return JSONResponse(alerts.log())
+
+    @app.get("/alerts/channel")
+    async def alerts_channel():
+        n = alerts.notifier.name
+        note = {"whatsapp": "WhatsApp Cloud API configured. Business-initiated messages need an approved template outside the 24-hour window.",  # noqa: E501
+                "telegram": "Telegram bot configured. Message the bot once, then use your chat id as the contact.",
+                "dry-run": "No WhatsApp or Telegram credentials yet: alerts are evaluated and logged here, not delivered. Set WHATSAPP_TOKEN + WHATSAPP_PHONE_ID or TELEGRAM_BOT_TOKEN in .env."}[n]  # noqa: E501
+        return JSONResponse({"channel": n, "note": note, "kinds": list(__import__("deltadesk.beta", fromlist=["KINDS"]).KINDS)})
+
+    @app.post("/alerts/test")
+    async def alerts_test(body: ContactIn):
+        return JSONResponse(await asyncio.to_thread(alerts.test, body.contact))
+
+    @app.post("/alerts/run")
+    async def alerts_run():
+        return JSONResponse(await asyncio.to_thread(alerts.evaluate))
 
     @app.get("/ipo")
     async def ipo_page():

@@ -9,10 +9,19 @@ from deltadesk.server.app import create_app
 
 def _client():
     warnings.simplefilter("ignore")
+    import tempfile
+    from pathlib import Path
+
     from fastapi.testclient import TestClient
 
+    from deltadesk.beta import Alerts, Notifier, Waitlist
+
+    d = Path(tempfile.mkdtemp())
     s = Settings(feed="synthetic", cycle_seconds=30, _env_file=None)
-    return TestClient(create_app(Pipeline(s, SyntheticFeed(s, speed=0.0)), cycles=1))
+    from deltadesk.markets.service import MarketsService
+    m = MarketsService()
+    return TestClient(create_app(Pipeline(s, SyntheticFeed(s, speed=0.0)), cycles=1, markets=m, waitlist=Waitlist(d / "wl.jsonl"),
+                                 alerts=Alerts(m, notifier=Notifier(), path=d / "a.json", log_path=d / "log.jsonl"), alert_interval=3600))
 
 
 def test_pages_and_assets():
@@ -25,6 +34,15 @@ def test_pages_and_assets():
         dom = c.get("/markets/domains").json()
         assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
         assert c.get("/static/ui.js").status_code == 200 and "/static/ui.js" in home
+        assert "waitlist" in c.get("/beta").text and "Risk disclosure" in c.get("/legal").text
+        w = c.post("/waitlist", json={"name": "Test User", "email": "t@example.com", "phone": "+919999999999", "interests": ["ipo"], "whatsapp_ok": True}).json()  # noqa: E501
+        assert w["ok"] and w["position"] >= 1 and c.get("/waitlist/stats").json()["total"] >= 1
+        a = c.post("/alerts", json={"contact": "+919999999999", "symbol": "HDFCBANK", "kind": "price_move", "value": 0.0001}).json()
+        assert a["ok"] and len(c.get("/alerts?contact=%2B919999999999").json()) >= 1
+        assert c.get("/alerts/channel").json()["channel"] in ("dry-run", "whatsapp", "telegram")
+        fired = c.post("/alerts/run").json()
+        assert any(f["symbol"] == "HDFCBANK" for f in fired) and c.get("/alerts/log").json()[0]["sent"] is False
+        assert c.delete("/alerts/" + a["rule"]["id"]).json()["ok"]
         lim = c.get("/limits").json()
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
         assert "TradingView" in c.get("/chart").text and "tvSymbol" in c.get("/chart").text

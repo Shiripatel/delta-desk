@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Beta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:26px 20px 30px}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
+h1{margin:0 0 10px;font:500 clamp(26px,3.4vw,40px)/1.06 var(--sans);letter-spacing:-.03em;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
+.lead{max-width:56ch;font-size:13px;color:var(--ink-2);margin:0 0 16px}
+.perks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.perk{padding:12px 14px}
+.perk b{display:block;font:600 13px/1.2 var(--sans);margin-bottom:4px}
+.perk span{font-size:11.5px;color:var(--ink-2)}
+.perk .ico{color:var(--accent-deep);width:18px;height:18px;display:block;margin-bottom:8px}
+.form{padding:18px 18px 16px}
+.form h2{margin:0 0 4px;font:500 16px/1.2 var(--sans);letter-spacing:-.02em}
+.form .sub{font-size:11.5px;color:var(--ink-3);margin-bottom:12px}
+.field{display:block;margin-bottom:10px;font-size:11.5px;color:var(--ink-2)}
+.field input,.field select{display:block;width:100%;margin-top:4px;padding:9px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg);font-size:13px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chk label{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line-2);border-radius:999px;font-size:11.5px;cursor:pointer}
+.chk input{accent-color:var(--accent-deep)}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--ink-3);margin:8px 0 12px}
+.ok{padding:12px 14px;border-radius:8px;background:color-mix(in srgb,var(--good) 12%,transparent);color:var(--good);font-size:12.5px;display:none}
+.err{padding:10px 14px;border-radius:8px;background:color-mix(in srgb,var(--bad) 12%,transparent);color:var(--bad);font-size:12px;display:none;margin-bottom:10px}
+.stats{display:flex;gap:18px;font-size:11.5px;color:var(--ink-3);margin-top:10px}
+.stats b{font:500 16px/1 var(--sans);color:var(--ink);display:block;margin-bottom:2px}
+/* alerts */
+.alerts{margin-top:22px}
+.alerts h2{margin:0 0 4px;font:500 16px/1.2 var(--sans);letter-spacing:-.02em}
+.agrid{display:grid;grid-template-columns:1fr 1.3fr;gap:16px;align-items:start}
+.rule{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rule .full{grid-column:1 / -1}
+.search{position:relative}
+.search .sug{position:absolute;left:0;right:0;top:100%;z-index:6;background:var(--bg);border:1px solid var(--line-2);max-height:220px;overflow:auto;display:none}
+.search .sug button{display:flex;justify-content:space-between;width:100%;text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-size:12px}
+.search .sug button:hover{background:var(--fill)}
+.chan{font-size:11.5px;color:var(--ink-2);padding:10px 14px;border-radius:8px;background:var(--fill);margin-top:10px}
+.chan b{color:var(--ink)}
+@media (max-width:900px){.hero,.agrid,.row,.rule,.perks{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">BETA</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="page">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">[01] &nbsp;private beta</div>
+      <h1>Agents that <em>watch the market</em> for you. Join the beta.</h1>
+      <p class="lead">Delta Desk is an agentic desk for Indian markets: an AI radar for stocks, a live news wire with impact calls, an IPO tracker, a council of analysis agents, and a paper-trading F&amp;O sniper. We are onboarding a small group first. Leave your details and we will open the door in batches.</p>
+      <div class="perks">
+        <div class="card perk"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg><b>Early access</b><span>Use every page before public launch and shape what we build next.</span></div>
+        <div class="card perk"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8a8 8 0 0 1 16 0v5l2 3H2l2-3z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><b>Free alerts</b><span>WhatsApp or Telegram when a stock moves, a council verdict flips, or bad news lands.</span></div>
+        <div class="card perk"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><b>Paper first</b><span>Every agent runs on paper until it earns a track record. No live orders in beta.</span></div>
+        <div class="card perk"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg><b>Your data stays yours</b><span>We store what you type here and nothing else. Delete it any time by writing to us.</span></div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="card form">
+      <h2>Join the waitlist</h2>
+      <div class="sub">Two fields are enough. The rest helps us build the right thing first.</div>
+      <div class="err" id="err"></div>
+      <div class="ok" id="ok"></div>
+      <form id="wl">
+        <div class="row"><label class="field">Name <input name="name" required maxlength="80" placeholder="Your name"></label><label class="field">Email <input name="email" type="email" required placeholder="you@example.com"></label></div>
+        <div class="row"><label class="field">Phone (WhatsApp, optional) <input name="phone" placeholder="+91 98765 43210"></label><label class="field">Trading experience <select name="experience"><option value="">prefer not to say</option><option>new</option><option>under 2 years</option><option>2 to 5 years</option><option>5+ years</option></select></label></div>
+        <div class="field">What are you here for?<div class="chk"><label><input type="checkbox" name="interests" value="stocks"> stocks &amp; radar</label><label><input type="checkbox" name="interests" value="fno"> F&amp;O sniper</label><label><input type="checkbox" name="interests" value="ipo"> IPOs</label><label><input type="checkbox" name="interests" value="news"> news &amp; alerts</label><label><input type="checkbox" name="interests" value="agents"> agent council</label></div></div>
+        <label class="consent"><input type="checkbox" name="whatsapp_ok"> Send me beta updates and alerts on WhatsApp. I understand Delta Desk is not a SEBI-registered advisor and nothing here is investment advice.</label>
+        <button class="btn primary" type="submit">Join the beta</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="alerts" id="alerts">
+    <div class="eyebrow">[02] &nbsp;free alerts</div>
+    <h2>Set an alert. We watch, you get a message.</h2>
+    <div class="agrid">
+      <div class="card form">
+        <div class="err" id="aerr"></div>
+        <div class="ok" id="aok"></div>
+        <form id="af" class="rule">
+          <label class="field full">Where to send <input name="contact" required placeholder="+91 phone (WhatsApp) · Telegram chat id · email"></label>
+          <label class="field search full">Stock or index <input name="symbol" id="asym" required autocomplete="off" placeholder="type to search, e.g. HDFCBANK, NIFTY50"><div class="sug" id="asug"></div></label>
+          <label class="field">Alert when <select name="kind" id="akind"><option value="price_move">price moves more than X % today</option><option value="price_above">price crosses above X</option><option value="price_below">price crosses below X</option><option value="verdict_flip">council verdict flips</option><option value="bad_news">a bad-impact headline lands</option></select></label>
+          <label class="field" id="avalWrap">X <input name="value" id="aval" type="number" step="any" placeholder="e.g. 2"></label>
+          <label class="field" id="ahzWrap" style="display:none">Horizon <select name="horizon"><option value="1d">1 day</option><option value="1w">1 week</option><option value="1mo">1 month</option><option value="1y">1 year</option></select></label>
+          <div class="full"><button class="btn primary" type="submit">Create alert</button> <button class="btn" type="button" id="atest">Send a test message</button></div>
+        </form>
+        <div class="chan" id="chan">Channel: checking…</div>
+      </div>
+      <div>
+        <div class="card"><div class="tbl-wrap"><table id="rules"><thead><tr><th>your alerts</th><th>when</th><th class="num">value</th><th></th></tr></thead><tbody id="rulesBody"><tr><td colspan="4" class="muted">enter your contact above to see your alerts</td></tr></tbody></table></div></div>
+        <div class="card" style="margin-top:12px"><div class="tbl-wrap"><table><thead><tr><th>recent alerts</th><th>message</th><th>status</th></tr></thead><tbody id="logBody"><tr><td colspan="3" class="muted">nothing fired yet</td></tr></tbody></table></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<footer><div class="wrap"></div></footer>
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  function get(u){return fetch(u).then(function(r){return r.json()})}
+  function post(u,body){return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+
+  function stats(){get('/waitlist/stats').then(function(s){$('#stats').innerHTML='<div><b>'+s.total+'</b>on the waitlist</div><div><b>'+s.last_24h+'</b>joined today</div><div><b>'+s.whatsapp+'</b>want WhatsApp alerts</div>'}).catch(function(){})}
+  $('#wl').addEventListener('submit',function(e){e.preventDefault();var f=e.target,body={name:f.name.value,email:f.email.value,phone:f.phone.value,experience:f.experience.value,whatsapp_ok:f.whatsapp_ok.checked,
+      interests:Array.prototype.slice.call(f.querySelectorAll('input[name=interests]:checked')).map(function(x){return x.value})};
+    $('#err').style.display='none';post('/waitlist',body).then(function(r){if(!r.ok){$('#err').textContent=r.error;$('#err').style.display='block';return}
+      $('#ok').textContent=(r.duplicate?'You are already on the list, ':'You are in, ')+'position #'+r.position+' of '+r.total+'. We will write to '+body.email+' when your batch opens.';$('#ok').style.display='block';f.reset();stats();
+      if(body.phone)$('#af').contact.value=body.phone;try{localStorage.setItem('dd.contact',body.phone||body.email)}catch(x){}loadRules()})});
+
+  /* alerts */
+  var kind=$('#akind');function kindUi(){var k=kind.value;$('#avalWrap').style.display=k.indexOf('price')===0?'block':'none';$('#ahzWrap').style.display=k==='verdict_flip'?'block':'none'}
+  kind.addEventListener('change',kindUi);kindUi();
+  try{var c=localStorage.getItem('dd.contact');if(c)$('#af').contact.value=c}catch(e){}
+  var sym=$('#asym'),sug=$('#asug'),timer=null;
+  sym.addEventListener('input',function(){clearTimeout(timer);var v=sym.value.trim();if(!v){sug.style.display='none';return}
+    timer=setTimeout(function(){get('/markets/search?q='+encodeURIComponent(v)).then(function(rs){sug.innerHTML=rs.map(function(r){return '<button type="button" data-key="'+esc(r.key)+'"><span><b>'+esc(r.key)+'</b> <span class="muted">'+esc(r.name)+'</span></span><span class="muted">'+esc(r.kind)+'</span></button>'}).join('')||'<button type="button" disabled class="muted">no match</button>';sug.style.display='block'})},120)});
+  sug.addEventListener('click',function(e){var b=e.target.closest('button[data-key]');if(!b)return;sym.value=b.dataset.key;sug.style.display='none'});
+  document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
+  function contact(){return $('#af').contact.value.trim()}
+  function loadRules(){var c=contact();if(!c){return}get('/alerts?contact='+encodeURIComponent(c)).then(function(rs){$('#rulesBody').innerHTML=rs.length?rs.map(function(r){return '<tr><td><b>'+esc(r.symbol)+'</b></td><td>'+esc(r.kind.replace('_',' '))+(r.kind==='verdict_flip'?' · '+esc(r.horizon):'')+'</td><td class="num">'+(r.value!=null?r.value:'—')+'</td><td class="num"><button class="btn" data-del="'+esc(r.id)+'">remove</button></td></tr>'}).join(''):'<tr><td colspan="4" class="muted">no alerts yet for this contact</td></tr>'});
+    get('/alerts/log').then(function(ls){$('#logBody').innerHTML=ls.length?ls.slice(0,12).map(function(l){return '<tr><td class="num">'+new Date(l.ts*1000).toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'})+'<br><span class="muted">'+esc(l.symbol)+'</span></td><td style="font-size:11.5px">'+esc(l.text)+'</td><td><span class="pill '+(l.sent?'open':'closed')+'">'+(l.sent?'sent · '+esc(l.channel):'logged · '+esc(l.channel))+'</span></td></tr>'}).join(''):'<tr><td colspan="3" class="muted">nothing fired yet</td></tr>'})}
+  $('#af').contact.addEventListener('change',function(){try{localStorage.setItem('dd.contact',contact())}catch(e){}loadRules()});
+  $('#af').addEventListener('submit',function(e){e.preventDefault();var f=e.target;$('#aerr').style.display='none';$('#aok').style.display='none';
+    post('/alerts',{contact:contact(),symbol:f.symbol.value,kind:f.kind.value,value:f.value.value?+f.value.value:null,horizon:f.horizon.value}).then(function(r){if(!r.ok){$('#aerr').textContent=r.error;$('#aerr').style.display='block';return}
+      $('#aok').textContent='Alert created for '+r.rule.symbol+'. We check every minute during market hours.';$('#aok').style.display='block';f.symbol.value='';f.value.value='';loadRules()})});
+  $('#rulesBody').addEventListener('click',function(e){var b=e.target.closest('button[data-del]');if(!b)return;fetch('/alerts/'+b.dataset.del,{method:'DELETE'}).then(loadRules)});
+  $('#atest').addEventListener('click',function(){var c=contact();if(!c){$('#aerr').textContent='enter a contact first';$('#aerr').style.display='block';return}post('/alerts/test',{contact:c}).then(function(r){$('#aok').textContent=r.sent?'Test message sent via '+r.channel+'.':'Logged only: '+(r.note||r.error||'no channel configured');$('#aok').style.display='block'})});
+  get('/alerts/channel').then(function(c){$('#chan').innerHTML='Channel: <b>'+esc(c.channel)+'</b>. '+esc(c.note)}).catch(function(){});
+  stats();loadRules();
+})();
+</script>
+</body>
+</html>

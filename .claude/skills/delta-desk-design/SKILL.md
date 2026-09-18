@@ -75,7 +75,7 @@ validated. Shared marks live in `static/ai.css` / `static/ai.js`: score rings (`
 ## Copy
 
 * Sentence case, short labels, no exclamation marks. Numbers are Indian-formatted (`en-IN`), rupees with ₹.
-* Every page footer ends with "Nothing here is investment advice." Anything modelled or sampled is tagged
+* Every page's `<footer>` is replaced by `static/nav.js` with the standard legal footer (disclaimer line, SEBI note, copyright, links to `/legal`). Leave an empty `<footer><div class="wrap"></div></footer>` in new pages. The header gets a "Join beta" pill the same way. Every page still ends with "Nothing here is investment advice." Anything modelled or sampled is tagged
   `example data`, `computed`, `delayed` or `rules model v0` in the UI.
 
 ## Checklist before committing a page change

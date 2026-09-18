@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Legal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:26px 20px 30px;max-width:860px}
+h1{margin:0 0 6px;font:500 26px/1.1 var(--sans);letter-spacing:-.03em}
+.upd{font-size:11.5px;color:var(--ink-3);margin-bottom:18px}
+.toc{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.toc a{padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;font-size:12px}
+.card{padding:18px 20px;margin-bottom:12px}
+h2{margin:0 0 8px;font:500 16px/1.2 var(--sans);letter-spacing:-.02em}
+p,li{font-size:12.5px;color:var(--ink-2);line-height:1.6}
+p{margin:0 0 10px}
+ul{margin:0 0 10px;padding-left:18px}
+b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">LEGAL</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status"><span class="clock num" id="clock">—</span></div>
+</div></header>
+
+<main class="wrap">
+<div class="page">
+  <h1>Legal &amp; disclosures</h1>
+  <div class="upd">Beta version · last updated 18 September 2026 · these terms will be revised before public launch</div>
+  <div class="toc"><a href="#disclaimer">Disclaimer</a><a href="#risk">Risk disclosure</a><a href="#terms">Terms of use</a><a href="#privacy">Privacy</a><a href="#data">Data sources</a><a href="#contact">Contact</a></div>
+
+  <div class="card" id="disclaimer"><h2>Disclaimer</h2>
+    <p><b>Delta Desk is not a SEBI-registered investment adviser, research analyst, stock broker or portfolio manager.</b> Nothing on this site is investment, tax or legal advice, a recommendation, or an offer to buy or sell any security or derivative.</p>
+    <p>Every score, verdict, forecast, "AI" label, impact call and signal is the output of a transparent rules model (version 0) or an experimental algorithm. It can be wrong, late or based on delayed or incomplete data. It is provided for information and education only. Do your own research and consult a SEBI-registered adviser before acting.</p>
+    <p>Sample rows marked "example data" are placeholders, not facts. Delayed quotes are labelled with their delay.</p></div>
+
+  <div class="card" id="risk"><h2>Risk disclosure</h2>
+    <ul><li>Trading in equities and especially futures and options involves substantial risk, including the loss of the entire capital and, for short options, losses larger than the capital deployed.</li>
+    <li>As per SEBI's study, a large majority of individual traders in the equity F&amp;O segment incur net losses. Past performance of any rule, model or backtest does not guarantee future results.</li>
+    <li>The F&amp;O Sniper runs in paper mode. No order is sent to any exchange or broker from this software in beta.</li>
+    <li>Algorithmic trading by retail investors is governed by SEBI's framework; any future live routing will only happen through a registered broker, with an exchange-issued algo ID, from a static IP, and with a kill switch.</li></ul></div>
+
+  <div class="card" id="terms"><h2>Terms of use (beta)</h2>
+    <ul><li>The service is provided "as is" during beta, without warranties of any kind, and may change or stop at any time.</li>
+    <li>You may use the site for personal, non-commercial purposes. Do not scrape, resell or redistribute the data or outputs.</li>
+    <li>Third-party data and tools (TradingView, Yahoo Finance, public RSS feeds, favicon services, NSE and BSE publications) are subject to their own terms; we do not own or redistribute them.</li>
+    <li>We are not liable for any loss arising from use of the site, its alerts or its outputs, to the fullest extent permitted by law. Disputes are subject to the courts of India.</li></ul></div>
+
+  <div class="card" id="privacy"><h2>Privacy</h2>
+    <ul><li>We store only what you enter: waitlist details (name, email, phone, interests, experience), alert rules and the contact they should reach, and watchlists. Nothing is sold or shared with third parties.</li>
+    <li>Alerts are delivered through WhatsApp (Meta) or Telegram; their handling of message metadata is governed by their policies. Opt out by removing your alerts or writing to us.</li>
+    <li>The site keeps small preferences (theme, tracked IPOs, picked stocks) in your browser only. No advertising trackers.</li>
+    <li>To see, correct or delete your data, email the address below. We reply within seven days.</li></ul></div>
+
+  <div class="card" id="data"><h2>Data sources and delays</h2>
+    <ul><li>Quotes and history: Yahoo Finance public endpoints, about 15 minutes delayed for NSE and BSE; TradingView for the interactive chart.</li>
+    <li>News: public RSS feeds of Economic Times, Moneycontrol, Mint and Business Standard. Headlines link to the publisher; we do not reproduce articles.</li>
+    <li>Index constituents: NSE Indices official CSVs. IPO, earnings, holidays and FII/DII flows: files we maintain by hand until an official feed is wired; rows are dated and sourced.</li>
+    <li>Company logos are fetched by each company's website domain from a public favicon service and belong to their owners.</li></ul></div>
+
+  <div class="card" id="contact"><h2>Contact</h2>
+    <p>Delta Desk (beta), India. Email <b>shirishpatel1611@gmail.com</b> for data requests, corrections or takedown of any mark or content.</p></div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>(function(){function p(x){return (x<10?'0':'')+x}(function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);document.getElementById('clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})()})();</script>
+</body>
+</html>
