@@ -163,7 +163,7 @@
   function sigCls(a){return !a.available?'n':a.signal>0.15?'g':a.signal<-0.15?'r':'n'}
   function edge(x1,y1,x2,y2){var mx=(x1+x2)/2;return 'M'+x1+' '+y1+' C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2}
   function render(d){data=d;var v=d.verdict;
-    $('#symName').innerHTML='<a href="/chart#'+esc(d.symbol)+'/3m" style="text-decoration:underline">'+esc(d.symbol)+'</a> · '+esc(d.name)+(d.sector?' · '+esc(d.sector):'')+' · '+esc(d.horizon_label);
+    $('#symName').innerHTML=(window.DDUI?window.DDUI.logo(d.symbol,d.name).replace('class="logo','style="width:22px;height:22px;vertical-align:-6px;margin-right:6px" class="logo'):'')+'<a href="/chart#'+esc(d.symbol)+'/3m" style="text-decoration:underline">'+esc(d.symbol)+'</a> · '+esc(d.name)+(d.sector?' · '+esc(d.sector):'')+' · '+esc(d.horizon_label);
     $('#wTech').style.width=(d.weights.technical*100)+'%';$('#wFund').style.width=(d.weights.fundamental*100)+'%';
     $('#wTechTxt').textContent=Math.round(d.weights.technical*100)+' %';$('#wFundTxt').textContent=Math.round(d.weights.fundamental*100)+' %';
     var tech=d.agents.filter(function(a){return a.group==='technical'}),fund=d.agents.filter(function(a){return a.group==='fundamental'});
@@ -207,6 +207,7 @@
   load();
 })();
 </script>
+<script src="/static/ui.js"></script>
 <script src="/static/nav.js"></script>
 </body>
 </html>

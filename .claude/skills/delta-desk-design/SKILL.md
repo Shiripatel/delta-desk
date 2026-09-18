@@ -60,8 +60,8 @@ Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEX
 
 * Content sits in **cards** (`.card`: white-ish `--card` surface, 10px radius, hairline) on the grey ground, one card per table.
 * **Pill tabs** (`.pills`) for states such as Open / Upcoming / Closed, with a count badge; a small select for a secondary filter.
-* **Calm tables** (`table.tbl-clean`): a light header band, 14px row padding, horizontal dividers only, no vertical rules, hover highlight.
-* **Monograms** (`.mono`) in place of logos: two initials on a hue derived from the symbol, so every company gets an identity mark we own.
+* **Calm tables everywhere**: `.tbl-wrap` is a card (rounded, hairline, `--card` surface, 20px side margin) and every `table` has a light header band, sentence-case headers, 11px 14px cells, horizontal dividers only, hover highlight. Inside a `.card` use `.tbl-wrap` as is; use `.tbl-wrap.flush` when the table should sit edge to edge.
+* **Company logos** via `DDUI.logo(symbol, name)` from `static/ui.js`: a favicon fetched by the company's domain (`deltadesk/markets/logos.py`, served at `/markets/domains`), with a **monogram** (`.mono`, two initials on a hue from the symbol) underneath as the fallback when no domain is known or the image fails.
 * Status as soft **pills** (`.pill.open|upcoming|closed|listed|info|warn`); one action per row as a quiet `.btn` (filled `.btn.primary` only for the main action on a page).
 * Generous whitespace beats more content: fewer columns, short dates ("16 Sep 2026"), rupee formatting, no jargon in headers.
 * Our own icons only: small stroke SVGs in `currentColor` (`.ico`), never stock icon packs or screenshots of other apps.

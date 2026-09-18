@@ -12,7 +12,7 @@ window.DDAI=(function(){
   function starBtn(sym){if(!window.DDWL)return '';var on=inWl(sym);return '<button class="star" data-star="'+esc(sym)+'" aria-pressed="'+on+'" title="'+(on?'remove from':'add to')+' watchlist">'+(on?'★':'☆')+'</button>'}
   function bindStars(root){root.addEventListener('click',function(e){var b=e.target.closest('button[data-star]');if(!b||!window.DDWL)return;e.stopPropagation();
     var on=b.getAttribute('aria-pressed')==='true';(on?window.DDWL.remove(b.dataset.star):window.DDWL.add(b.dataset.star)).then(function(){b.setAttribute('aria-pressed',String(!on));b.textContent=on?'☆':'★'})})}
-  function mono(name,sym){var h=0;for(var i=0;i<sym.length;i++)h=(h*31+sym.charCodeAt(i))>>>0;var parts=(name||sym).split(/\s+/);return '<span class="mono" style="--h:'+(h%360)+'">'+esc(((parts[0]||'?')[0]+(parts[1]?parts[1][0]:'')).toUpperCase())+'</span>'}
+  function mono(name,sym){if(window.DDUI)return window.DDUI.logo(sym,name);var h=0;for(var i=0;i<sym.length;i++)h=(h*31+sym.charCodeAt(i))>>>0;var parts=(name||sym).split(/\s+/);return '<span class="mono" style="--h:'+(h%360)+'">'+esc(((parts[0]||'?')[0]+(parts[1]?parts[1][0]:'')).toUpperCase())+'</span>'}
   function ring(v,max){var p=Math.max(0,Math.min(1,v/max)),c=2*Math.PI*14;
     return '<span class="ring '+band(v)+'" title="'+v+' / '+max+'"><svg viewBox="0 0 34 34" aria-hidden="true"><circle class="bg" cx="17" cy="17" r="14"/><circle class="fg" cx="17" cy="17" r="14" stroke-dasharray="'+(c*p).toFixed(1)+' '+c.toFixed(1)+'"/></svg><b>'+v+'</b></span>'}
   function spark(pts){if(!pts||pts.length<2)return '';var W=84,H=28,lo=Math.min.apply(null,pts),hi=Math.max.apply(null,pts),rg=hi-lo||1;
@@ -38,6 +38,7 @@ window.DDAI=(function(){
       Array.prototype.forEach.call(head.querySelectorAll('button[data-k]'),function(x){x.removeAttribute('data-dir')});b.dataset.dir=dir;render()});
     bindStars(body);
     document.addEventListener('dd:watchlist',function(){if(data)render()});
+    document.addEventListener('dd:domains',function(){if(data)render()});
     return {load:load,refresh:render,data:function(){return data}};
   }
 
@@ -70,7 +71,7 @@ window.DDAI=(function(){
       if(movers){var mv=f.points.filter(function(p){return first[p.symbol]!=null}).map(function(p){return {s:p.symbol,a:first[p.symbol],b:p.score,d:p.score-first[p.symbol]}}).filter(function(x){return x.d}).sort(function(x,y){return Math.abs(y.d)-Math.abs(x.d)}).slice(0,8);
         movers.innerHTML=mv.map(function(x){return '<tr><td><b>'+esc(x.s)+'</b></td><td class="num muted">'+x.a+'</td><td class="num '+(x.d>0?'up':'dn')+'">'+x.b+' ('+(x.d>0?'+':'')+x.d+')</td></tr>'}).join('')||'<tr><td colspan="3" class="muted">no score changes in the window</td></tr>'}
       if(picks){var top=f.points.filter(function(p){return p.score>=7}).sort(function(a,b){return b.score-a.score||b.weight-a.weight}).slice(0,8);
-        picks.innerHTML=top.map(function(p){return '<div class="pick"><span>'+starBtn(p.symbol)+' <b>'+esc(p.symbol)+'</b> <em>'+esc(p.name)+'</em></span>'+ring(p.score,10)+'</div>'}).join('')||'<div class="muted" style="padding:8px 0">nothing in the buy zone in this universe today</div>'}
+        picks.innerHTML=top.map(function(p){return '<div class="pick"><span class="cowrap">'+mono(p.name,p.symbol)+'<span>'+starBtn(p.symbol)+' <a href="/chart#'+esc(p.symbol)+'/3m"><b>'+esc(p.symbol)+'</b></a> <em>'+esc(p.name)+'</em></span></span>'+ring(p.score,10)+'</div>'}).join('')||'<div class="muted" style="padding:8px 0">nothing in the buy zone in this universe today</div>'}
       if(o.onFrame)o.onFrame(f,frame,rd)}
     function stop(){clearInterval(timer);timer=null;if(play){play.textContent='▶ replay '+days+' '+(rd&&rd.step==='week'?'weeks':'sessions');play.classList.remove('on')}}
     function load(ix,md){if(ix!=null)index=ix;if(md!=null)mode=md;stop();if(meta)meta.textContent='computing… (first run fetches history per symbol)';

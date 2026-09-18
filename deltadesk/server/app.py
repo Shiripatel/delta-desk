@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from deltadesk.markets import universe
+from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
 from deltadesk.pipeline import Pipeline
 
@@ -126,6 +127,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         q = markets.quotes
         return JSONResponse({"name": q.name, "delay_min": getattr(q, "delay_min", 0), "note": getattr(q, "note", ""),
                              "errors": len(getattr(q, "errors", {}) or {}), "history": markets.ai.history.name})
+
+    @app.get("/markets/domains")
+    async def m_domains():
+        return JSONResponse(DOMAINS)
 
     @app.get("/markets/indices")
     async def m_indices():

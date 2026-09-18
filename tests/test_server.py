@@ -22,6 +22,9 @@ def test_pages_and_assets():
         for path, marker in (("/news", 'id="flow"'), ("/chart", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
             assert marker in c.get(path).text, path
         assert 'href="/news">News</a>' in home and 'href="/sniper">Sniper</a>' in home
+        dom = c.get("/markets/domains").json()
+        assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
+        assert c.get("/static/ui.js").status_code == 200 and "DDUI" in home
         lim = c.get("/limits").json()
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
         assert "TradingView" in c.get("/chart").text and "tvSymbol" in c.get("/chart").text

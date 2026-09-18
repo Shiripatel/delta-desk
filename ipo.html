@@ -79,6 +79,7 @@
 
 <footer><div class="wrap"><div>Delta Desk · IPO tracker. Nothing here is investment advice.</div><div>DD.IPO.0S2</div></div></footer>
 
+<script src="/static/ui.js"></script>
 <script src="/static/nav.js"></script>
 <script>
 (function(){
@@ -98,7 +99,7 @@
   try{tracked=JSON.parse(localStorage.getItem('dd.ipo.tracked')||'[]')}catch(e){}
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function dstr(iso){if(!iso)return '—';var d=new Date(iso+'T00:00:00');return isNaN(d)?esc(iso):d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()}
-  function mono(name){var parts=name.replace(/\(.*?\)/g,'').trim().split(/\s+/);var ini=(parts[0]||'?')[0]+(parts[1]?parts[1][0]:'');var h=0;for(var i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return '<span class="mono" style="--h:'+(h%360)+'">'+esc(ini.toUpperCase())+'</span>'}
+  function mono(name,e){return window.DDUI?window.DDUI.logo(e&&e.symbol||name,name,e&&e.domain):'<span class="mono">'+esc(name.slice(0,2).toUpperCase())+'</span>'}
   function band(e){return '₹'+fmt(e.price_lo,0)+' – ₹'+fmt(e.price_hi,0)}
   function sub(e){return e.subscribed_x!=null?'<span class="sub"><i><b style="width:'+Math.min(100,e.subscribed_x*10)+'%"></b></i>'+fmt(e.subscribed_x,2)+'x</span>':'<span class="muted">—</span>'}
   function typePill(e){return '<span class="pill '+(e.segment==='SME'?'warn':'info')+'">'+esc(e.segment)+'</span>'}
@@ -110,7 +111,7 @@
     closed:[['Company name',''],['Type',''],['Closed',''],['Listing',''],['Issue price','num'],['Overall subscription',''],['','']],
     listed:[['Company name',''],['Type',''],['Listed on',''],['Issue price','num'],['Listing price','num'],['Listing gain','num'],['Subscription',''],['','']],
     tracked:[['Company name',''],['Type',''],['Status',''],['Open date',''],['Close date',''],['Issue price','num'],['','']]};
-  function rowFor(e){var c='<td><div class="company">'+mono(e.name)+'<div><b>'+esc(e.name)+'</b><small>'+esc(e.symbol||'')+(e.example?' · example data':'')+'</small></div></div></td><td>'+typePill(e)+'</td>';
+  function rowFor(e){var c='<td><div class="company">'+mono(e.name,e)+'<div><b>'+esc(e.name)+'</b><small>'+esc(e.symbol||'')+(e.example?' · example data':'')+'</small></div></div></td><td>'+typePill(e)+'</td>';
     if(tab==='open')return c+'<td>'+dstr(e.open)+'</td><td>'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">₹'+fmt(e.lot*e.price_hi,0)+'</td><td>'+sub(e)+'</td><td class="num">'+trackBtn(e)+'</td>';
     if(tab==='upcoming')return c+'<td>'+dstr(e.open)+'</td><td>'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">₹'+fmt(e.issue_size_cr,0)+' cr</td><td class="num">'+trackBtn(e)+'</td>';
     if(tab==='closed')return c+'<td>'+dstr(e.close)+'</td><td>'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td>'+sub(e)+'</td><td class="num">'+trackBtn(e)+'</td>';

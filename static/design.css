@@ -155,6 +155,9 @@ table.tbl-clean th{background:var(--fill);color:var(--ink-2);font-size:11px;lett
 table.tbl-clean td{padding:14px 16px;vertical-align:middle;border-bottom:1px solid var(--line);font-size:12.5px}
 table.tbl-clean tbody tr:last-child td{border-bottom:0}
 table.tbl-clean tbody tr:hover td{background:var(--fill)}
+.logo{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;flex:0 0 auto;position:relative;overflow:hidden}
+.logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px;background:var(--card);border:1px solid var(--line);border-radius:8px;z-index:1}
+.logo:not(.has) img{display:none}
 .mono{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;font:600 12px var(--sans);letter-spacing:.02em;color:hsl(var(--h,200) 45% 30%);background:hsl(var(--h,200) 60% 92%);border:1px solid hsl(var(--h,200) 40% 80%);flex:0 0 auto}
 :root[data-theme="dark"] .mono,:root[data-theme="ink"] .mono,:root[data-theme="midnight"] .mono{color:hsl(var(--h,200) 60% 78%);background:hsl(var(--h,200) 30% 20%);border-color:hsl(var(--h,200) 30% 30%)}
 .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--card);white-space:nowrap}
@@ -174,14 +177,16 @@ table.tbl-clean tbody tr:hover td{background:var(--fill)}
 .stat{padding:12px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .stat .v{font:500 18px/1.1 var(--sans);letter-spacing:-.02em;margin-top:5px}
 
-/* ---- tables -------------------------------------------------------------------------------- */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{font-weight:400;text-align:left;color:var(--ink-3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+/* ---- tables: every table is a calm card (header band, roomy rows, horizontal dividers only) ---- */
+.tbl-wrap{overflow-x:auto;margin:12px 20px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.card > .tbl-wrap,.tbl-wrap.flush{margin:0;border:0;border-radius:0;background:transparent}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{font-weight:400;text-align:left;color:var(--ink-2);font-size:11px;letter-spacing:.04em;text-transform:none;padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--fill)}
 th button{color:inherit;letter-spacing:inherit;text-transform:inherit;font-size:inherit;padding:0}
 th button[data-dir]::after{content:" ↓";color:var(--ink)}
 th button[data-dir="asc"]::after{content:" ↑"}
-td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
 td.num,th.num{text-align:right}
 tbody tr:hover td{background:var(--fill)}
 .state{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:2px;border:1px solid var(--line-2)}
