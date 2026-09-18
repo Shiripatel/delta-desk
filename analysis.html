@@ -72,14 +72,7 @@
 .toggle label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
 .ohlc{display:flex;gap:16px;align-items:baseline;padding:8px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:11.5px;color:var(--ink-3)}
 .ohlc b{font-weight:500;color:var(--ink)}
-#tv{height:600px;display:none}
-#tv .tradingview-widget-container,#tv .tradingview-widget-container > div{height:100%!important;width:100%}
-#desk{display:none}
-#price{height:440px;position:relative}
-#rsi{height:120px;border-top:1px solid var(--line);position:relative}
-.lbl{position:absolute;left:12px;top:8px;z-index:2;font-size:11px;color:var(--ink-3);pointer-events:none}
-.lbl b{font-weight:500;color:var(--ink)}
-.lbl .e20{color:var(--s2)}.lbl .e50{color:var(--s1)}
+#price{height:420px;position:relative}
 /* agents */
 .hz{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;border-bottom:1px solid var(--line)}
 .hz button{padding:5px 11px;border:1px solid var(--line-2);border-radius:999px;font-size:11.5px;color:var(--ink-2);background:var(--card)}
@@ -141,14 +134,11 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   <!-- chart -->
   <section class="pane card" id="pane-chart">
     <div class="tool">
-      <span class="seg" id="engine"><button data-e="desk" aria-pressed="true">Desk chart</button><button data-e="tv">TradingView</button></span>
       <span class="seg" id="rangeSeg"><button data-r="1d">1d</button><button data-r="5d">5d</button><button data-r="1m">1m</button><button data-r="3m" aria-pressed="true">3m</button><button data-r="6m">6m</button><button data-r="1y">1y</button><button data-r="5y">5y</button><button data-r="all">all</button></span>
-      <span class="toggle" id="deskOpts"><label><input type="checkbox" id="ema" checked> EMA 20 / 50</label><label><input type="checkbox" id="vol" checked> volume</label><label><input type="checkbox" id="rsiOn" checked> RSI 14</label><label><input type="checkbox" id="logs"> log scale</label></span>
     </div>
-    <div class="ohlc"><span id="cnm">—</span><span>O <b class="num" id="o">—</b></span><span>H <b class="num" id="h">—</b></span><span>L <b class="num" id="l">—</b></span><span>C <b class="num" id="c">—</b></span><span>vol <b class="num" id="v">—</b></span><span id="cmeta"></span></div>
-    <div id="tv"></div>
-    <div id="desk"><div id="price"><div class="lbl" id="plbl"></div></div><div id="rsi"><div class="lbl">RSI 14 <b id="rsiv">—</b> · 30 / 70 bands</div></div></div>
-    <div class="note">Desk chart: our bars and indicators, works on the synthetic market too. TradingView: the full third-party chart with its own tools; optional, loads from tradingview.com. Nothing here is investment advice.</div>
+    <div class="ohlc"><span id="cnm">—</span><span id="cdate"></span><span>close <b class="num" id="c">—</b></span><span id="cchg"></span><span id="cmeta"></span></div>
+    <div id="price"></div>
+    <div class="note">Daily closes for 1m and longer, 5-minute closes for 1d and 5d. Hover for the value on any day. Nothing here is investment advice.</div>
   </section>
 
   <!-- agents -->
@@ -195,8 +185,7 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 
   var hash=location.hash.replace(/^#/,'').split('/');
-  var state={symbol:(hash[0]||'NIFTY50').toUpperCase(),range:hash[1]||'3m',tab:hash[2]||'overview',horizon:'1d',engine:'desk'};
-  try{state.engine=localStorage.getItem('dd.an.engine')||'desk'}catch(e){}
+  var state={symbol:(hash[0]||'NIFTY50').toUpperCase(),range:hash[1]||'3m',tab:hash[2]||'overview',horizon:'1d'};
   var daily=null,council=null,aiRow=null;
   function setHash(){location.hash='#'+state.symbol+'/'+state.range+'/'+state.tab}
 
@@ -268,50 +257,25 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
     var t=[['RSI 14',r!=null?fmt(r,1):'—',r!=null?(r>70?'dn':r<30?'up':''):''],['ATR 14',a!=null?fmt(a)+' ('+fmt(a/px*100,1)+' %)':'—',''],['vs SMA 20',s20?pct((px/s20-1)*100):'—',s20?cls(px-s20):''],['vs SMA 50',s50?pct((px/s50-1)*100):'—',s50?cls(px-s50):''],['vs SMA 200',s200?pct((px/s200-1)*100):'—',s200?cls(px-s200):''],['52w position',yhi>ylo?fmt((px-ylo)/(yhi-ylo)*100,0)+' % of range':'—','']];
     $('#ind').innerHTML=t.map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num '+x[2]+'">'+x[1]+'</div></div>'}).join('')}
 
-  /* ---- chart: desk (Lightweight Charts) + optional TradingView ---- */
-  var TV_IDX={NIFTY50:'NSE:NIFTY',BANKNIFTY:'NSE:BANKNIFTY',FINNIFTY:'NSE:CNXFINANCE',MIDCPNIFTY:'NSE:NIFTY_MID_SELECT',NIFTYNEXT50:'NSE:CNXNEXT50',SENSEX:'BSE:SENSEX',INDIAVIX:'NSE:INDIAVIX',
-    USDINR:'FX_IDC:USDINR',EURUSD:'FX:EURUSD',GBPUSD:'FX:GBPUSD',USDJPY:'FX:USDJPY',USDCNY:'FX_IDC:USDCNY',AUDUSD:'FX:AUDUSD',USDCAD:'FX:USDCAD',USDCHF:'FX:USDCHF',USDSGD:'FX_IDC:USDSGD',USDAED:'FX_IDC:USDAED',USDHKD:'FX_IDC:USDHKD',EURINR:'FX_IDC:EURINR',GBPINR:'FX_IDC:GBPINR',JPYINR:'FX_IDC:JPYINR',DXY:'TVC:DXY',GOLD:'COMEX:GC1!',SILVER:'COMEX:SI1!',BRENT:'TVC:UKOIL',NATGAS:'NYMEX:NG1!',
-    BTC:'BITSTAMP:BTCUSD',ETH:'BITSTAMP:ETHUSD',US10Y:'TVC:US10Y',SPX:'SP:SPX',NDX:'NASDAQ:IXIC',DJI:'DJ:DJI',N225:'TVC:NI225',HSI:'HSI:HSI'};
-  function tvSymbol(k){if(TV_IDX[k])return TV_IDX[k];if(/^FUT:/.test(k)){var u=k.split(':')[1];return 'NSE:'+(u==='NIFTY50'?'NIFTY':u)+'1!'}return 'NSE:'+k.replace(/[&-]/g,'_')}
-  var TV_INT={'1d':'5','5d':'15','1m':'60','3m':'D','6m':'D','1y':'D','5y':'W','all':'M'},tvPending=false;
-  function tvTheme(){var t=document.documentElement.dataset.theme||'';return (t==='ink'||t==='dark'||t==='midnight'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))?'dark':'light'}
-  function tvRender(){var box=$('#tv');box.innerHTML='<div class="tradingview-widget-container"><div id="tvw"></div></div>';
-    if(!window.TradingView){if(!tvPending){tvPending=true;var s=document.createElement('script');s.src='https://s3.tradingview.com/tv.js';s.onload=tvRender;s.onerror=function(){tvPending=false;box.innerHTML='<div class="note">TradingView could not be loaded. Use the Desk chart.</div>'};document.head.appendChild(s)}return}
-    new window.TradingView.widget({container_id:'tvw',autosize:true,symbol:tvSymbol(state.symbol),interval:TV_INT[state.range]||'D',timezone:'Asia/Kolkata',theme:tvTheme(),style:'1',locale:'en',toolbar_bg:cssVar('--card'),enable_publishing:false,withdateranges:true,hide_side_toolbar:false,allow_symbol_change:false,details:false,hotlist:false,calendar:false,studies:['MAExp@tv-basicstudies','RSI@tv-basicstudies','Volume@tv-basicstudies'],support_host:'https://www.tradingview.com'})}
-  var LW=window.LightweightCharts,chart,rsiChart,candles,volSeries,e20,e50,rsiSeries,bars=[],built=false,byTime={};
-  function theme(){return {layout:{background:{type:'solid',color:cssVar('--card')},textColor:cssVar('--ink-3'),fontFamily:cssVar('--sans')},grid:{vertLines:{color:cssVar('--line')},horzLines:{color:cssVar('--line')}},crosshair:{mode:0},rightPriceScale:{borderColor:cssVar('--line-2')},timeScale:{borderColor:cssVar('--line-2'),timeVisible:true,secondsVisible:false}}}
-  function build(){if(built||!LW)return;built=true;
-    chart=LW.createChart($('#price'),Object.assign({autoSize:true},theme()));
-    candles=chart.addCandlestickSeries({upColor:cssVar('--good'),downColor:cssVar('--bad'),borderVisible:false,wickUpColor:cssVar('--good'),wickDownColor:cssVar('--bad')});
-    volSeries=chart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'vol'});chart.priceScale('vol').applyOptions({scaleMargins:{top:0.82,bottom:0}});
-    e20=chart.addLineSeries({color:cssVar('--s2'),lineWidth:1,priceLineVisible:false,lastValueVisible:false});e50=chart.addLineSeries({color:cssVar('--s1'),lineWidth:1,priceLineVisible:false,lastValueVisible:false});
-    rsiChart=LW.createChart($('#rsi'),Object.assign({autoSize:true},theme(),{rightPriceScale:{borderColor:cssVar('--line-2'),scaleMargins:{top:0.1,bottom:0.1}}}));
-    rsiSeries=rsiChart.addLineSeries({color:cssVar('--ink'),lineWidth:1.5,priceLineVisible:false,lastValueVisible:true});
-    rsiSeries.createPriceLine({price:70,color:cssVar('--line-2'),lineWidth:1,lineStyle:2,axisLabelVisible:false});rsiSeries.createPriceLine({price:30,color:cssVar('--line-2'),lineWidth:1,lineStyle:2,axisLabelVisible:false});
-    chart.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)rsiChart.timeScale().setVisibleLogicalRange(r)});rsiChart.timeScale().subscribeVisibleLogicalRangeChange(function(r){if(r)chart.timeScale().setVisibleLogicalRange(r)});
-    chart.subscribeCrosshairMove(function(pm){var b=pm&&pm.time!=null?byTime[pm.time]:null;showBar(b||bars[bars.length-1])})}
-  function ema(vals,n){var k=2/(n+1),out=[],e=null;vals.forEach(function(v){e=e==null?v:v*k+e*(1-k);out.push(e)});return out}
-  function rsiSeriesCalc(closes,n){var out=[],g=0,l=0;for(var i=1;i<closes.length;i++){var d=closes[i]-closes[i-1];if(i<=n){g+=Math.max(d,0);l+=Math.max(-d,0);out.push(null);if(i===n){g/=n;l/=n;out[out.length-1]=l===0?100:100-100/(1+g/l)}}else{g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n;out.push(l===0?100:100-100/(1+g/l))}}return [null].concat(out)}
-  function showBar(b){if(!b)return;$('#o').textContent=fmt(b.open);$('#h').textContent=fmt(b.high);$('#l').textContent=fmt(b.low);$('#c').textContent=fmt(b.close);$('#v').textContent=b.volume?fmt(b.volume,0):'—'}
-  function loadDesk(){build();var s=state.symbol,r=state.range;
-    get('/markets/bars?symbol='+encodeURIComponent(s)+'&range='+r).then(function(d){bars=d.bars;byTime={};
-      var tz=d.intraday?1:0;var data=bars.map(function(b){var t=tz?Math.floor(b.ts)+19800:new Date(b.ts*1000).toISOString().slice(0,10);byTime[t]=b;return {time:t,open:b.open,high:b.high,low:b.low,close:b.close}});
-      candles.setData(data);var closes=bars.map(function(b){return b.close});
-      volSeries.setData($('#vol').checked?bars.map(function(b,i){return {time:data[i].time,value:b.volume||0,color:b.close>=b.open?'rgba(0,131,0,.35)':'rgba(227,73,72,.35)'}}):[]);
-      var on=$('#ema').checked;e20.setData(on?ema(closes,20).map(function(v,i){return {time:data[i].time,value:v}}):[]);e50.setData(on?ema(closes,50).map(function(v,i){return {time:data[i].time,value:v}}):[]);
-      var rv=rsiSeriesCalc(closes,14);rsiSeries.setData($('#rsiOn').checked?rv.map(function(v,i){return v==null?null:{time:data[i].time,value:v}}).filter(Boolean):[]);
-      $('#rsi').style.display=$('#rsiOn').checked?'block':'none';chart.applyOptions({rightPriceScale:{mode:$('#logs').checked?1:0}});chart.timeScale().fitContent();
-      $('#plbl').innerHTML='<b>'+esc(s)+'</b> '+esc(d.interval)+(on&&closes.length?' · <span class="e20">EMA 20 '+fmt(ema(closes,20).pop())+'</span> · <span class="e50">EMA 50 '+fmt(ema(closes,50).pop())+'</span>':'');
-      var lastR=rv.filter(function(v){return v!=null}).pop();$('#rsiv').textContent=lastR!=null?fmt(lastR,1):'—';chead(d)}).catch(function(e){$('#cnm').textContent=s+' · failed: '+e})}
-  function chead(d){var last=d.bars[d.bars.length-1];$('#cnm').innerHTML='<b>'+esc(d.name)+'</b> · '+esc(d.interval)+' · '+state.range;$('#cmeta').textContent=d.bars.length+' bars · '+d.source+(d.delayed?' · ~15 min delayed':'');showBar(last)}
-  function loadChart(){setHash();$('#tv').style.display=state.engine==='tv'?'block':'none';$('#desk').style.display=state.engine==='desk'?'block':'none';$('#deskOpts').style.display=state.engine==='desk'?'inline-flex':'none';
-    if(state.engine==='tv'){tvRender();get('/markets/bars?symbol='+encodeURIComponent(state.symbol)+'&range='+state.range).then(chead).catch(function(){})}else loadDesk()}
-  $('#engine').addEventListener('click',function(e){var b=e.target.closest('button[data-e]');if(!b)return;state.engine=b.dataset.e;try{localStorage.setItem('dd.an.engine',state.engine)}catch(x){}$$('#engine button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});loadChart()});
-  $$('#engine button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.e===state.engine))});
+  /* ---- chart: one line, close only ---- */
+  var LW=window.LightweightCharts,chart,line,built=false,byTime={},firstBar=null;
+  function theme(){return {layout:{background:{type:'solid',color:cssVar('--card')},textColor:cssVar('--ink-3'),fontFamily:cssVar('--sans')},grid:{vertLines:{visible:false},horzLines:{color:cssVar('--line')}},crosshair:{mode:0,vertLine:{color:cssVar('--ink-3'),labelBackgroundColor:cssVar('--ink')},horzLine:{color:cssVar('--ink-3'),labelBackgroundColor:cssVar('--ink')}},rightPriceScale:{borderColor:cssVar('--line-2')},timeScale:{borderColor:cssVar('--line-2'),timeVisible:true,secondsVisible:false},handleScale:false,handleScroll:false}}
+  function build(){if(built||!LW)return;built=true;chart=LW.createChart($('#price'),Object.assign({autoSize:true},theme()));
+    line=chart.addAreaSeries({lineColor:cssVar('--ink'),lineWidth:2,topColor:'rgba(23,26,31,.10)',bottomColor:'rgba(23,26,31,0)',priceLineVisible:true,lastValueVisible:true,crosshairMarkerRadius:4});
+    chart.subscribeCrosshairMove(function(pm){var b=pm&&pm.time!=null?byTime[pm.time]:null;showBar(b||lastBar)})}
+  var lastBar=null;
+  function rgba(hex,a){var h=hex.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');var n=parseInt(h,16);return isNaN(n)?hex:'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')'}
+  function showBar(b){if(!b)return;var d=new Date(b.ts*1000);$('#cdate').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+(state.range==='1d'||state.range==='5d'?' '+p(d.getHours())+':'+p(d.getMinutes()):'');$('#c').textContent=fmt(b.close);
+    var el=$('#cchg');if(firstBar&&firstBar!==b){var ch=b.close-firstBar.close,cp=ch/firstBar.close*100;el.textContent=(ch>0?'+':'')+fmt(ch)+' ('+pct(cp)+') since start of range';el.className=cls(cp)}else{el.textContent='';el.className=''}}
+  function loadChart(){setHash();build();var s=state.symbol,r=state.range;
+    get('/markets/bars?symbol='+encodeURIComponent(s)+'&range='+r).then(function(d){var bars=d.bars;byTime={};firstBar=bars[0]||null;lastBar=bars[bars.length-1]||null;
+      var data=bars.map(function(b){var t=d.intraday?Math.floor(b.ts)+19800:new Date(b.ts*1000).toISOString().slice(0,10);byTime[t]=b;return {time:t,value:b.close}});
+      var up=firstBar&&lastBar&&lastBar.close>=firstBar.close;var col=cssVar(up?'--good':'--bad');line.applyOptions({lineColor:col,topColor:rgba(col,.14),bottomColor:rgba(col,0)});
+      line.setData(data);chart.timeScale().fitContent();
+      $('#cnm').innerHTML='<b>'+esc(d.name)+'</b> · '+esc(d.interval)+' · '+r;$('#cmeta').textContent=bars.length+' points · '+d.source+(d.delayed?' · ~15 min delayed':'');showBar(lastBar)}).catch(function(e){$('#cnm').textContent=s+' · failed: '+e})}
   $('#rangeSeg').addEventListener('click',function(e){var b=e.target.closest('button[data-r]');if(!b)return;state.range=b.dataset.r;$$('#rangeSeg button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});loadChart()});
   $$('#rangeSeg button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.r===state.range))});
-  ['ema','vol','rsiOn','logs'].forEach(function(id){$('#'+id).addEventListener('change',loadChart)});
-  var themeSel=document.getElementById('theme');if(themeSel)themeSel.addEventListener('change',function(){if(state.tab==='chart'&&state.engine==='tv')setTimeout(tvRender,50)});
+  var themeSel=document.getElementById('theme');if(themeSel)themeSel.addEventListener('change',function(){if(built){chart.applyOptions(theme());if(state.tab==='chart')loadChart()}});
 
   /* ---- search + symbol switch ---- */
   var q=$('#q'),sug=$('#sug'),timer=null;
@@ -330,7 +294,7 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   $('#ticker').addEventListener('click',function(e){var a=e.target.closest('a[data-sym]');if(!a)return;e.preventDefault();go(a.dataset.sym)});
   get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
   setInterval(function(){if(!document.hidden)ticker()},10000);
-  setInterval(function(){if(!document.hidden&&state.tab==='chart'&&state.engine==='desk'&&(state.range==='1d'||state.range==='5d'))loadDesk()},60000);
+  setInterval(function(){if(!document.hidden&&state.tab==='chart'&&(state.range==='1d'||state.range==='5d'))loadChart()},60000);
   document.title='Delta Desk · '+state.symbol;boot();
 })();
 </script>
