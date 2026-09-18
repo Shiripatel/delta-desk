@@ -88,6 +88,13 @@ tr.atm td{background:var(--fill)}
 .chart text{fill:var(--ink-3)}
 .chart .lg{display:flex;gap:16px;font-size:11px;color:var(--ink-2);margin-bottom:6px}
 .chart .lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.ind{border-bottom:1px solid var(--line)}
+.ind h4{margin:0;padding:8px 16px 4px;font:300 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.ind .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.ind .tiles button{text-align:left;padding:10px 16px 12px;border-right:1px solid var(--line);border-top:1px solid var(--line)}
+.ind .tiles button:hover{background:var(--fill)}
+.ind .n{font:500 19px/1.1 var(--sans);letter-spacing:-.02em;margin:4px 0 2px}
+.ind .u{font-size:10.5px;color:var(--ink-3)}
 .radar-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px}
 .radar-side{border-left:1px solid var(--line);padding:14px 16px}
 @media (max-width:900px){.radar-wrap{grid-template-columns:1fr}.radar-side{border-left:0;border-top:1px solid var(--line)}}
@@ -117,23 +124,32 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 
 <!-- overview (default) -->
 <section class="view" data-view="overview">
-  <div class="sec-head"><h2><i>[01]</i>market overview</h2><span class="meta" id="ovMeta">hover Markets in the header for every view</span></div>
-  <div class="strip" id="ovStrip" role="list"></div>
+  <div class="sec-head"><h2><i>[01]</i>ipo tracker</h2><span class="meta" id="ovIpoMeta">—</span></div>
+  <div class="stats" id="ovIpoStats"></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>issue</th><th>segment</th><th>open</th><th>close</th><th>listing</th><th class="num">price band</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th><th>status</th></tr></thead>
+    <tbody id="ovIpo"></tbody>
+  </table></div>
+  <div class="note">Bids go through your broker's app (UPI). Fed from <code>data/ipo.json</code>; <a href="#/ipo" style="text-decoration:underline">all issues</a>.</div>
+
+  <div class="sec-head"><h2><i>[02]</i>key indicators</h2><span class="meta" id="ovIndMeta">India, rupee, commodities, crypto, rates, world · click a tile to add it to your watchlist</span></div>
+  <div id="ovInd"></div>
+
   <div class="grid2">
     <div class="left">
-      <div class="sec-head"><h2><i>[02]</i>NIFTY 50 · breadth &amp; movers</h2><span class="meta" id="ovBreadth">—</span></div>
+      <div class="sec-head"><h2><i>[03]</i>NIFTY 50 · breadth &amp; movers</h2><span class="meta" id="ovBreadth">—</span></div>
       <div style="padding:8px 16px 0"><div class="breadth" id="ovBar"></div></div>
       <div class="grid2"><div class="left"><div class="tbl-wrap"><table><thead><tr><th>gainers</th><th class="num">ltp</th><th class="num">chg %</th></tr></thead><tbody id="ovGain"></tbody></table></div></div>
       <div><div class="tbl-wrap"><table><thead><tr><th>losers</th><th class="num">ltp</th><th class="num">chg %</th></tr></thead><tbody id="ovLose"></tbody></table></div></div></div>
     </div>
     <div>
-      <div class="sec-head"><h2><i>[03]</i>ipo tracker</h2><span class="meta"><a href="#/ipo" style="text-decoration:underline">all issues</a></span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>issue</th><th>open</th><th>close</th><th>status</th></tr></thead><tbody id="ovIpo"></tbody></table></div>
-      <div class="sec-head"><h2><i>[04]</i>next on the calendar</h2><span class="meta"><a href="#/calendar" style="text-decoration:underline">full calendar</a></span></div>
+      <div class="sec-head"><h2><i>[04]</i>institutional flows · ₹ crore</h2><span class="meta"><a href="#/flows" style="text-decoration:underline">tracker</a></span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>date</th><th class="num">FII net</th><th class="num">DII net</th></tr></thead><tbody id="ovFlows"></tbody></table></div>
+      <div class="sec-head"><h2><i>[05]</i>next on the calendar</h2><span class="meta"><a href="#/calendar" style="text-decoration:underline">full calendar</a></span></div>
       <div class="tbl-wrap"><table><thead><tr><th>date</th><th>event</th></tr></thead><tbody id="ovCal"></tbody></table></div>
     </div>
   </div>
-  <div class="sec-head"><h2><i>[05]</i>headlines</h2><span class="meta"><a href="#/news" style="text-decoration:underline">all headlines</a></span></div>
+  <div class="sec-head"><h2><i>[06]</i>headlines</h2><span class="meta"><span id="ovTrend"></span> · <a href="#/news" style="text-decoration:underline">all headlines</a></span></div>
   <div class="news" id="ovNews"></div>
 </section>
 
@@ -504,16 +520,23 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   loaders.radar=loadRadar;
 
   /* overview */
-  function loadOverview(){get('/markets/indices').then(function(list){renderStrip(list);var keep=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'];
-      $('#ovStrip').innerHTML=list.filter(function(ix){return keep.indexOf(ix.code)>=0}).map(function(ix){var q=ix.quote||{};var c=cls(q.change_pct||0);
-        return '<button role="listitem" data-go="'+esc(ix.code)+'"><span class="eyebrow">'+esc(ix.name)+'</span><div class="n num">'+(q.ltp!=null?fmt(q.ltp):'—')+'</div><div class="c num '+c+'">'+(q.change!=null?sgn(q.change)+' · '+pct(q.change_pct):'—')+'</div></button>'}).join('')}).catch(offline);
+  var GROUPS=[['india','India'],['currency','Currency'],['commodity','Commodities'],['crypto','Crypto'],['rates','Rates'],['global','World indices']];
+  function loadOverview(){
+    get('/markets/indicators').then(function(list){var by={};list.forEach(function(x){(by[x.group]=by[x.group]||[]).push(x)});
+      $('#ovInd').innerHTML=GROUPS.filter(function(g){return by[g[0]]}).map(function(g){return '<div class="ind"><h4>'+g[1]+'</h4><div class="tiles">'+by[g[0]].map(function(x){var q=x.quote;
+        return '<button data-key="'+esc(x.key)+'" title="add '+esc(x.name)+' to watchlist"><span class="eyebrow">'+esc(x.name)+'</span><div class="n num">'+(q?fmt(q.ltp,x.decimals):'—')+'</div><div class="u"><span class="num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span> · '+esc(x.unit)+'</div></button>'}).join('')+'</div></div>'}).join('')}).catch(offline);
+    get('/markets/ipo').then(function(d){var n=function(s){return d.entries.filter(function(e){return e.status===s}).length};$('#ovIpoMeta').textContent='source: '+d.source;
+      $('#ovIpoStats').innerHTML=[['open now',n('open')],['upcoming',n('upcoming')],['closed, awaiting listing',n('closed')],['listed',n('listed')]].map(function(x){return '<div class="stat"><div class="eyebrow">'+x[0]+'</div><div class="v num">'+x[1]+'</div></div>'}).join('');
+      var rows=d.entries.filter(function(e){return e.status==='open'||e.status==='upcoming'}).slice(0,8);
+      $('#ovIpo').innerHTML=rows.length?rows.map(function(e){return '<tr><td><b>'+esc(e.name)+'</b>'+(e.example?' <span class="tag">example data</span>':'')+'<br><span class="muted">'+esc(e.symbol||'')+'</span></td><td>'+esc(e.segment)+'</td><td class="num">'+esc(e.open)+'</td><td class="num">'+esc(e.close)+'</td><td class="num">'+esc(e.listing||'—')+'</td><td class="num">₹'+fmt(e.price_lo,0)+' – '+fmt(e.price_hi,0)+'</td><td class="num">'+fmt(e.lot*e.price_hi,0)+'</td><td class="num">'+fmt(e.issue_size_cr,0)+'</td><td><span class="state '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join(''):'<tr><td colspan="9" class="muted">nothing open or upcoming · add entries to data/ipo.json</td></tr>'}).catch(function(){});
     get('/markets/index/NIFTY50').then(function(d){var b=d.breadth;$('#ovBar').innerHTML='<i style="flex:'+b.advances+';background:var(--good)"></i><i style="flex:'+b.unchanged+';background:var(--line-2)"></i><i style="flex:'+b.declines+';background:var(--bad)"></i>';
       $('#ovBreadth').textContent=b.advances+' up · '+b.declines+' down · '+b.unchanged+' flat';var row=function(r){return '<tr><td><b>'+esc(r.symbol)+'</b> <span class="muted">'+esc(r.name)+'</span></td><td class="num">'+fmt(r.quote.ltp)+'</td><td class="num '+cls(r.quote.change_pct)+'">'+pct(r.quote.change_pct)+'</td></tr>'};
       $('#ovGain').innerHTML=d.gainers.map(row).join('');$('#ovLose').innerHTML=d.losers.map(row).join('')}).catch(function(){});
-    get('/markets/ipo').then(function(d){$('#ovIpo').innerHTML=d.entries.slice(0,6).map(function(e){return '<tr><td><b>'+esc(e.name)+'</b>'+(e.example?' <span class="tag">example</span>':'')+'</td><td class="num">'+esc(e.open)+'</td><td class="num">'+esc(e.close)+'</td><td><span class="state '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="4" class="muted">no issues</td></tr>'}).catch(function(){});
+    get('/markets/flows').then(function(d){$('#ovFlows').innerHTML=d.entries.slice(-5).reverse().map(function(r){return '<tr><td class="num">'+esc(r.date)+(r.example?' <span class="tag">example</span>':'')+'</td><td class="num '+cls(r.fii_net_cr)+'">'+sgn(r.fii_net_cr,0)+'</td><td class="num '+cls(r.dii_net_cr)+'">'+sgn(r.dii_net_cr,0)+'</td></tr>'}).join('')}).catch(function(){});
     get('/markets/calendar').then(function(d){$('#ovCal').innerHTML=d.entries.slice(0,6).map(function(e){return '<tr><td class="num">'+esc(e.date)+' <span class="muted">'+dow(e.date)+'</span></td><td>'+esc(e.title)+'</td></tr>'}).join('')}).catch(function(){});
-    get('/markets/news').then(function(d){$('#ovNews').innerHTML=d.entries.slice(0,8).map(function(h){return '<a href="'+esc(h.link)+'" target="_blank" rel="noopener"><div class="h">'+esc(h.title)+'</div><div class="s">'+esc(h.source)+'</div></a>'}).join('')||'<div class="note">no headlines (feeds unreachable)</div>'}).catch(function(){})}
-  $('#ovStrip').addEventListener('click',function(e){var b=e.target.closest('button[data-go]');if(!b)return;active=b.dataset.go;location.hash='#/stocks'});
+    get('/markets/news').then(function(d){$('#ovNews').innerHTML=d.entries.slice(0,8).map(function(h){return '<a href="'+esc(h.link)+'" target="_blank" rel="noopener"><div class="h">'+esc(h.title)+'</div><div class="s">'+esc(h.source)+'</div></a>'}).join('')||'<div class="note">no headlines (feeds unreachable)</div>'}).catch(function(){});
+    get('/markets/trending').then(function(d){$('#ovTrend').textContent=d.entries.length?'trending: '+d.entries.slice(0,6).map(function(t){return t.term}).join(', '):''}).catch(function(){})}
+  $('#ovInd').addEventListener('click',function(e){var b=e.target.closest('button[data-key]');if(!b)return;send('POST','/markets/watchlist/'+encodeURIComponent(wlName())+'/'+encodeURIComponent(b.dataset.key)).then(function(d){renderWatch(d);b.style.outline='2px solid var(--accent)';setTimeout(function(){b.style.outline=''},600)})});
 
   /* boot + polling */
   get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');$('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(window.__src);var f=document.querySelector('footer .wrap div');if(f&&s.note)f.textContent='Delta Desk · markets · quotes: '+s.note+'. Nothing here is investment advice.'}).catch(function(){});

@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime
 from typing import Protocol
 
-from deltadesk.markets.universe import ETFS, FX, INDICES, SEED_LEVELS, all_symbols, futures_contracts
+from deltadesk.markets.universe import ETFS, FX, GLOBAL, INDICES, SEED_LEVELS, all_symbols, futures_contracts
 
 
 @dataclass
@@ -68,6 +68,9 @@ class SyntheticQuotes:
         self._etf = {e[0]: e for e in ETFS}
         self._fx = {f[0]: f for f in FX}
         self._fx_walk = {f[0]: 0.0 for f in FX}
+        self._glob = {g[0]: g for g in GLOBAL}
+        for g in GLOBAL:
+            self._fx_walk[g[0]] = 0.0
         self._futs = {f["key"]: f for f in futures_contracts(self.today)}
         self._state: dict[str, tuple[float, float, float, float]] = {}   # key -> (ltp, high, low, last_t)
         self._last = self.t0
@@ -112,6 +115,10 @@ class SyntheticQuotes:
         for sym, (_, _, _, seed_px) in self._fx.items():
             self._fx_walk[sym] = self._fx_walk[sym] * (0.9995 ** dt) + rng.gauss(0, per_sec * 0.3 * math.sqrt(dt))
             self._put(sym, seed_px * math.exp(self._fx_walk[sym]), now)
+        for key, g in self._glob.items():
+            v = 3.0 if g[5] == "crypto" else 0.6 if g[5] == "commodity" else 0.3
+            self._fx_walk[key] = self._fx_walk[key] * (0.9995 ** dt) + rng.gauss(0, per_sec * v * math.sqrt(dt))
+            self._put(key, g[6] * math.exp(self._fx_walk[key]), now)
         for key, f in self._futs.items():
             spot = self._state[f["underlying"]][0]
             T = max(0.0, (datetime.fromisoformat(f["expiry"]).timestamp() + 15.5 * 3600 - now) / (365 * 86400))
@@ -138,6 +145,8 @@ class SyntheticQuotes:
             return self._etf[k][3]
         if k in self._fx:
             return self._fx[k][3]
+        if k in self._glob:
+            return self._glob[k][6]
         if k in self._futs:
             f = self._futs[k]
             T = max(0.0, (datetime.fromisoformat(f["expiry"]).timestamp() + 15.5 * 3600 - self.t0) / (365 * 86400))
@@ -157,7 +166,7 @@ class SyntheticQuotes:
             h = abs(hash((self.seed, k)))
             vol = 0 if k in INDICES else int(h % 4_000_000 + 200_000)
             oi = int(h % 9_000_000 + 3_000_000) if k in self._futs else 0
-            d = 4 if k in self._fx else 2
+            d = 4 if k in self._fx else self._glob[k][3] if k in self._glob else 2
             out[k] = Quote(key=k, ltp=round(ltp, d), prev_close=round(prev, d), open=round(prev, d),
                            high=round(hi, d), low=round(lo, d), volume=vol, change=round(chg, d),
                            change_pct=round(chg / prev * 100, 2), ts=ts, oi=oi)

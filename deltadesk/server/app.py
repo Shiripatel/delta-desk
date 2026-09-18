@@ -126,6 +126,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
                             "vix": s["vix"], "expiry": s["expiry"], "atm": s["atm"], "chain": s["chain"],
                             "stats": _dump(stats) if stats else None, "feed": pipeline.feed.name})
 
+    @app.get("/markets/indicators")
+    async def m_indicators():
+        return JSONResponse(await asyncio.to_thread(markets.indicators))
+
     @app.get("/markets/futures")
     async def m_futures():
         return JSONResponse(await asyncio.to_thread(markets.futures))

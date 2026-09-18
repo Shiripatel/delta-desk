@@ -46,6 +46,20 @@ def test_other_asset_classes(tmp_path):
     assert any(f["symbol"] == "USDINR" and 60 < f["quote"]["ltp"] < 120 for f in fx)
 
 
+def test_indicators_and_global_search(tmp_path):
+    s = _svc(tmp_path)
+    ind = s.indicators()
+    groups = {i["group"] for i in ind}
+    assert groups == {"india", "currency", "commodity", "crypto", "rates", "global"}
+    assert all(i["quote"] and i["quote"]["ltp"] > 0 for i in ind)
+    gold = next(i for i in ind if i["key"] == "GOLD")
+    assert gold["decimals"] == 1 and "oz" in gold["unit"]
+    assert any(h["kind"] == "global" and h["key"] == "BTC" for h in s.search("bitcoin"))
+    assert s.known("US10Y")
+    s.watchlist.add("Core", "GOLD")
+    assert any(r["key"] == "GOLD" and r["kind"] == "global" and r["quote"] for r in s.watchlists()["lists"]["Core"])
+
+
 def test_screener(tmp_path):
     s = _svc(tmp_path)
     all_rows = s.screener()

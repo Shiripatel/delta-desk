@@ -173,6 +173,24 @@ FX = [("USDINR", "US Dollar / Indian Rupee", "NSE CDS · lot 1,000 USD", 88.10),
       ("EURINR", "Euro / Indian Rupee", "NSE CDS · lot 1,000 EUR", 96.40),
       ("GBPINR", "British Pound / Indian Rupee", "NSE CDS · lot 1,000 GBP", 112.30),
       ("JPYINR", "Japanese Yen / Indian Rupee", "NSE CDS · lot 100,000 JPY", 0.585)]
+# key, name, yahoo symbol, decimals, unit, group, seed (for the synthetic provider)
+GLOBAL = [
+    ("USDINR", "USD / INR", "USDINR=X", 2, "₹ per $", "currency", 88.10),
+    ("DXY", "US dollar index", "DX-Y.NYB", 2, "index", "currency", 100.3),
+    ("GOLD", "Gold", "GC=F", 1, "$ / oz (COMEX)", "commodity", 4400.0),
+    ("SILVER", "Silver", "SI=F", 2, "$ / oz (COMEX)", "commodity", 66.8),
+    ("BRENT", "Brent crude", "BZ=F", 2, "$ / bbl", "commodity", 103.7),
+    ("NATGAS", "Natural gas", "NG=F", 3, "$ / MMBtu", "commodity", 2.87),
+    ("BTC", "Bitcoin", "BTC-USD", 0, "$", "crypto", 77500.0),
+    ("ETH", "Ethereum", "ETH-USD", 0, "$", "crypto", 2480.0),
+    ("US10Y", "US 10-year yield", "^TNX", 3, "%", "rates", 4.95),
+    ("SPX", "S&P 500", "^GSPC", 0, "index", "global", 7638.0),
+    ("NDX", "Nasdaq composite", "^IXIC", 0, "index", "global", 26418.0),
+    ("DJI", "Dow Jones", "^DJI", 0, "index", "global", 51778.0),
+    ("N225", "Nikkei 225", "^N225", 0, "index", "global", 65172.0),
+    ("HSI", "Hang Seng", "^HSI", 0, "index", "global", 24805.0),
+]
+GLOBAL_BY_KEY = {g[0]: g for g in GLOBAL}
 FUTURES_UNDERLYINGS = ["NIFTY50", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]
 
 

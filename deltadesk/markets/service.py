@@ -70,6 +70,18 @@ class MarketsService:
                         "underlying_name": universe.INDICES[c["underlying"]].name})
         return out
 
+    def indicators(self) -> list[dict]:
+        """India indices plus the global indicators people watch: rupee, gold, silver, crude, crypto, US yields, world indices."""
+        keys = ["NIFTY50", "BANKNIFTY", "SENSEX", "INDIAVIX"] + [g[0] for g in universe.GLOBAL]
+        q = self.quotes.quotes(keys)
+        out = []
+        for k in keys[:4]:
+            ix = universe.INDICES[k]
+            out.append({"key": k, "name": ix.name, "group": "india", "unit": "index", "decimals": 2, "quote": q[k].json() if k in q else None})  # noqa: E501
+        for g in universe.GLOBAL:
+            out.append({"key": g[0], "name": g[1], "group": g[5], "unit": g[4], "decimals": g[3], "quote": q[g[0]].json() if g[0] in q else None})  # noqa: E501
+        return out
+
     def etfs(self) -> list[dict]:
         q = self.quotes.quotes([e[0] for e in universe.ETFS])
         return [{"symbol": s, "name": n, "tracks": t, "quote": q[s].json() if s in q else None} for s, n, t, _ in universe.ETFS]
@@ -121,6 +133,9 @@ class MarketsService:
         for s, n, d, _ in universe.FX:
             if s == k:
                 return n, "forex", d
+        if k in universe.GLOBAL_BY_KEY:
+            g = universe.GLOBAL_BY_KEY[k]
+            return g[1], "global", g[4]
         if k.startswith("FUT:"):
             for f in universe.futures_contracts(date.today()):
                 if f["key"] == k:
@@ -147,6 +162,9 @@ class MarketsService:
         for s, n, d, _ in universe.FX:
             if q in s or q in n.upper():
                 out.append({"key": s, "name": n, "kind": "forex", "sector": d})
+        for g in universe.GLOBAL:
+            if q in g[0] or q in g[1].upper():
+                out.append({"key": g[0], "name": g[1], "kind": "global", "sector": g[4]})
         out.sort(key=lambda r: (not r["key"].startswith(q), r["key"]))
         return out[:limit]
 

@@ -23,6 +23,7 @@ def test_mapping():
     assert YahooQuotes.map_symbol("HDFCBANK") == "HDFCBANK.NS"
     assert YahooQuotes.map_symbol("M&M") == "M&M.NS"
     assert YahooQuotes.map_symbol("USDINR") == "USDINR=X"
+    assert YahooQuotes.map_symbol("GOLD") == "GC=F" and YahooQuotes.map_symbol("US10Y") == "^TNX"
     assert YahooQuotes.map_symbol("MIDCPNIFTY") is None
     assert YahooQuotes.map_symbol("FUT:NIFTY50:2026-09-29") is None
 

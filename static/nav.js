@@ -23,7 +23,12 @@
   mega.innerHTML='<div class="cols">'+cols.map(function(c){return '<div><h5>'+c[0]+'</h5>'+c[1].map(function(i){return '<a href="/markets#/'+i[0]+'" data-view="'+i[0]+'">'+i[1]+'<small>'+i[2]+'</small></a>'}).join('')+'</div>'}).join('')+'</div>';
   wrap.appendChild(mega);
   /* on the markets page a menu click only changes the hash; make sure the router runs even for the same hash */
-  mega.addEventListener('click',function(e){var a=e.target.closest('a[data-view]');if(!a)return;if(location.pathname==='/markets'){e.preventDefault();var h='#/'+a.dataset.view;if(location.hash===h)window.dispatchEvent(new HashChangeEvent('hashchange'));else location.hash=h;wrap.classList.remove('open')}});
+  mega.addEventListener('click',function(e){var a=e.target.closest('a[data-view]');if(!a)return;if(location.pathname==='/markets'){e.preventDefault();var h='#/'+a.dataset.view;if(location.hash===h)window.dispatchEvent(new HashChangeEvent('hashchange'));else location.hash=h}wrap.classList.remove('open')});
   link.addEventListener('click',function(e){if(location.pathname==='/markets'){e.preventDefault();if(location.hash==='#/overview'||location.hash===''){location.hash='#/overview';window.dispatchEvent(new HashChangeEvent('hashchange'))}else location.hash='#/overview'}});
+  /* hover intent: open on enter, keep open while the pointer is on the link or the panel, close after a short grace period */
+  var timer=null;function open(){clearTimeout(timer);wrap.classList.add('open')}function close(){clearTimeout(timer);timer=setTimeout(function(){wrap.classList.remove('open')},350)}
+  wrap.addEventListener('mouseenter',open);wrap.addEventListener('mouseleave',close);mega.addEventListener('mouseenter',open);mega.addEventListener('mouseleave',close);
+  link.addEventListener('focus',open);
+  document.addEventListener('click',function(e){if(!wrap.contains(e.target))wrap.classList.remove('open')});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')wrap.classList.remove('open')});
 })();

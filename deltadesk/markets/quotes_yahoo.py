@@ -18,7 +18,7 @@ import urllib.parse
 import urllib.request
 
 from deltadesk.markets.quotes import Quote
-from deltadesk.markets.universe import FX, INDICES
+from deltadesk.markets.universe import FX, GLOBAL_BY_KEY, INDICES
 
 INDEX_SYMBOLS = {"NIFTY50": "^NSEI", "BANKNIFTY": "^NSEBANK", "SENSEX": "^BSESN", "INDIAVIX": "^INDIAVIX",
                  "FINNIFTY": "NIFTY_FIN_SERVICE.NS", "NIFTYNEXT50": "^NSMIDCP"}   # ^NSMIDCP is Yahoo's NIFTY NEXT 50
@@ -47,6 +47,8 @@ class YahooQuotes:
             return INDEX_SYMBOLS.get(k)
         if k in FX_KEYS:
             return f"{k}=X"
+        if k in GLOBAL_BY_KEY:
+            return GLOBAL_BY_KEY[k][2]
         if k.startswith("FUT:"):
             return None
         return f"{k}.NS"
@@ -68,7 +70,7 @@ class YahooQuotes:
             return None
         prev = meta.get("chartPreviousClose") or meta.get("previousClose") or ltp
         chg = float(ltp) - float(prev)
-        d = 4 if key in FX_KEYS else 2
+        d = 4 if key in FX_KEYS else GLOBAL_BY_KEY[key][3] if key in GLOBAL_BY_KEY else 2
         return Quote(key=key, ltp=round(float(ltp), d), prev_close=round(float(prev), d), open=round(float(prev), d),
                      high=round(float(meta.get("regularMarketDayHigh") or ltp), d),
                      low=round(float(meta.get("regularMarketDayLow") or ltp), d),
