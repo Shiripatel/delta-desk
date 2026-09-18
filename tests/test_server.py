@@ -27,8 +27,9 @@ def test_pages_and_assets():
         assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
         mk = c.get("/markets").text
         assert "DDAI.radar(" in mk and "DDAI.ranking(" in mk and "/static/ai.css" in mk and "wlPane" not in mk
-        assert 'data-ix="SENSEX"' in home and "limit=10" in home
-        for path in ("/static/ai.js", "/static/ai.css", "/static/design.css", "/static/watchlist.js", "/static/watchlist.css"):
+        assert 'data-ix="SENSEX"' in home and "limit=10" in home and 'data-ix=""' not in home
+        assert 'data-view="overview"' in mk and "/static/nav.js" in mk and "maBtn" not in mk
+        for path in ("/static/ai.js", "/static/ai.css", "/static/design.css", "/static/nav.js", "/static/watchlist.js", "/static/watchlist.css"):
             assert c.get(path).status_code == 200, path
         src = c.get("/markets/source").json()
         assert src["name"] == "synthetic" and src["history"] == "synthetic"

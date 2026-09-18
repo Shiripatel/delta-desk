@@ -20,14 +20,6 @@
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .up{color:var(--good)}.dn{color:var(--bad)}.muted{color:var(--ink-3)}
 /* header + mega menu */
-.nav button.ma{color:var(--accent-deep)}
-.mega{position:absolute;left:-1px;right:-1px;top:100%;background:var(--bg);border-bottom:1px solid var(--line);border-top:1px solid var(--line);display:none;z-index:6}
-.mega[data-open="1"]{display:block}
-.mega .cols{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:40px;padding:22px 20px 26px}
-.mega h5{margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--line);font:300 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.mega a{display:block;padding:9px 0;font:500 14px/1.2 var(--sans);letter-spacing:-.01em}
-.mega a[aria-current]{color:var(--accent-deep)}
-.mega a small{display:block;font:300 11px/1.3 var(--mono);color:var(--ink-3);margin-top:2px}
 /* sections */
 section{border-bottom:1px solid var(--line)}
 .view{display:none}.view[data-active="1"]{display:block}
@@ -112,39 +104,37 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">MARKETS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/markets" aria-current="page">Markets</a><a href="/desk">Agents</a><button class="ma" id="maBtn" aria-expanded="false" aria-controls="mega">market analysis ▾</button></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/markets" aria-current="page">Markets</a><a href="/desk">Agents</a></nav>
   <div class="status">
     <span id="feedName" title="quote source"><span class="dot" id="feedDot"></span>connecting</span>
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
-  <div class="mega" id="mega"><div class="cols">
-    <div><h5>Real-time quotes</h5>
-      <a href="#/stocks" data-view="stocks">Stock market<small>indices, constituents, movers</small></a>
-      <a href="#/options" data-view="options">Options market<small>NIFTY chain, IV, OI, Greeks</small></a>
-      <a href="#/futures" data-view="futures">Futures market<small>index futures, basis, OI</small></a>
-      <a href="#/etf" data-view="etf">ETF market<small>index, gold, silver, global</small></a>
-      <a href="#/forex" data-view="forex">Forex market<small>USDINR, EURINR, GBPINR, JPYINR</small></a>
-    </div>
-    <div><h5>Technical tools</h5>
-      <a href="#/screener" data-view="screener">Stock screener<small>index, sector, change, price</small></a>
-      <a href="#/heatmap" data-view="heatmap">Heat map<small>weight × change, breadth</small></a>
-      <a href="#/earnings" data-view="earnings">Earnings calendar<small>results dates</small></a>
-      <a href="#/flows" data-view="flows">Institutional tracker<small>FII / DII daily flows</small></a>
-      <a href="#/ipo" data-view="ipo">IPO tracker<small>upcoming, open, listing</small></a>
-      <a href="#/ai" data-view="ai">AI ranking<small>score, win rate, forecast, risk</small></a>
-      <a href="#/radar" data-view="radar">AI radar<small>bullseye of scores, replay 5 days</small></a>
-    </div>
-    <div><h5>Trading news</h5>
-      <a href="#/news" data-view="news">Headlines<small>latest from public feeds</small></a>
-      <a href="#/calendar" data-view="calendar">Financial calendar<small>expiries, holidays, RBI</small></a>
-      <a href="#/trending" data-view="trending">Trending topics<small>terms across headlines</small></a>
-      <a href="#/watchlist" data-view="watchlist">Watchlist<small>your lists, any asset class</small></a>
-    </div>
-  </div></div>
 </div></header>
 
 <main class="wrap">
+
+<!-- overview (default) -->
+<section class="view" data-view="overview">
+  <div class="sec-head"><h2><i>[01]</i>market overview</h2><span class="meta" id="ovMeta">hover Markets in the header for every view</span></div>
+  <div class="strip" id="ovStrip" role="list"></div>
+  <div class="grid2">
+    <div class="left">
+      <div class="sec-head"><h2><i>[02]</i>NIFTY 50 · breadth &amp; movers</h2><span class="meta" id="ovBreadth">—</span></div>
+      <div style="padding:8px 16px 0"><div class="breadth" id="ovBar"></div></div>
+      <div class="grid2"><div class="left"><div class="tbl-wrap"><table><thead><tr><th>gainers</th><th class="num">ltp</th><th class="num">chg %</th></tr></thead><tbody id="ovGain"></tbody></table></div></div>
+      <div><div class="tbl-wrap"><table><thead><tr><th>losers</th><th class="num">ltp</th><th class="num">chg %</th></tr></thead><tbody id="ovLose"></tbody></table></div></div></div>
+    </div>
+    <div>
+      <div class="sec-head"><h2><i>[03]</i>ipo tracker</h2><span class="meta"><a href="#/ipo" style="text-decoration:underline">all issues</a></span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>issue</th><th>open</th><th>close</th><th>status</th></tr></thead><tbody id="ovIpo"></tbody></table></div>
+      <div class="sec-head"><h2><i>[04]</i>next on the calendar</h2><span class="meta"><a href="#/calendar" style="text-decoration:underline">full calendar</a></span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>date</th><th>event</th></tr></thead><tbody id="ovCal"></tbody></table></div>
+    </div>
+  </div>
+  <div class="sec-head"><h2><i>[05]</i>headlines</h2><span class="meta"><a href="#/news" style="text-decoration:underline">all headlines</a></span></div>
+  <div class="news" id="ovNews"></div>
+</section>
 
 <!-- stocks -->
 <section class="view" data-view="stocks">
@@ -368,17 +358,13 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
-  /* mega menu + views */
-  var mega=$('#mega'),maBtn=$('#maBtn');
-  maBtn.addEventListener('click',function(){var open=mega.dataset.open!=='1';mega.dataset.open=open?'1':'0';maBtn.setAttribute('aria-expanded',String(open))});
-  document.addEventListener('click',function(e){if(!e.target.closest('#mega')&&!e.target.closest('#maBtn')){mega.dataset.open='0';maBtn.setAttribute('aria-expanded','false')}});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'){mega.dataset.open='0';maBtn.setAttribute('aria-expanded','false')}});
+  /* views */
   var view='stocks',loaded={};
-  var loaders={stocks:loadStocks,heatmap:loadStocks,options:loadOptions,futures:loadFutures,etf:loadEtf,forex:loadForex,screener:runScreener,earnings:loadEarnings,flows:loadFlows,ipo:loadIpo,watchlist:loadWatch,news:loadNews,calendar:loadCal,trending:loadTrending};
-  function route(){var v=(location.hash.replace(/^#\/?/,'')||'stocks');if(!loaders[v])v='stocks';view=v;
+  var loaders={overview:loadOverview,stocks:loadStocks,heatmap:loadStocks,options:loadOptions,futures:loadFutures,etf:loadEtf,forex:loadForex,screener:runScreener,earnings:loadEarnings,flows:loadFlows,ipo:loadIpo,watchlist:loadWatch,news:loadNews,calendar:loadCal,trending:loadTrending};
+  function route(){var v=(location.hash.replace(/^#\/?/,'')||'overview');if(!loaders[v])v='overview';view=v;
     $$('.view').forEach(function(s){s.dataset.active=s.dataset.view===v?'1':'0'});
     $$('[data-view]').forEach(function(a){if(a.tagName==='A'){if(a.dataset.view===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')}});
-    mega.dataset.open='0';maBtn.setAttribute('aria-expanded','false');window.scrollTo(0,0);loaders[v]()}
+    window.scrollTo(0,0);loaders[v]()}
   window.addEventListener('hashchange',route);
 
   /* indices strip (shared by stocks + heat map) */
@@ -516,12 +502,25 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   $('#rdSel').addEventListener('change',loadRadar);
   loaders.radar=loadRadar;
 
+  /* overview */
+  function loadOverview(){get('/markets/indices').then(function(list){renderStrip(list);var keep=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'];
+      $('#ovStrip').innerHTML=list.filter(function(ix){return keep.indexOf(ix.code)>=0}).map(function(ix){var q=ix.quote||{};var c=cls(q.change_pct||0);
+        return '<button role="listitem" data-go="'+esc(ix.code)+'"><span class="eyebrow">'+esc(ix.name)+'</span><div class="n num">'+(q.ltp!=null?fmt(q.ltp):'—')+'</div><div class="c num '+c+'">'+(q.change!=null?sgn(q.change)+' · '+pct(q.change_pct):'—')+'</div></button>'}).join('')}).catch(offline);
+    get('/markets/index/NIFTY50').then(function(d){var b=d.breadth;$('#ovBar').innerHTML='<i style="flex:'+b.advances+';background:var(--good)"></i><i style="flex:'+b.unchanged+';background:var(--line-2)"></i><i style="flex:'+b.declines+';background:var(--bad)"></i>';
+      $('#ovBreadth').textContent=b.advances+' up · '+b.declines+' down · '+b.unchanged+' flat';var row=function(r){return '<tr><td><b>'+esc(r.symbol)+'</b> <span class="muted">'+esc(r.name)+'</span></td><td class="num">'+fmt(r.quote.ltp)+'</td><td class="num '+cls(r.quote.change_pct)+'">'+pct(r.quote.change_pct)+'</td></tr>'};
+      $('#ovGain').innerHTML=d.gainers.map(row).join('');$('#ovLose').innerHTML=d.losers.map(row).join('')}).catch(function(){});
+    get('/markets/ipo').then(function(d){$('#ovIpo').innerHTML=d.entries.slice(0,6).map(function(e){return '<tr><td><b>'+esc(e.name)+'</b>'+(e.example?' <span class="tag">example</span>':'')+'</td><td class="num">'+esc(e.open)+'</td><td class="num">'+esc(e.close)+'</td><td><span class="state '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="4" class="muted">no issues</td></tr>'}).catch(function(){});
+    get('/markets/calendar').then(function(d){$('#ovCal').innerHTML=d.entries.slice(0,6).map(function(e){return '<tr><td class="num">'+esc(e.date)+' <span class="muted">'+dow(e.date)+'</span></td><td>'+esc(e.title)+'</td></tr>'}).join('')}).catch(function(){});
+    get('/markets/news').then(function(d){$('#ovNews').innerHTML=d.entries.slice(0,8).map(function(h){return '<a href="'+esc(h.link)+'" target="_blank" rel="noopener"><div class="h">'+esc(h.title)+'</div><div class="s">'+esc(h.source)+'</div></a>'}).join('')||'<div class="note">no headlines (feeds unreachable)</div>'}).catch(function(){})}
+  $('#ovStrip').addEventListener('click',function(e){var b=e.target.closest('button[data-go]');if(!b)return;active=b.dataset.go;location.hash='#/stocks'});
+
   /* boot + polling */
   get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');$('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(window.__src);var f=document.querySelector('footer .wrap div');if(f&&s.note)f.textContent='Delta Desk · markets · quotes: '+s.note+'. Nothing here is investment advice.'}).catch(function(){});
   route();
-  setInterval(function(){if(document.hidden)return;if(view==='stocks'||view==='heatmap'){get('/markets/indices').then(renderStrip).catch(offline);loadIndex()}else if(['futures','etf','forex','watchlist','options'].indexOf(view)>=0)loaders[view]()},3000);
+  setInterval(function(){if(document.hidden)return;if(view==='stocks'||view==='heatmap'){get('/markets/indices').then(renderStrip).catch(offline);loadIndex()}else if(view==='overview')loadOverview();else if(['futures','etf','forex','watchlist','options'].indexOf(view)>=0)loaders[view]()},3000);
 })();
 </script>
 <script src="/static/ai.js"></script>
+<script src="/static/nav.js"></script>
 </body>
 </html>

@@ -15,19 +15,19 @@
 
 /* ---- hero ---- */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;align-items:stretch}
-.hero > div{padding:34px 20px 26px;min-width:0}
+.hero > div{padding:18px 20px 16px;min-width:0}
 .hero .left{border-right:1px solid var(--line)}
-h1{margin:0 0 12px;font:500 clamp(30px,4.4vw,54px)/1.04 var(--sans);letter-spacing:-.03em;text-wrap:balance}
+h1{margin:0 0 8px;font:500 clamp(24px,3vw,36px)/1.08 var(--sans);letter-spacing:-.03em;text-wrap:balance}
 h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
-.hero p{max-width:60ch;margin:0;font-size:13.5px;color:var(--ink-2)}
-.zones{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:8px}
-.zones div{padding:12px 14px;border-right:1px solid var(--line)}
+.hero p{max-width:62ch;margin:0;font-size:12.5px;color:var(--ink-2)}
+.zones{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:6px}
+.zones div{padding:8px 12px;border-right:1px solid var(--line)}
 .zones div:last-child{border-right:0}
-.zones .v{font:500 26px/1.1 var(--sans);letter-spacing:-.02em;margin:5px 0 2px}
-.zones .v i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:2px}
-.zones .g i{background:var(--good)}.zones .a i{background:var(--warn)}.zones .r i{background:var(--bad)}
-.zones .c{font-size:11px;color:var(--ink-3)}
-.asof{margin-top:12px;font-size:11.5px;color:var(--ink-3)}
+.zones .v{font:500 22px/1.1 var(--sans);letter-spacing:-.02em;margin:3px 0 0;display:flex;align-items:center;gap:8px}
+.zones .g .ico{color:var(--good)}.zones .a .ico{color:var(--warn)}.zones .r .ico{color:var(--bad)}
+.zones .ico{width:20px;height:20px;margin:0}
+.zones .c{font-size:10.5px;color:var(--ink-3)}
+.asof{margin-top:8px;font-size:11px;color:var(--ink-3)}
 /* ---- radar block ---- */
 .rgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)}
 .rgrid > div{min-width:0}
@@ -74,14 +74,14 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   <div class="left">
     <div class="eyebrow">[01] &nbsp;today's field</div>
     <h1>Which stocks sit in the <em>buy zone</em> today?</h1>
-    <p>Every stock in the index is scored 1 to 10 from three months of price action and placed on the radar: 10 at the centre, 1 at the rim. Press replay to watch the last five sessions move the field. Scores are a transparent rules model, not advice.</p>
+    <p>Every stock is scored 1 to 10 from three months of price action: 10 at the centre of the radar, 1 at the rim. Replay the last five sessions to watch the field move. Rules model, not advice.</p>
   </div>
   <div>
     <div class="eyebrow"><span id="zoneIdx">NIFTY 50</span> · today</div>
     <div class="zones">
-      <div class="g"><span class="eyebrow">buy zone · 7–10</span><div class="v num" id="zBuy"><i></i>—</div><div class="c">stocks</div></div>
-      <div class="a"><span class="eyebrow">hold · 4–6</span><div class="v num" id="zHold"><i></i>—</div><div class="c">stocks</div></div>
-      <div class="r"><span class="eyebrow">sell zone · 1–3</span><div class="v num" id="zSell"><i></i>—</div><div class="c">stocks</div></div>
+      <div class="g"><span class="eyebrow">buy zone · 7–10</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><span id="zBuy">—</span></div><div class="c">stocks</div></div>
+      <div class="a"><span class="eyebrow">hold · 4–6</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18"/><path d="M6 8h12"/><path d="M6 16h12"/></svg><span id="zHold">—</span></div><div class="c">stocks</div></div>
+      <div class="r"><span class="eyebrow">sell zone · 1–3</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l6 6 4-4 8 8"/><path d="M14 17h7v-7"/></svg><span id="zSell">—</span></div><div class="c">stocks</div></div>
     </div>
     <div class="asof" id="asof">—</div>
   </div>
@@ -89,7 +89,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section id="radar">
   <div class="tabs" id="tabs">
-    <button data-ix="NIFTY50" aria-pressed="true">NIFTY 50</button><button data-ix="BANKNIFTY">BANK NIFTY</button><button data-ix="SENSEX">SENSEX</button><button data-ix="">ALL</button>
+    <button data-ix="NIFTY50" aria-pressed="true"><svg class="ico" style="width:14px;height:14px" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>NIFTY 50</button><button data-ix="BANKNIFTY">BANK NIFTY</button><button data-ix="SENSEX">SENSEX</button>
     <span class="meta" id="rdMeta">—</span>
   </div>
   <div class="rgrid">
@@ -141,9 +141,9 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
-  var index='NIFTY50',limit=10,names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX','':'ALL INDICES'};
+  var index='NIFTY50',limit=10,names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX'};
   function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
-    $('#zBuy').innerHTML='<i></i>'+b;$('#zHold').innerHTML='<i></i>'+h;$('#zSell').innerHTML='<i></i>'+s;$('#zoneIdx').textContent=names[index]}
+    $('#zBuy').textContent=b;$('#zHold').textContent=h;$('#zSell').textContent=s;$('#zoneIdx').textContent=names[index]}
   var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
     onFrame:function(f,i,d){zones(f);$('#asof').textContent='as of '+(f.asof||'—')+(i===d.frames.length-1?' · latest session':' · replaying session '+(i+1)+' of '+d.frames.length)+' · history: '+d.source}});
   var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',note:'aiNote',index:index,limit:limit});
@@ -151,7 +151,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-ix]');if(!b)return;index=b.dataset.ix;
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});
   $('#more').addEventListener('click',function(){limit=limit===10?1000:10;this.textContent=limit===10?'show all':'show top 10';rank.load(index,limit)});
-  function breadth(){if(!index){$('#breadth').textContent='pick one index for breadth';return}get('/markets/index/'+index).then(function(d){var b=d.breadth;
+  function breadth(){get('/markets/index/'+index).then(function(d){var b=d.breadth;
     $('#breadth').innerHTML='<span class="up">'+b.advances+' advancing</span> · <span class="dn">'+b.declines+' declining</span> · '+b.unchanged+' flat'+(d.quote?'<br><span class="muted">'+names[index]+' '+fmt(d.quote.ltp)+' · '+pct(d.quote.change_pct)+'</span>':'')}).catch(function(){})}
   var order=['NIFTY50','BANKNIFTY','FINNIFTY','NIFTYNEXT50','SENSEX','INDIAVIX'];
   function ticker(){get('/markets/indices').then(function(list){var by={};list.forEach(function(ix){by[ix.code]=ix});
@@ -164,5 +164,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   loadAll();
 })();
 </script>
+<script src="/static/nav.js"></script>
 </body>
 </html>

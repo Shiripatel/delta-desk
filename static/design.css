@@ -76,6 +76,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .status .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .status .seg button.live[aria-pressed="true"]{background:var(--accent);color:#1E1E1E}
 
+/* ---- market-analysis menu (injected by static/nav.js) ---- */
+.has-mega{position:static;display:inline-flex}
+.has-mega .mega{position:absolute;left:-1px;right:-1px;top:100%;background:var(--bg);border:1px solid var(--line);border-top:0;display:none;z-index:6}
+.has-mega:hover .mega,.has-mega:focus-within .mega,.has-mega.open .mega{display:block}
+.has-mega:hover > a{color:var(--ink)}
+.mega .cols{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:40px;padding:20px 20px 24px}
+.mega h5{margin:0 0 6px;padding-bottom:8px;border-bottom:1px solid var(--line);font:300 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.mega a{display:block;padding:7px 0;font:500 13.5px/1.2 var(--sans);letter-spacing:-.01em;color:var(--ink)}
+.mega a:hover{color:var(--accent-deep)}
+.mega a small{display:block;font:300 11px/1.3 var(--mono);color:var(--ink-3);margin-top:2px}
+@media (max-width:1000px){.mega .cols{grid-template-columns:1fr;gap:14px}}
+/* ---- icons: small inline SVG marks, stroke inherits currentColor ---- */
+.ico{width:16px;height:16px;vertical-align:-3px;margin-right:6px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
 /* ---- ticker strip ------------------------------------------------------------------------- */
 .ticker{display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
 .ticker::-webkit-scrollbar{display:none}
