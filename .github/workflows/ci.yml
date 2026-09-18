@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --group dev
+      - name: Lint
+        run: uv run ruff check .
+      - name: Test
+        run: uv run pytest -q
+      - name: Page scripts parse
+        run: |
+          python3 - <<'EOF'
+          import re, io
+          for f in ("index.html", "markets.html"):
+              s = io.open(f, encoding="utf-8").read()
+              for i, b in enumerate(re.findall(r"<script>(.*?)</script>", s, re.S)):
+                  io.open(f"/tmp/{f}.{i}.js", "w", encoding="utf-8").write(b)
+          EOF
+          for f in /tmp/*.js; do node --check "$f"; done
