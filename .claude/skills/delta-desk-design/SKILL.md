@@ -31,7 +31,7 @@ on the current one. Section anchors go in the page body (tabs, `.sec-head`), not
 * Two-series categorical: `--s1` blue, `--s2` orange (calls/puts, FII/DII). Fixed order, never cycled.
 * Diverging heat-map ramp `--dn3..--up3` with `--flat` midpoint. Every tile carries a signed label. The colour-safe toggle (`data-safe="1"` on `<html>`) swaps the up pole to blue; keep it on every page.
 * Type: JetBrains Mono 300 for data and body; Host Grotesk 500/600 for headlines and big numbers. Tabular numerals via `.num`.
-* Dark mode follows `prefers-color-scheme` and `data-theme`; tokens already swap, so pages never hard-code colours.
+* Four themes, all in `design.css`: Mist (light grey, default), White, Paper (warm), Ink (dark), Midnight (blue-black). `static/nav.js` stamps `data-theme` from the user's choice and adds the switch to the header; pages never hard-code colours. A new colour must be defined for every theme.
 
 ## Header
 

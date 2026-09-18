@@ -1,6 +1,17 @@
 /* Shared header behaviour: the Markets item opens the market-analysis menu on hover (and on focus),
    and clicking it goes to the Markets overview. Injected so every page carries the same menu. */
 (function(){
+  /* theme: stored choice wins; otherwise Mist (light grey), or Ink when the system prefers dark */
+  var THEMES=[['mist','Mist · light grey'],['white','White'],['paper','Paper · warm'],['ink','Ink · dark'],['midnight','Midnight · blue']];
+  var theme=null;try{theme=localStorage.getItem('dd.theme')}catch(e){}
+  if(theme==='dark')theme='ink';
+  if(theme)document.documentElement.dataset.theme=theme;
+  var status=document.querySelector('.status');
+  if(status){var sel=document.createElement('select');sel.id='theme';sel.title='colour theme';
+    sel.innerHTML=THEMES.map(function(t){return '<option value="'+t[0]+'">'+t[1]+'</option>'}).join('');
+    var cur=theme||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'ink':'mist');sel.value=cur;
+    sel.addEventListener('change',function(){document.documentElement.dataset.theme=sel.value;try{localStorage.setItem('dd.theme',sel.value)}catch(e){}});
+    var safe=document.getElementById('safe');status.insertBefore(sel,safe||null)}
   var link=document.querySelector('.nav a[href="/markets"]');if(!link||link.closest('.has-mega'))return;
   var cols=[
     ['Real-time quotes',[['stocks','Stock market','indices, constituents, movers'],['options','Options market','NIFTY chain, IV, OI, Greeks'],['futures','Futures market','index futures, basis, OI'],['etf','ETF market','index, gold, silver, global'],['forex','Forex market','USDINR, EURINR, GBPINR, JPYINR']]],
