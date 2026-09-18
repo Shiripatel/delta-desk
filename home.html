@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="/static/ai.css">
-<link rel="stylesheet" href="/static/watchlist.css">
 <style>
 :root{
   --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
@@ -56,38 +55,54 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .up{color:var(--good)}.dn{color:var(--bad)}.muted{color:var(--ink-3)}
-/* header */
+
+/* ---- header: one row, three zones, everything 56px tall and vertically centred ---- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:stretch;justify-content:space-between;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;padding:14px 20px;border-right:1px solid var(--line)}
+.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:56px;padding:0 20px}
+.brand{display:flex;align-items:center;gap:10px;justify-self:start}
 .brand b{font:600 15px/1 var(--sans);letter-spacing:-.01em}
-.nav{display:flex;align-items:center;gap:22px;padding:0 20px;flex:1;min-width:0;overflow-x:auto}
-.nav a{font-size:12px;color:var(--ink-2);white-space:nowrap}
-.nav a:hover,.nav a[aria-current]{color:var(--ink)}
-.tools{display:flex;align-items:stretch;border-left:1px solid var(--line)}
-.tool{padding:8px 16px;border-right:1px solid var(--line);font-size:11px;line-height:1.35;color:var(--ink-2)}
-.tool strong{display:block;color:var(--ink);font-weight:400;white-space:nowrap}
-.tool button{padding:4px 8px;border:1px solid var(--line-2);font-size:11px;border-radius:2px;margin-top:2px}
-.tool button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-/* hero */
+.brand .tag{margin-left:2px}
+.nav{display:flex;align-items:center;gap:2px;justify-self:center;border:1px solid var(--line);border-radius:3px;padding:2px}
+.nav a{font-size:12px;color:var(--ink-2);padding:6px 14px;border-radius:2px;white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+.nav a[aria-current]{background:var(--ink);color:var(--bg)}
+.status{display:flex;align-items:center;gap:8px;justify-self:end}
+.status > *{display:inline-flex;align-items:center;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:3px;font-size:11px;color:var(--ink-2);white-space:nowrap;background:var(--bg)}
+.status .num{color:var(--ink)}
+.status button{cursor:pointer}
+.status button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+/* ---- ticker strip under the header ---- */
+.ticker{display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+.ticker::-webkit-scrollbar{display:none}
+.ticker a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;padding:9px 16px;border-right:1px solid var(--line);font-size:12px}
+.ticker a:hover{background:var(--fill)}
+.ticker .n{color:var(--ink-2);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.ticker .v{color:var(--ink)}
+.ticker .c{font-size:11px}
+.ticker .src{margin-left:auto;padding:9px 16px;font-size:11px;color:var(--ink-3);white-space:nowrap;border-left:1px solid var(--line);border-right:0}
+
+/* ---- hero ---- */
 section{border-bottom:1px solid var(--line)}
-.hero{display:grid;grid-template-columns:1.1fr 1fr;align-items:end}
-.hero > div{padding:34px 20px 22px;min-width:0}
+.hero{display:grid;grid-template-columns:1.25fr 1fr;align-items:stretch}
+.hero > div{padding:34px 20px 26px;min-width:0}
 .hero .left{border-right:1px solid var(--line)}
 h1{margin:0 0 12px;font:500 clamp(30px,4.4vw,54px)/1.04 var(--sans);letter-spacing:-.03em;text-wrap:balance}
 h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
 .hero p{max-width:60ch;margin:0;font-size:13.5px;color:var(--ink-2)}
-.pulse{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line)}
-.pulse div{padding:12px 14px;border-right:1px solid var(--line)}
-.pulse div:last-child{border-right:0}
-.pulse .v{font:500 20px/1.1 var(--sans);letter-spacing:-.02em;margin:5px 0 2px}
-.pulse .c{font-size:11.5px}
-/* universe tabs */
+.zones{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:8px}
+.zones div{padding:12px 14px;border-right:1px solid var(--line)}
+.zones div:last-child{border-right:0}
+.zones .v{font:500 26px/1.1 var(--sans);letter-spacing:-.02em;margin:5px 0 2px}
+.zones .v i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:2px}
+.zones .g i{background:var(--good)}.zones .a i{background:var(--warn)}.zones .r i{background:var(--bad)}
+.zones .c{font-size:11px;color:var(--ink-3)}
+.asof{margin-top:12px;font-size:11.5px;color:var(--ink-3)}
+/* ---- universe tabs ---- */
 .tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line)}
 .tabs button{padding:11px 18px;border-right:1px solid var(--line);font-size:12px;color:var(--ink-2);white-space:nowrap}
 .tabs button[aria-pressed="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent-deep)}
 .tabs .meta{margin-left:auto;padding:11px 20px;font-size:11px;color:var(--ink-3);white-space:nowrap}
-/* radar block */
+/* ---- radar block ---- */
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .sec-head h2{margin:0;font:300 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .sec-head h2 i{font-style:normal;color:var(--ink-3);margin-right:10px}
@@ -105,7 +120,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .side td{padding:6px 0;border-bottom:1px solid var(--line)}
 .side td.num,.side th.num{text-align:right}
 .side .block{margin-top:18px}
-/* ranking */
+/* ---- ranking ---- */
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{font-weight:400;text-align:left;color:var(--ink-3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -115,7 +130,7 @@ td.num,th.num{text-align:right}
 tbody tr:hover td{background:var(--fill)}
 .more{display:block;width:100%;padding:12px;text-align:center;font-size:12px;color:var(--ink-2);border-top:1px solid var(--line)}
 .more:hover{color:var(--ink);background:var(--fill)}
-/* how it works */
+/* ---- how it works ---- */
 .how{display:grid;grid-template-columns:repeat(4,1fr)}
 .how div{padding:16px 20px;border-right:1px solid var(--line)}
 .how div:last-child{border-right:0}
@@ -124,21 +139,27 @@ tbody tr:hover td{background:var(--fill)}
 .how span{font-size:12px;color:var(--ink-2)}
 .note{padding:10px 20px;font-size:11.5px;color:var(--ink-2)}
 footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 20px;font-size:11px;color:var(--ink-3)}
-@media (max-width:1000px){.hero,.rgrid{grid-template-columns:1fr}.hero .left,.rgrid .left{border-right:0;border-bottom:1px solid var(--line)}.how{grid-template-columns:1fr 1fr}}
+@media (max-width:1000px){
+  .top .wrap{grid-template-columns:1fr auto;height:auto;padding:10px 16px;row-gap:8px}
+  .nav{grid-column:1 / -1;justify-self:stretch;overflow-x:auto}
+  .status .clock{display:none}
+  .hero,.rgrid{grid-template-columns:1fr}.hero .left,.rgrid .left{border-right:0;border-bottom:1px solid var(--line)}.how{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">AI RADAR</span></div>
   <nav class="nav"><a href="/" aria-current="page">radar</a><a href="#ranking">ranking</a><a href="/markets">markets</a><a href="/desk">desk</a></nav>
-  <div class="tools">
-    <div class="tool">Clock<strong id="clock" class="num">—</strong></div>
-    <div class="tool">Data<strong><span class="dot" id="feedDot"></span><span id="feedName">connecting</span></strong></div>
-    <div class="tool">Colour<button id="safe" aria-pressed="false" title="Swap the up pole to blue for red/green colour-vision deficiency">colour-safe</button></div>
+  <div class="status">
+    <span id="feedName" title="quote and history source"><span class="dot" id="feedDot"></span>connecting</span>
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
 </div></header>
-<div class="shell"><aside class="wlpane" id="wlPane" aria-label="watchlist"></aside><div class="center">
+
 <main class="wrap">
+<div class="ticker" id="ticker"><span class="src" id="tickerSrc">loading indices…</span></div>
 
 <section class="hero">
   <div class="left">
@@ -147,8 +168,13 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
     <p>Every stock in the index is scored 1 to 10 from three months of price action and placed on the radar: 10 at the centre, 1 at the rim. Press replay to watch the last five sessions move the field. Scores are a transparent rules model, not advice.</p>
   </div>
   <div>
-    <div class="eyebrow" style="margin-bottom:8px">market pulse</div>
-    <div class="pulse" id="pulse"><div><span class="eyebrow">NIFTY 50</span><div class="v num">—</div><div class="c num">—</div></div><div><span class="eyebrow">NIFTY BANK</span><div class="v num">—</div><div class="c num">—</div></div><div><span class="eyebrow">INDIA VIX</span><div class="v num">—</div><div class="c num">—</div></div></div>
+    <div class="eyebrow"><span id="zoneIdx">NIFTY 50</span> · today</div>
+    <div class="zones">
+      <div class="g"><span class="eyebrow">buy zone · 7–10</span><div class="v num" id="zBuy"><i></i>—</div><div class="c">stocks</div></div>
+      <div class="a"><span class="eyebrow">hold · 4–6</span><div class="v num" id="zHold"><i></i>—</div><div class="c">stocks</div></div>
+      <div class="r"><span class="eyebrow">sell zone · 1–3</span><div class="v num" id="zSell"><i></i>—</div><div class="c">stocks</div></div>
+    </div>
+    <div class="asof" id="asof">—</div>
   </div>
 </section>
 
@@ -161,7 +187,7 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
     <div class="left">
       <div class="radar" id="rdBox"><svg id="rdSvg" viewBox="0 0 680 680" role="img" aria-label="Stocks placed by AI score: 10 at the centre, 1 at the rim; spokes are sectors"></svg><div class="tip" id="rdTip"></div></div>
       <div class="rd-ctl"><button id="rdPlay">▶ replay 5 sessions</button><input id="rdScrub" type="range" min="0" max="4" value="4"><span id="rdDay" class="num">—</span></div>
-      <div class="rd-ctl"><div class="rd-legend"><span><i class="g"></i>7–10 buy zone</span><span><i class="a"></i>4–6 hold</span><span><i class="r"></i>1–3 sell zone</span><span><i class="w"></i>size = index weight</span><span><i class="wl"></i>in your watchlist</span></div></div>
+      <div class="rd-ctl"><div class="rd-legend"><span><i class="g"></i>7–10 buy zone</span><span><i class="a"></i>4–6 hold</span><span><i class="r"></i>1–3 sell zone</span><span><i class="w"></i>size = index weight</span></div></div>
     </div>
     <div class="side">
       <h3>in the buy zone now</h3>
@@ -194,23 +220,23 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 </section>
 
 </main>
-</div></div>
-<button class="wltoggle" id="wlToggle">watchlist</button>
-<footer><div class="wrap"><div id="foot"><b>Delta Desk</b> · AI radar · quotes and history from the configured source. Nothing here is investment advice.</div><div>DD.HOME.0S1</div></div></footer>
+<footer><div class="wrap"><div id="foot"><b>Delta Desk</b> · AI radar · quotes and history from the configured source. Nothing here is investment advice.</div><div>DD.HOME.0S2</div></div></footer>
 
-<script src="/static/watchlist.js"></script>
 <script src="/static/ai.js"></script>
 <script>
 (function(){
-  var $=function(s){return document.querySelector(s)},fmt=DDAI.fmt,pct=DDAI.pct,cls=DDAI.cls,get=DDAI.get;
+  var $=function(s){return document.querySelector(s)},fmt=DDAI.fmt,pct=DDAI.pct,cls=DDAI.cls,esc=DDAI.esc,get=DDAI.get;
   function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds())+' IST';setTimeout(tick,1000)})();
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
   var safe=$('#safe');
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
   var index='NIFTY50',limit=25,names={NIFTY50:'NIFTY 50',NIFTYNEXT50:'NIFTY NEXT 50',BANKNIFTY:'NIFTY BANK',FINNIFTY:'NIFTY FIN SERVICE',MIDCPNIFTY:'NIFTY MIDCAP SELECT','':'ALL INDICES'};
-  var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true});
+  function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
+    $('#zBuy').innerHTML='<i></i>'+b;$('#zHold').innerHTML='<i></i>'+h;$('#zSell').innerHTML='<i></i>'+s;$('#zoneIdx').textContent=names[index]}
+  var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
+    onFrame:function(f,i,d){zones(f);$('#asof').textContent='as of '+(f.asof||'—')+(i===d.frames.length-1?' · latest session':' · replaying session '+(i+1)+' of '+d.frames.length)+' · history: '+d.source}});
   var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',note:'aiNote',index:index,limit:limit});
   function loadAll(){$('#rkIdx').textContent=names[index];radar.load(index);rank.load(index,limit);breadth()}
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-ix]');if(!b)return;index=b.dataset.ix;
@@ -218,11 +244,14 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   $('#more').addEventListener('click',function(){limit=limit===25?1000:25;this.textContent=limit===25?'show all':'show top 25';rank.load(index,limit)});
   function breadth(){if(!index){$('#breadth').textContent='pick one index for breadth';return}get('/markets/index/'+index).then(function(d){var b=d.breadth;
     $('#breadth').innerHTML='<span class="up">'+b.advances+' advancing</span> · <span class="dn">'+b.declines+' declining</span> · '+b.unchanged+' flat'+(d.quote?'<br><span class="muted">'+names[index]+' '+fmt(d.quote.ltp)+' · '+pct(d.quote.change_pct)+'</span>':'')}).catch(function(){})}
-  function pulse(){get('/markets/indices').then(function(list){var want={NIFTY50:0,BANKNIFTY:1,INDIAVIX:2},cells=document.querySelectorAll('#pulse > div');
-    list.forEach(function(ix){var i=want[ix.code];if(i==null||!ix.quote)return;var q=ix.quote,c=cells[i];c.querySelector('.v').textContent=fmt(q.ltp);var ch=c.querySelector('.c');ch.textContent=(q.change>0?'+':'')+fmt(q.change)+' · '+pct(q.change_pct);ch.className='c num '+cls(q.change_pct)});
-    $('#feedDot').className='dot on'}).catch(function(){$('#feedDot').className='dot';$('#feedName').textContent='offline'})}
-  get('/markets/source').then(function(s){$('#feedName').textContent=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');if(s.note)$('#foot').innerHTML='<b>Delta Desk</b> · AI radar · '+DDAI.esc(s.note)+'. Nothing here is investment advice.'}).catch(function(){});
-  pulse();setInterval(function(){if(!document.hidden)pulse()},5000);
+  var order=['NIFTY50','BANKNIFTY','FINNIFTY','NIFTYNEXT50','SENSEX','INDIAVIX'];
+  function ticker(){get('/markets/indices').then(function(list){var by={};list.forEach(function(ix){by[ix.code]=ix});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;
+      return '<a href="/markets#/stocks" title="'+esc(ix.name)+'"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="tickerSrc">'+esc(window.__srcNote||'')+'</span>';
+    $('#feedDot').className='dot on'}).catch(function(){$('#feedDot').className='dot';$('#feedName').innerHTML='<span class="dot" id="feedDot"></span>offline'})}
+  get('/markets/source').then(function(s){var lbl=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');window.__srcNote=lbl;
+    $('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(lbl);if(s.note)$('#foot').innerHTML='<b>Delta Desk</b> · AI radar · '+esc(s.note)+'. Nothing here is investment advice.';ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},5000);
   loadAll();
 })();
 </script>
