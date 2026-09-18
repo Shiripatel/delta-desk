@@ -60,6 +60,17 @@ def test_indicators_and_global_search(tmp_path):
     assert any(r["key"] == "GOLD" and r["kind"] == "global" and r["quote"] for r in s.watchlists()["lists"]["Core"])
 
 
+def test_forex_market_and_strength(tmp_path):
+    s = _svc(tmp_path)
+    fx = s.forex_market()
+    assert [p["key"] for p in fx["inr"]] == ["USDINR", "EURINR", "GBPINR", "JPYINR"] and len(fx["world"]) == 10
+    assert all(p["quote"] for p in fx["inr"] + fx["world"])
+    ccys = {m["ccy"] for m in fx["strength"]}
+    assert {"INR", "USD", "EUR", "GBP", "JPY", "CNY", "AUD", "CAD", "CHF"} <= ccys
+    assert fx["strength"] == sorted(fx["strength"], key=lambda m: -m["score"])
+    assert any(h["key"] == "EURUSD" and h["kind"] == "forex" for h in s.search("euro"))
+
+
 def test_screener(tmp_path):
     s = _svc(tmp_path)
     all_rows = s.screener()

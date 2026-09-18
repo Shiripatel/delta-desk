@@ -34,6 +34,7 @@ def test_pages_and_assets():
         dom = c.get("/markets/domains").json()
         assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
         assert c.get("/static/ui.js").status_code == 200 and "/static/ui.js" in home
+        assert 'id="fxmap"' in c.get("/forex").text and len(c.get("/markets/forex-market").json()["world"]) == 10
         assert "waitlist" in c.get("/beta").text and "Risk disclosure" in c.get("/legal").text
         w = c.post("/waitlist", json={"name": "Test User", "email": "t@example.com", "phone": "+919999999999", "interests": ["ipo"], "whatsapp_ok": True}).json()  # noqa: E501
         assert w["ok"] and w["position"] >= 1 and c.get("/waitlist/stats").json()["total"] >= 1

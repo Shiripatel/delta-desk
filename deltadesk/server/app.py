@@ -96,6 +96,14 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def chart_page():
         return FileResponse(ROOT / "chart.html")
 
+    @app.get("/forex")
+    async def forex_page():
+        return FileResponse(ROOT / "forex.html")
+
+    @app.get("/markets/forex-market")
+    async def m_forex_market():
+        return JSONResponse(await asyncio.to_thread(markets.forex_market))
+
     @app.get("/beta")
     async def beta_page():
         return FileResponse(ROOT / "beta.html")

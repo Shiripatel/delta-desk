@@ -92,6 +92,27 @@ class MarketsService:
         q = self.quotes.quotes([f[0] for f in universe.FX])
         return [{"symbol": s, "name": n, "detail": d, "quote": q[s].json() if s in q else None} for s, n, d, _ in universe.FX]
 
+    def forex_market(self) -> dict:
+        """INR crosses, world majors, and a currency-strength meter (average day change of each currency vs the others)."""
+        inr_keys = [f[0] for f in universe.FX]
+        world_keys = [f[0] for f in universe.FX_WORLD]
+        q = self.quotes.quotes(inr_keys + world_keys + ["DXY"])
+        inr = [{"key": s, "name": n, "detail": d, "base": universe.FX_INR[s][0], "quote_ccy": "INR", "decimals": 4, "group": "inr",
+                "quote": q[s].json() if s in q else None} for s, n, d, _ in universe.FX]
+        world = [{"key": k, "name": n, "detail": f"{b}/{c}", "base": b, "quote_ccy": c, "decimals": d, "group": "world",
+                  "quote": q[k].json() if k in q else None} for k, n, _, d, b, c, _ in universe.FX_WORLD]
+        strength: dict[str, list[float]] = {}
+        for p in inr + world:
+            qq = p["quote"]
+            if not qq:
+                continue
+            strength.setdefault(p["base"], []).append(qq["change_pct"])
+            strength.setdefault(p["quote_ccy"], []).append(-qq["change_pct"])
+        meter = sorted(({"ccy": c, "score": round(sum(v) / len(v), 3), "pairs": len(v)} for c, v in strength.items()), key=lambda x: -x["score"])  # noqa: E501
+        dxy = q.get("DXY")
+        return {"inr": inr, "world": world, "strength": meter, "dxy": dxy.json() if dxy else None,
+                "note": "Strength is the average day change of a currency across the pairs shown, positive means it strengthened. Not advice."}  # noqa: E501
+
     def screener(self, index: str | None = None, sector: str | None = None, chg_min: float | None = None,
                  chg_max: float | None = None, px_min: float | None = None, px_max: float | None = None,
                  sort: str = "change_pct", desc: bool = True, limit: int = 100) -> dict:
@@ -138,6 +159,9 @@ class MarketsService:
         if k in universe.GLOBAL_BY_KEY:
             g = universe.GLOBAL_BY_KEY[k]
             return g[1], "global", g[4]
+        if k in universe.FX_WORLD_BY_KEY:
+            f = universe.FX_WORLD_BY_KEY[k]
+            return f[1], "forex", f"{f[4]}/{f[5]}"
         if k.startswith("FUT:"):
             for f in universe.futures_contracts(date.today()):
                 if f["key"] == k:
@@ -167,6 +191,9 @@ class MarketsService:
         for g in universe.GLOBAL:
             if q in g[0] or q in g[1].upper():
                 out.append({"key": g[0], "name": g[1], "kind": "global", "sector": g[4]})
+        for f in universe.FX_WORLD:
+            if q in f[0] or q in f[1].upper():
+                out.append({"key": f[0], "name": f[1], "kind": "forex", "sector": f"{f[4]}/{f[5]}"})
         out.sort(key=lambda r: (not r["key"].startswith(q), r["key"]))
         return out[:limit]
 

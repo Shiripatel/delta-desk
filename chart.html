@@ -43,7 +43,7 @@
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">CHART</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
@@ -94,7 +94,7 @@
 
   /* ---- TradingView symbol map ---- */
   var TV_IDX={NIFTY50:'NSE:NIFTY',BANKNIFTY:'NSE:BANKNIFTY',FINNIFTY:'NSE:CNXFINANCE',MIDCPNIFTY:'NSE:NIFTY_MID_SELECT',NIFTYNEXT50:'NSE:CNXNEXT50',SENSEX:'BSE:SENSEX',INDIAVIX:'NSE:INDIAVIX',
-    USDINR:'FX_IDC:USDINR',EURINR:'FX_IDC:EURINR',GBPINR:'FX_IDC:GBPINR',JPYINR:'FX_IDC:JPYINR',DXY:'TVC:DXY',GOLD:'COMEX:GC1!',SILVER:'COMEX:SI1!',BRENT:'TVC:UKOIL',NATGAS:'NYMEX:NG1!',
+    USDINR:'FX_IDC:USDINR',EURUSD:'FX:EURUSD',GBPUSD:'FX:GBPUSD',USDJPY:'FX:USDJPY',USDCNY:'FX_IDC:USDCNY',AUDUSD:'FX:AUDUSD',USDCAD:'FX:USDCAD',USDCHF:'FX:USDCHF',USDSGD:'FX_IDC:USDSGD',USDAED:'FX_IDC:USDAED',USDHKD:'FX_IDC:USDHKD',EURINR:'FX_IDC:EURINR',GBPINR:'FX_IDC:GBPINR',JPYINR:'FX_IDC:JPYINR',DXY:'TVC:DXY',GOLD:'COMEX:GC1!',SILVER:'COMEX:SI1!',BRENT:'TVC:UKOIL',NATGAS:'NYMEX:NG1!',
     BTC:'BITSTAMP:BTCUSD',ETH:'BITSTAMP:ETHUSD',US10Y:'TVC:US10Y',SPX:'SP:SPX',NDX:'NASDAQ:IXIC',DJI:'DJ:DJI',N225:'TVC:NI225',HSI:'HSI:HSI'};
   function tvSymbol(k){if(TV_IDX[k])return TV_IDX[k];if(/^FUT:/.test(k)){var u=k.split(':')[1];return 'NSE:'+(u==='NIFTY50'?'NIFTY':u)+'1!'}return 'NSE:'+k.replace(/[&-]/g,'_')}
   var TV_INT={'1d':'5','5d':'15','1m':'60','3m':'D','6m':'D','1y':'D','5y':'W','all':'M'};

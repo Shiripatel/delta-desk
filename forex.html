@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Forex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:22px 20px 28px}
+.page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
+.page .lead{font-size:12.5px;color:var(--ink-2);margin:0 0 16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.fxcard{padding:14px 16px}
+.fxcard .pair{display:flex;justify-content:space-between;align-items:baseline}
+.fxcard .pair b{font:600 14px/1.2 var(--sans)}
+.fxcard .pair small{font-size:11px;color:var(--ink-3)}
+.fxcard .px{font:600 24px/1.1 var(--sans);letter-spacing:-.02em;margin:8px 0 4px}
+.fxcard .chg{font-size:12px}
+.fxcard .rng{margin-top:10px}
+.rngbar{height:4px;background:var(--fill-2);border-radius:999px;position:relative}
+.rngbar i{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--ink);transform:translateX(-50%)}
+.rnglbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:6px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:18px}
+.card .hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.card .hd h2{margin:0;font:600 14px/1.2 var(--sans)}
+.card .hd span{font-size:11px;color:var(--ink-3)}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;padding:12px}
+.map a{display:block;padding:12px 12px 10px;border-radius:8px;background:var(--flat);color:var(--ink);min-height:74px}
+.map a b{display:block;font:600 13px/1.2 var(--sans)}
+.map a small{display:block;font-size:10.5px;color:var(--ink-2);margin-top:2px}
+.map a .v{display:flex;justify-content:space-between;margin-top:8px;font-size:12px}
+.map a.dn3,.map a.up3{color:var(--tile-ink-strong)}.map a.dn3 small,.map a.up3 small{color:rgba(255,255,255,.8)}
+.map a.dn3{background:var(--dn3)}.map a.dn2{background:var(--dn2)}.map a.dn1{background:var(--dn1)}
+.map a.up1{background:var(--up1)}.map a.up2{background:var(--up2)}.map a.up3{background:var(--up3)}
+.legend{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink-3)}
+.legend i{display:inline-block;width:16px;height:9px;border-radius:2px}
+.strength{padding:8px 16px 14px}
+.srow{display:grid;grid-template-columns:44px 1fr 64px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.srow:last-child{border-bottom:0}
+.srow b{font:600 12.5px var(--sans)}
+.sbar{position:relative;height:8px;background:var(--fill-2);border-radius:999px;overflow:hidden}
+.sbar::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line-2)}
+.sbar i{position:absolute;top:0;bottom:0;border-radius:999px}
+.sbar i.up{left:50%;background:var(--good)}.sbar i.dn{right:50%;background:var(--bad)}
+.srow .num{text-align:right}
+.pos{display:inline-block;width:70px;height:4px;background:var(--fill-2);border-radius:999px;position:relative;vertical-align:middle}
+.pos i{position:absolute;top:-3px;width:10px;height:10px;border-radius:50%;background:var(--ink);transform:translateX(-50%)}
+@media (max-width:1000px){.grid4{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}
+@media (max-width:600px){.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">FOREX</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex" aria-current="page">Forex</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading…</span></div>
+<div class="page">
+  <h1>Forex market</h1>
+  <p class="lead">The rupee against the majors, the world's main pairs, and which currencies are strong today. Click any pair for its chart.</p>
+
+  <div class="grid4" id="inr"></div>
+
+  <div class="two">
+    <div class="card">
+      <div class="hd"><h2>Market map · today's change</h2><span class="legend"><span>weaker</span><i style="background:var(--dn3)"></i><i style="background:var(--dn2)"></i><i style="background:var(--dn1)"></i><i style="background:var(--flat)"></i><i style="background:var(--up1)"></i><i style="background:var(--up2)"></i><i style="background:var(--up3)"></i><span>stronger</span></span></div>
+      <div class="map" id="fxmap"></div>
+    </div>
+    <div class="card">
+      <div class="hd"><h2>Currency strength</h2><span id="strMeta">average day change vs the others</span></div>
+      <div class="strength" id="strength"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hd"><h2>All pairs</h2><span id="allMeta">—</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Pair</th><th>Name</th><th class="num">Price</th><th class="num">Change</th><th class="num">Change %</th><th>Day range</th><th></th></tr></thead>
+      <tbody id="allBody"></tbody>
+    </table></div>
+  </div>
+  <div class="note" id="note" style="border:0;padding:12px 0 0">Spot rates from the configured source, about 15 minutes delayed. NSE currency futures (USDINR, EURINR, GBPINR, JPYINR) trade 09:00 to 17:00 IST; lot size 1,000 units (100,000 for JPYINR). Nothing here is investment advice.</div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.005?'up':x<-0.005?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+
+  function bucket(x){return x<=-1?'dn3':x<=-0.5?'dn2':x<-0.1?'dn1':x<0.1?'':x<0.5?'up1':x<1?'up2':'up3'}
+  function rangePos(q){if(!q||q.high<=q.low)return 50;return Math.max(0,Math.min(100,(q.ltp-q.low)/(q.high-q.low)*100))}
+  function card(pr){var q=pr.quote||{},d=pr.decimals;return '<a class="card fxcard" href="/chart#'+esc(pr.key)+'/1d"><div class="pair"><b>'+esc(pr.base)+'/'+esc(pr.quote_ccy)+'</b><small>'+esc(pr.name)+'</small></div><div class="px num">'+(q.ltp!=null?fmt(q.ltp,d):'—')+'</div><div class="chg num '+cls(q.change_pct||0)+'">'+(q.change!=null?(q.change>0?'+':'')+fmt(q.change,d)+' · '+pct(q.change_pct):'no data')+'</div><div class="rng"><div class="rngbar"><i style="left:'+rangePos(q)+'%"></i></div><div class="rnglbl"><span class="num">'+(q.low!=null?fmt(q.low,d):'—')+'</span><span>day range</span><span class="num">'+(q.high!=null?fmt(q.high,d):'—')+'</span></div></div></a>'}
+  function render(d){
+    $('#inr').innerHTML=d.inr.map(card).join('');
+    var all=d.inr.concat(d.world);
+    $('#fxmap').innerHTML=all.map(function(pr){var q=pr.quote||{},c=q.change_pct||0;return '<a class="'+bucket(c)+'" href="/chart#'+esc(pr.key)+'/1d" title="'+esc(pr.name)+'"><b>'+esc(pr.base)+'/'+esc(pr.quote_ccy)+'</b><small>'+esc(pr.name)+'</small><div class="v"><span class="num">'+(q.ltp!=null?fmt(q.ltp,pr.decimals):'—')+'</span><span class="num">'+pct(q.change_pct)+'</span></div></a>'}).join('');
+    var mx=Math.max.apply(null,d.strength.map(function(m){return Math.abs(m.score)}))||1;
+    $('#strength').innerHTML=d.strength.map(function(m){var w=Math.abs(m.score)/mx*50;return '<div class="srow"><b>'+esc(m.ccy)+'</b><div class="sbar"><i class="'+(m.score>=0?'up':'dn')+'" style="width:'+w.toFixed(1)+'%"></i></div><span class="num '+cls(m.score)+'">'+(m.score>0?'+':'')+fmt(m.score)+' %</span></div>'}).join('');
+    $('#strMeta').textContent=(d.dxy?'DXY '+fmt(d.dxy.ltp)+' ('+pct(d.dxy.change_pct)+') · ':'')+'across '+all.length+' pairs';
+    $('#allBody').innerHTML=all.map(function(pr){var q=pr.quote||{},dd=pr.decimals;return '<tr><td><b>'+esc(pr.base)+'/'+esc(pr.quote_ccy)+'</b></td><td class="muted">'+esc(pr.name)+(pr.detail&&pr.group==='inr'?' · '+esc(pr.detail):'')+'</td><td class="num">'+(q.ltp!=null?fmt(q.ltp,dd):'—')+'</td><td class="num '+cls(q.change||0)+'">'+(q.change!=null?(q.change>0?'+':'')+fmt(q.change,dd):'—')+'</td><td class="num '+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</td><td><span class="num muted" style="font-size:11px">'+(q.low!=null?fmt(q.low,dd):'—')+'</span> <span class="pos"><i style="left:'+rangePos(q)+'%"></i></span> <span class="num muted" style="font-size:11px">'+(q.high!=null?fmt(q.high,dd):'—')+'</span></td><td class="num"><a class="btn" href="/chart#'+esc(pr.key)+'/1d">Chart</a></td></tr>'}).join('');
+    $('#allMeta').textContent=all.length+' pairs · '+(window.__src||'')}
+  function load(){get('/markets/forex-market').then(render).catch(function(e){$('#allMeta').textContent='failed: '+e})}
+  function ticker(){get('/markets/indicators').then(function(list){var order=['USDINR','DXY','GOLD','BRENT','US10Y','NIFTY50','SENSEX'],by={};list.forEach(function(i){by[i.key]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/chart#'+esc(c)+'/1d"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp,ix.decimals==null?2:ix.decimals):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker();load()}).catch(function(){ticker();load()});
+  setInterval(function(){if(!document.hidden){ticker();load()}},15000);
+})();
+</script>
+</body>
+</html>

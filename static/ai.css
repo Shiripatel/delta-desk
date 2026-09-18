@@ -1,7 +1,7 @@
 /* Shared AI ranking + radar components (used by / and /markets). Requires the page's design tokens. */
 .ring{display:inline-grid;place-items:center;width:34px;height:34px;position:relative}
 .ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
-.ring b{font-weight:500;font-size:12px;position:relative}
+.ring b{font-weight:600;font-size:12px;position:relative}
 .ring circle{fill:none;stroke-width:3}
 .ring .bg{stroke:var(--fill-2)}
 .ring.g .fg{stroke:var(--good)}.ring.a .fg{stroke:var(--warn)}.ring.r .fg{stroke:var(--bad)}
@@ -18,7 +18,7 @@ table.ai th button[data-dir="asc"]::after{content:" ↑"}
 .star[aria-pressed="true"]{color:var(--accent-deep)}
 /* radar */
 .radar{position:relative;padding:12px 16px}
-.radar svg{width:100%;height:auto;display:block;margin:0 auto;font:300 10.5px var(--mono)}
+.radar svg{width:100%;height:auto;display:block;margin:0 auto;font:400 10.5px var(--sans)}
 .radar .ring-r{fill:none;stroke:var(--line);stroke-width:1}
 .radar .ring-r.buy{fill:var(--up1);stroke:var(--up2)}
 .radar .ring-r.sell{stroke:var(--dn2)}

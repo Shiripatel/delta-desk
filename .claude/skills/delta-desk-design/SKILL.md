@@ -56,6 +56,15 @@ Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEX
 * Buttons are outlined, 2px radius; the only filled button is the current nav item and the kill switch.
 * Text wears ink tokens. Colour lives in dots, rings, tiles and signed numbers.
 
+## Lessons taken from moomoo (principles, not the look)
+
+* **One readable UI sans for all text** (`--sans`, Inter with Host Grotesk as the display face for the brand and big numbers). Body 13.5px/1.55 at weight 400, headings 600, never light weights for running text. Monospace is for code and logs only; numbers use tabular figures in the sans (`.num`).
+* **Hierarchy you can scan:** page title 22px/600, section title 14px/600 in sentence case with the small mono index, meta line 11.5px muted. Secondary inks are dark enough to read (`--ink-2` ≈ 4.5:1 on the ground).
+* **Dashboards are card grids:** a row of stat cards, then a map or chart card beside a ranking card, then a full-width table card. Each card has a header row with title left and meta or legend right.
+* **Consistent up / down colour** on every number that moves, a range bar for the day's low–high, and a colour map (equal tiles) for a market at a glance.
+* **Tab strips** for views inside a page, pills for states, one primary action.
+* Dense but airy: 40–48px table rows, 12px card gaps, no decorative borders.
+
 ## Lessons taken from Groww (principles, not the look)
 
 * Content sits in **cards** (`.card`: white-ish `--card` surface, 10px radius, hairline) on the grey ground, one card per table.

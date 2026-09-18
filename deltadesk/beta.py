@@ -19,6 +19,7 @@ import os
 import re
 import threading
 import time
+import uuid
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -164,7 +165,7 @@ class Alerts:
             return {"ok": False, "error": f"unknown symbol {symbol!r}"}
         if kind.startswith("price") and (value is None or value <= 0):
             return {"ok": False, "error": "value must be a positive number"}
-        rule = {"id": f"a{int(time.time() * 1000) % 10_000_000}", "ts": time.time(), "contact": contact, "kind": kind, "symbol": symbol,
+        rule = {"id": "a" + uuid.uuid4().hex[:8], "ts": time.time(), "contact": contact, "kind": kind, "symbol": symbol,
                 "value": value, "horizon": horizon, "channel": channel, "active": True}
         with self._lock:
             self.rules.append(rule)

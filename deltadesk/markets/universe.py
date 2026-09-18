@@ -191,6 +191,16 @@ GLOBAL = [
     ("HSI", "Hang Seng", "^HSI", 0, "index", "global", 24805.0),
 ]
 GLOBAL_BY_KEY = {g[0]: g for g in GLOBAL}
+# world majors: key, name, yahoo symbol, decimals, base, quote, seed
+FX_WORLD = [
+    ("EURUSD", "Euro / US dollar", "EURUSD=X", 4, "EUR", "USD", 1.085), ("GBPUSD", "Pound / US dollar", "GBPUSD=X", 4, "GBP", "USD", 1.34),
+    ("USDJPY", "US dollar / Yen", "JPY=X", 2, "USD", "JPY", 157.0), ("USDCNY", "US dollar / Yuan", "CNY=X", 4, "USD", "CNY", 7.15),
+    ("AUDUSD", "Aussie / US dollar", "AUDUSD=X", 4, "AUD", "USD", 0.66), ("USDCAD", "US dollar / Canadian dollar", "CAD=X", 4, "USD", "CAD", 1.37),  # noqa: E501
+    ("USDCHF", "US dollar / Swiss franc", "CHF=X", 4, "USD", "CHF", 0.85), ("USDSGD", "US dollar / Singapore dollar", "SGD=X", 4, "USD", "SGD", 1.29),  # noqa: E501
+    ("USDAED", "US dollar / UAE dirham", "AED=X", 4, "USD", "AED", 3.6725), ("USDHKD", "US dollar / HK dollar", "HKD=X", 4, "USD", "HKD", 7.8),  # noqa: E501
+]
+FX_WORLD_BY_KEY = {f[0]: f for f in FX_WORLD}
+FX_INR = {"USDINR": ("USD", "INR"), "EURINR": ("EUR", "INR"), "GBPINR": ("GBP", "INR"), "JPYINR": ("JPY", "INR")}
 FUTURES_UNDERLYINGS = ["NIFTY50", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]
 
 
