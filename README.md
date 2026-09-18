@@ -7,6 +7,7 @@ opportunity zones, and fires one typed, risk-checked decision when the market re
 * `docs/PLAN.md` — the build plan: principles, sniper workflow, agent topology, live-data API
   comparison, SEBI retail-algo constraints, enterprise checklist, phases.
 * `home.html` — the landing page at `/`: AI radar and the top-10 ranking (NIFTY 50, BANK NIFTY, SENSEX, all).
+* `ipo.html` — the IPO page at `/ipo`: open, upcoming, closed and listed issues with dates, band, lot, minimum bid, size.
 * `agents.html` — the agents page at `/desk`: the agent council. Ten narrow agents (trend, momentum, MACD, volume,
   volatility, levels, valuation, growth, quality, ownership) read one stock at one horizon (15 min to 10 years) and
   feed a verdict; short horizons weight the technical agents, long horizons the fundamentals.

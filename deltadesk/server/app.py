@@ -45,6 +45,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def desk():
         return FileResponse(ROOT / "agents.html")
 
+    @app.get("/ipo")
+    async def ipo_page():
+        return FileResponse(ROOT / "ipo.html")
+
     @app.get("/sniper")
     async def sniper():
         return FileResponse(ROOT / "sniper.html")

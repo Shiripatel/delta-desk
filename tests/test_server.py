@@ -19,6 +19,9 @@ def test_pages_and_assets():
     with _client() as c:
         home = c.get("/").text
         assert "AI RADAR" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
+        ipo = c.get("/ipo").text
+        assert 'id="ipoOpen"' in ipo and 'href="/ipo" aria-current="page"' in ipo
+        assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text

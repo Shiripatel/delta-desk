@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · IPO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.hero{display:grid;grid-template-columns:1.25fr 1fr}
+.hero > div{padding:18px 20px 16px;min-width:0}
+.hero .left{border-right:1px solid var(--line)}
+h1{margin:0 0 8px;font:500 clamp(24px,3vw,36px)/1.08 var(--sans);letter-spacing:-.03em;text-wrap:balance}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
+.hero p{max-width:62ch;margin:0;font-size:12.5px;color:var(--ink-2)}
+.counts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin-top:6px}
+.counts div{padding:8px 12px;border-right:1px solid var(--line)}
+.counts div:last-child{border-right:0}
+.counts .v{font:500 22px/1.1 var(--sans);letter-spacing:-.02em;margin-top:3px}
+.counts .open .v{color:var(--good)}.counts .upcoming .v{color:var(--warn)}
+.filters{display:flex;gap:8px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
+.filters .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.filters .seg button{padding:5px 12px;border-right:1px solid var(--line);font-size:11px}
+.filters .seg button:last-child{border-right:0}
+.filters .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.issue{font-weight:500}
+.issue em{display:block;font-style:normal;font-size:11px;color:var(--ink-3)}
+.days{font-size:11px;color:var(--ink-3)}
+.bar{display:inline-block;width:80px;height:6px;background:var(--fill-2);border-radius:1px;position:relative;vertical-align:middle;margin-right:6px}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:1px}
+.how{display:grid;grid-template-columns:repeat(3,1fr)}
+.how div{padding:16px 20px;border-right:1px solid var(--line)}
+.how div:last-child{border-right:0}
+.how b{display:block;font:600 14px/1.2 var(--sans);margin-bottom:6px}
+.how b::before{content:"✢ ";color:var(--accent-deep)}
+.how span{font-size:12px;color:var(--ink-2)}
+@media (max-width:1000px){.hero{grid-template-columns:1fr}.hero .left{border-right:0;border-bottom:1px solid var(--line)}.counts{grid-template-columns:1fr 1fr}.how{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">IPO</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/ipo" aria-current="page">IPO</a><a href="/desk">Agents</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+
+<section class="hero">
+  <div class="left">
+    <div class="eyebrow">[01] &nbsp;ipo tracker</div>
+    <h1>What is <em>open</em>, what is coming, what just listed.</h1>
+    <p>Mainboard and SME issues with dates, price band, lot, minimum bid and issue size. Bids go through your broker app with a UPI mandate; this page is the calendar and the tracker, not the order form.</p>
+  </div>
+  <div>
+    <div class="eyebrow">right now</div>
+    <div class="counts">
+      <div class="open"><span class="eyebrow">open</span><div class="v num" id="cOpen">—</div></div>
+      <div class="upcoming"><span class="eyebrow">upcoming</span><div class="v num" id="cUp">—</div></div>
+      <div><span class="eyebrow">awaiting listing</span><div class="v num" id="cClosed">—</div></div>
+      <div><span class="eyebrow">listed</span><div class="v num" id="cListed">—</div></div>
+    </div>
+    <div class="days" id="src" style="margin-top:8px">—</div>
+  </div>
+</section>
+
+<section>
+  <div class="filters"><span>segment</span><span class="seg" id="seg"><button data-seg="" aria-pressed="true">all</button><button data-seg="Mainboard">mainboard</button><button data-seg="SME">SME</button></span><span style="margin-left:auto" id="meta">—</span></div>
+  <div class="sec-head"><h2><i>[02]</i>open now</h2><span class="meta">bidding window is live</span></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>issue</th><th>segment</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th><th class="num">subscribed</th><th>listing</th></tr></thead>
+    <tbody id="ipoOpen"></tbody>
+  </table></div>
+  <div class="sec-head"><h2><i>[03]</i>upcoming</h2><span class="meta">opens in the coming days</span></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>issue</th><th>segment</th><th>opens</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th></tr></thead>
+    <tbody id="ipoUp"></tbody>
+  </table></div>
+  <div class="sec-head"><h2><i>[04]</i>closed &amp; listed</h2><span class="meta">most recent first</span></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>issue</th><th>segment</th><th>closed</th><th>listing</th><th class="num">price band</th><th class="num">subscribed</th><th class="num">listing gain</th><th>status</th></tr></thead>
+    <tbody id="ipoDone"></tbody>
+  </table></div>
+  <div class="note" id="note">—</div>
+</section>
+
+<section>
+  <div class="sec-head"><h2><i>[05]</i>how to use this page</h2><span class="meta">no retail broker API exposes IPOs; data is maintained in <code>data/ipo.json</code></span></div>
+  <div class="how">
+    <div><b>Dates first</b><span>Open and close are bidding days. Allotment usually lands one working day after close, refunds and demat credit the next, and listing the day after that.</span></div>
+    <div><b>Minimum bid</b><span>One lot at the top of the price band. Retail bids are in lots up to ₹2 lakh; above that you are in the non-institutional bucket.</span></div>
+    <div><b>Fields you can add</b><span><code>subscribed_x</code> (times subscribed), <code>listing_price</code> and <code>allotment</code> date in the JSON show up here automatically when present.</span></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><div id="foot">Delta Desk · IPO tracker. Nothing here is investment advice.</div><div>DD.IPO.0S1</div></div></footer>
+
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+
+  var data=null,seg='';
+  var DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  function dow(iso){var d=new Date(iso+'T00:00:00');return isNaN(d)?'':DAY[d.getDay()]}
+  function dstr(iso){return iso?esc(iso)+' <span class="days">'+dow(iso)+'</span>':'—'}
+  function tag(e){return e.example?' <span class="tag">example data</span>':''}
+  function band(e){return '₹'+fmt(e.price_lo,0)+' – '+fmt(e.price_hi,0)}
+  function sub(e){return e.subscribed_x!=null?'<span class="bar"><i style="width:'+Math.min(100,e.subscribed_x*10)+'%"></i></span>'+fmt(e.subscribed_x,1)+'×':'<span class="muted">—</span>'}
+  function render(){if(!data)return;var rows=data.entries.filter(function(e){return !seg||e.segment===seg});
+    var n=function(s){return rows.filter(function(e){return e.status===s})};
+    $('#cOpen').textContent=n('open').length;$('#cUp').textContent=n('upcoming').length;$('#cClosed').textContent=n('closed').length;$('#cListed').textContent=n('listed').length;
+    $('#src').textContent='source: '+data.source;$('#meta').textContent=rows.length+' issues';
+    $('#ipoOpen').innerHTML=n('open').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+fmt(e.lot*e.price_hi,0)+'</td><td class="num">'+fmt(e.issue_size_cr,0)+'</td><td class="num">'+sub(e)+'</td><td class="num">'+dstr(e.listing)+'</td></tr>'}).join('')||'<tr><td colspan="9" class="muted">nothing open right now</td></tr>';
+    $('#ipoUp').innerHTML=n('upcoming').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.open)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+fmt(e.lot*e.price_hi,0)+'</td><td class="num">'+fmt(e.issue_size_cr,0)+'</td></tr>'}).join('')||'<tr><td colspan="8" class="muted">nothing announced · add entries to data/ipo.json</td></tr>';
+    var done=n('closed').concat(n('listed')).sort(function(a,b){return (b.close||'').localeCompare(a.close||'')});
+    $('#ipoDone').innerHTML=done.map(function(e){var g=e.listing_price!=null&&e.price_hi?((e.listing_price/e.price_hi-1)*100):null;return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+esc(e.segment)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td class="num">'+sub(e)+'</td><td class="num '+(g!=null?cls(g):'')+'">'+(g!=null?pct(g):'—')+'</td><td><span class="state '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="8" class="muted">no recent listings</td></tr>';
+    $('#note').textContent='Status is computed from the dates each day. '+(data.entries.some(function(e){return e.example})?'Example rows are placeholders until data/ipo.json exists.':'')}
+  $('#seg').addEventListener('click',function(e){var b=e.target.closest('button[data-seg]');if(!b)return;seg=b.dataset.seg;Array.prototype.forEach.call(document.querySelectorAll('#seg button'),function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
+  function load(){get('/markets/ipo').then(function(d){data=d;render()}).catch(function(e){$('#meta').textContent='failed: '+e})}
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},10000);
+  load();setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

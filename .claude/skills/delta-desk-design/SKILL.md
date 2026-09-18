@@ -15,13 +15,14 @@ new shared thing, add it to `design.css` and use it from every page.
 | route | file | nav label |
 |---|---|---|
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
-| `/markets` | `markets.html` | Markets |
+| `/ipo` | `ipo.html` | IPO |
+| `/markets` | `markets.html` | (full market-analysis surface, not in the nav for now) |
 | `/desk` | `agents.html` | Agents (the agent council: stock + horizon → verdict) |
 | `/sniper` | `sniper.html` | (F&O sniper desk, linked from the Agents page) |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
-Navigation is the segmented control in the header, same three items on every page, `aria-current="page"`
-on the current one. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+Navigation is three text links in the header (Home · IPO · Agents), the current one underlined in accent.
+The header is a quiet band (`--head`, slightly off the ground per theme); status items on the right are borderless text. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 
@@ -37,8 +38,8 @@ on the current one. Section anchors go in the page body (tabs, `.sec-head`), not
 
 `<header class="top"><div class="wrap">` with three zones in one 56px row:
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
-2. `.nav` segmented control (Home · Markets · Agents),
-3. `.status` pills of equal height: data source with a `.dot`, clock (`.clock`), colour-safe toggle, and on the Agents page the paper/live `.seg` switch and the `.kill` button.
+2. `.nav` text links (Home · IPO · Agents),
+3. `.status` borderless items: theme select (injected by nav.js), colour-safe toggle, clock; the Sniper page adds the paper/live `.seg` switch and the `.kill` button. The data source is shown in the ticker strip, not the header.
 
 The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
 

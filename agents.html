@@ -79,9 +79,8 @@
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">AGENTS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/markets">Markets</a><a href="/desk" aria-current="page">Agents</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/ipo">IPO</a><a href="/desk" aria-current="page">Agents</a></nav>
   <div class="status">
-    <span id="feedName"><span class="dot" id="feedDot"></span>connecting</span>
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
@@ -203,7 +202,7 @@
   document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
   function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
     $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/markets#/stocks"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');$('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(window.__src);ticker()}).catch(ticker);
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
   setInterval(function(){if(!document.hidden)ticker()},5000);
   load();
 })();
