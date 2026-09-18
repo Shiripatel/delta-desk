@@ -10,50 +10,28 @@
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/design.css">
 <style>
-.hero{display:grid;grid-template-columns:1.25fr 1fr}
-.hero > div{padding:18px 20px 16px;min-width:0}
-.hero .left{border-right:1px solid var(--line)}
-h1{margin:0 0 8px;font:500 clamp(24px,3vw,36px)/1.08 var(--sans);letter-spacing:-.03em;text-wrap:balance}
-h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
-.hero p{max-width:62ch;margin:0;font-size:12.5px;color:var(--ink-2)}
-.counts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin-top:6px}
-.counts div{padding:8px 12px;border-right:1px solid var(--line)}
-.counts div:last-child{border-right:0}
-.counts .v{font:500 22px/1.1 var(--sans);letter-spacing:-.02em;margin-top:3px}
-.counts .open .v{color:var(--good)}.counts .upcoming .v{color:var(--warn)}
-.filters{display:flex;gap:8px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
-.filters .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
-.filters .seg button{padding:5px 12px;border-right:1px solid var(--line);font-size:11px}
-.filters .seg button:last-child{border-right:0}
-.filters .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.issue{font:500 13.5px/1.25 var(--sans);letter-spacing:-.01em}
-.issue em{display:block;font:300 11px/1.3 var(--mono);color:var(--ink-3);margin-top:2px}
-table.ipo th{background:var(--fill);color:var(--ink-2);padding:10px 12px}
-table.ipo td{padding:11px 12px;vertical-align:middle;border-bottom:1px solid var(--line)}
-table.ipo tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--fill) 55%,transparent)}
-table.ipo .money{font-size:12.5px;color:var(--ink)}
-table.ipo .date{white-space:nowrap}
-table.ipo .date small{color:var(--ink-3);margin-left:4px}
-.pill{display:inline-block;padding:3px 8px;border-radius:3px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line-2);color:var(--ink-2)}
-.pill.open{background:var(--good);border-color:var(--good);color:#fff}
-.pill.upcoming{background:var(--warn);border-color:var(--warn);color:#1E1E1E}
-.pill.closed{background:var(--fill-2);border-color:var(--fill-2)}
-.pill.listed{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.pill.sme{border-color:var(--s2);color:var(--s2)}.pill.main{border-color:var(--s1);color:var(--s1)}
-.sec-head.open{background:color-mix(in srgb,var(--good) 9%,transparent)}
-.sec-head.upcoming{background:color-mix(in srgb,var(--warn) 10%,transparent)}
-.sec-head.done{background:var(--fill)}
+.page{padding:22px 20px 28px}
+.page h1{margin:0 0 14px;font:500 22px/1.15 var(--sans);letter-spacing:-.02em}
+.toolbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar .type{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.toolbar select{padding:5px 22px 5px 8px;border:1px solid var(--line-2);border-radius:6px;background:var(--card);font-size:12px}
+.toolbar .meta{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.count{display:inline-block;min-width:18px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--fill-2);font-size:10.5px;color:var(--ink-2);text-align:center}
+.pills button[aria-pressed="true"] .count{background:rgba(255,255,255,.22);color:inherit}
+.company{display:flex;align-items:center;gap:12px}
+.company b{font:500 13.5px/1.2 var(--sans);letter-spacing:-.01em;color:var(--ink)}
+.company small{display:block;font:300 11px/1.3 var(--mono);color:var(--ink-3);margin-top:2px}
+.sub{display:inline-flex;align-items:center;gap:8px}
+.sub i{display:inline-block;width:56px;height:6px;background:var(--fill-2);border-radius:999px;position:relative;overflow:hidden}
+.sub i b{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:999px}
 .gain.up{color:var(--good);font-weight:500}.gain.dn{color:var(--bad);font-weight:500}
-.days{font-size:11px;color:var(--ink-3)}
-.bar{display:inline-block;width:80px;height:6px;background:var(--fill-2);border-radius:1px;position:relative;vertical-align:middle;margin-right:6px}
-.bar i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:1px}
-.how{display:grid;grid-template-columns:repeat(3,1fr)}
-.how div{padding:16px 20px;border-right:1px solid var(--line)}
-.how div:last-child{border-right:0}
-.how b{display:block;font:600 14px/1.2 var(--sans);margin-bottom:6px}
-.how b::before{content:"✢ ";color:var(--accent-deep)}
+.empty{padding:28px 16px;text-align:center;color:var(--ink-3);font-size:12.5px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.how .card{padding:14px 16px}
+.how b{display:block;font:600 13.5px/1.2 var(--sans);margin-bottom:6px}
 .how span{font-size:12px;color:var(--ink-2)}
-@media (max-width:1000px){.hero{grid-template-columns:1fr}.hero .left{border-right:0;border-bottom:1px solid var(--line)}.counts{grid-template-columns:1fr 1fr}.how{grid-template-columns:1fr}}
+.how .ico{color:var(--accent-deep);width:18px;height:18px;margin-bottom:8px;display:block}
+@media (max-width:900px){.how{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -69,60 +47,42 @@ table.ipo .date small{color:var(--ink-3);margin-left:4px}
 <main class="wrap">
 <div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
 
-<section class="hero">
-  <div class="left">
-    <div class="eyebrow">[01] &nbsp;ipo tracker</div>
-    <h1>What is <em>open</em>, what is coming, what just listed.</h1>
-    <p>Mainboard and SME issues with dates, price band, lot, minimum bid and issue size. Bids go through your broker app with a UPI mandate; this page is the calendar and the tracker, not the order form.</p>
-  </div>
-  <div>
-    <div class="eyebrow">right now</div>
-    <div class="counts">
-      <div class="open"><span class="eyebrow">open</span><div class="v num" id="cOpen">—</div></div>
-      <div class="upcoming"><span class="eyebrow">upcoming</span><div class="v num" id="cUp">—</div></div>
-      <div><span class="eyebrow">awaiting listing</span><div class="v num" id="cClosed">—</div></div>
-      <div><span class="eyebrow">listed</span><div class="v num" id="cListed">—</div></div>
+<div class="page">
+  <h1 id="title">Open · IPOs</h1>
+  <div class="toolbar">
+    <div class="pills" id="tabs" role="tablist">
+      <button data-tab="open" aria-pressed="true">Open<span class="count" id="nOpen">0</span></button>
+      <button data-tab="upcoming">Upcoming<span class="count" id="nUp">0</span></button>
+      <button data-tab="closed">Closed<span class="count" id="nClosed">0</span></button>
+      <button data-tab="listed">Listed<span class="count" id="nListed">0</span></button>
+      <button data-tab="tracked">Tracked<span class="count" id="nTracked">0</span></button>
     </div>
-    <div class="days" id="src" style="margin-top:8px">—</div>
+    <label class="type">IPO type <select id="type"><option value="">All</option><option>Mainboard</option><option>SME</option></select></label>
+    <span class="meta" id="meta">—</span>
   </div>
-</section>
 
-<section>
-  <div class="filters"><span>segment</span><span class="seg" id="seg"><button data-seg="" aria-pressed="true">all</button><button data-seg="Mainboard">mainboard</button><button data-seg="SME">SME</button></span><span style="margin-left:auto" id="meta">—</span></div>
-  <div class="sec-head open"><h2><i>[02]</i>open now</h2><span class="meta">bidding window is live</span></div>
-  <div class="tbl-wrap"><table class="ipo">
-    <thead><tr><th>issue</th><th>segment</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th><th class="num">subscribed</th><th>listing</th></tr></thead>
-    <tbody id="ipoOpen"></tbody>
-  </table></div>
-  <div class="sec-head upcoming"><h2><i>[03]</i>upcoming</h2><span class="meta">opens in the coming days</span></div>
-  <div class="tbl-wrap"><table class="ipo">
-    <thead><tr><th>issue</th><th>segment</th><th>opens</th><th>closes</th><th class="num">price band</th><th class="num">lot</th><th class="num">min. bid ₹</th><th class="num">size ₹ cr</th></tr></thead>
-    <tbody id="ipoUp"></tbody>
-  </table></div>
-  <div class="sec-head done"><h2><i>[04]</i>closed &amp; listed</h2><span class="meta">most recent first</span></div>
-  <div class="tbl-wrap"><table class="ipo">
-    <thead><tr><th>issue</th><th>segment</th><th>closed</th><th>listing</th><th class="num">price band</th><th class="num">subscribed</th><th class="num">listing gain</th><th>status</th></tr></thead>
-    <tbody id="ipoDone"></tbody>
-  </table></div>
-  <div class="note" id="note">—</div>
-</section>
+  <div class="card">
+    <div class="tbl-wrap"><table class="tbl-clean" id="tbl">
+      <thead id="head"></thead>
+      <tbody id="body"></tbody>
+    </table></div>
+  </div>
 
-<section>
-  <div class="sec-head"><h2><i>[05]</i>how to use this page</h2><span class="meta">no retail broker API exposes IPOs; data is maintained in <code>data/ipo.json</code></span></div>
   <div class="how">
-    <div><b>Dates first</b><span>Open and close are bidding days. Allotment usually lands one working day after close, refunds and demat credit the next, and listing the day after that.</span></div>
-    <div><b>Minimum bid</b><span>One lot at the top of the price band. Retail bids are in lots up to ₹2 lakh; above that you are in the non-institutional bucket.</span></div>
-    <div><b>Fields you can add</b><span><code>subscribed_x</code> (times subscribed), <code>listing_price</code> and <code>allotment</code> date in the JSON show up here automatically when present.</span></div>
+    <div class="card"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg><b>Dates first</b><span>Open and close are bidding days. Allotment usually lands one working day after close, refunds and demat credit the next, and listing the day after.</span></div>
+    <div class="card"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><b>Subscription</b><span>Times the issue was bid overall. Above 1× means oversubscribed; retail allotment then becomes a lottery for one lot.</span></div>
+    <div class="card"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg><b>Track, don't apply here</b><span>Bids go through your broker app with a UPI mandate. Track an issue to keep it in your list; the IPO agent (next) will add a stance from DRHP facts, subscription and sentiment.</span></div>
   </div>
-</section>
+  <div class="note" id="note" style="padding:12px 0 0;border:0">Data is maintained in <code>data/ipo.json</code>; example rows are shown until it exists. Nothing here is investment advice.</div>
+</div>
 </main>
 
-<footer><div class="wrap"><div id="foot">Delta Desk · IPO tracker. Nothing here is investment advice.</div><div>DD.IPO.0S1</div></div></footer>
+<footer><div class="wrap"><div>Delta Desk · IPO tracker. Nothing here is investment advice.</div><div>DD.IPO.0S2</div></div></footer>
 
 <script src="/static/nav.js"></script>
 <script>
 (function(){
-  var $=function(s){return document.querySelector(s)};
+  var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
   var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
   var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
   var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
@@ -134,28 +94,42 @@ table.ipo .date small{color:var(--ink-3);margin-left:4px}
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
-  var data=null,seg='';
-  var DAY=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  function dow(iso){var d=new Date(iso+'T00:00:00');return isNaN(d)?'':DAY[d.getDay()]}
+  var data=null,tab='open',type='',tracked=[];
+  try{tracked=JSON.parse(localStorage.getItem('dd.ipo.tracked')||'[]')}catch(e){}
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  function dstr(iso){if(!iso)return '—';var d=new Date(iso+'T00:00:00');if(isNaN(d))return esc(iso);return '<span class="date">'+d.getDate()+' '+MON[d.getMonth()]+'<small>'+DAY[d.getDay()]+'</small></span>'}
-  function tag(e){return e.example?' <span class="tag">example data</span>':''}
-  function seg(e){return '<span class="pill '+(e.segment==='SME'?'sme':'main')+'">'+esc(e.segment)+'</span>'}
-  function band(e){return '<span class="money">₹'+fmt(e.price_lo,0)+'–'+fmt(e.price_hi,0)+'</span>'}
-  function money(v){return '<span class="money">₹'+fmt(v,0)+'</span>'}
-  function sub(e){return e.subscribed_x!=null?'<span class="bar"><i style="width:'+Math.min(100,e.subscribed_x*10)+'%"></i></span>'+fmt(e.subscribed_x,1)+'×':'<span class="muted">—</span>'}
-  function render(){if(!data)return;var rows=data.entries.filter(function(e){return !seg||e.segment===seg});
-    var n=function(s){return rows.filter(function(e){return e.status===s})};
-    $('#cOpen').textContent=n('open').length;$('#cUp').textContent=n('upcoming').length;$('#cClosed').textContent=n('closed').length;$('#cListed').textContent=n('listed').length;
-    $('#src').textContent='source: '+data.source;$('#meta').textContent=rows.length+' issues';
-    $('#ipoOpen').innerHTML=n('open').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+money(e.lot*e.price_hi)+'</td><td class="num">'+money(e.issue_size_cr)+' cr</td><td class="num">'+sub(e)+'</td><td class="num">'+dstr(e.listing)+'</td></tr>'}).join('')||'<tr><td colspan="9" class="muted">nothing open right now</td></tr>';
-    $('#ipoUp').innerHTML=n('upcoming').map(function(e){return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.open)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">'+money(e.lot*e.price_hi)+'</td><td class="num">'+money(e.issue_size_cr)+' cr</td></tr>'}).join('')||'<tr><td colspan="8" class="muted">nothing announced · add entries to data/ipo.json</td></tr>';
-    var done=n('closed').concat(n('listed')).sort(function(a,b){return (b.close||'').localeCompare(a.close||'')});
-    $('#ipoDone').innerHTML=done.map(function(e){var g=e.listing_price!=null&&e.price_hi?((e.listing_price/e.price_hi-1)*100):null;return '<tr><td class="issue">'+esc(e.name)+tag(e)+'<em>'+esc(e.symbol||'')+'</em></td><td>'+seg(e)+'</td><td class="num">'+dstr(e.close)+'</td><td class="num">'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td class="num">'+sub(e)+'</td><td class="num gain '+(g!=null?cls(g):'')+'">'+(g!=null?pct(g):'—')+'</td><td><span class="pill '+esc(e.status)+'">'+esc(e.status)+'</span></td></tr>'}).join('')||'<tr><td colspan="8" class="muted">no recent listings</td></tr>';
-    $('#note').textContent='Status is computed from the dates each day. '+(data.entries.some(function(e){return e.example})?'Example rows are placeholders until data/ipo.json exists.':'')}
-  $('#seg').addEventListener('click',function(e){var b=e.target.closest('button[data-seg]');if(!b)return;seg=b.dataset.seg;Array.prototype.forEach.call(document.querySelectorAll('#seg button'),function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
+  function dstr(iso){if(!iso)return '—';var d=new Date(iso+'T00:00:00');return isNaN(d)?esc(iso):d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()}
+  function mono(name){var parts=name.replace(/\(.*?\)/g,'').trim().split(/\s+/);var ini=(parts[0]||'?')[0]+(parts[1]?parts[1][0]:'');var h=0;for(var i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))>>>0;return '<span class="mono" style="--h:'+(h%360)+'">'+esc(ini.toUpperCase())+'</span>'}
+  function band(e){return '₹'+fmt(e.price_lo,0)+' – ₹'+fmt(e.price_hi,0)}
+  function sub(e){return e.subscribed_x!=null?'<span class="sub"><i><b style="width:'+Math.min(100,e.subscribed_x*10)+'%"></b></i>'+fmt(e.subscribed_x,2)+'x</span>':'<span class="muted">—</span>'}
+  function typePill(e){return '<span class="pill '+(e.segment==='SME'?'warn':'info')+'">'+esc(e.segment)+'</span>'}
+  function isTracked(e){return tracked.indexOf(e.symbol||e.name)>=0}
+  function trackBtn(e){var k=e.symbol||e.name,on=isTracked(e);return '<button class="btn'+(on?' on':'')+'" data-track="'+esc(k)+'">'+(on?'Tracking':'Track')+'</button>'}
+  var COLS={
+    open:[['Company name',''],['Type',''],['Open date',''],['Close date',''],['Issue price','num'],['Min. bid','num'],['Overall subscription',''],['','']],
+    upcoming:[['Company name',''],['Type',''],['Open date',''],['Close date',''],['Issue price','num'],['Lot','num'],['Issue size','num'],['','']],
+    closed:[['Company name',''],['Type',''],['Closed',''],['Listing',''],['Issue price','num'],['Overall subscription',''],['','']],
+    listed:[['Company name',''],['Type',''],['Listed on',''],['Issue price','num'],['Listing price','num'],['Listing gain','num'],['Subscription',''],['','']],
+    tracked:[['Company name',''],['Type',''],['Status',''],['Open date',''],['Close date',''],['Issue price','num'],['','']]};
+  function rowFor(e){var c='<td><div class="company">'+mono(e.name)+'<div><b>'+esc(e.name)+'</b><small>'+esc(e.symbol||'')+(e.example?' · example data':'')+'</small></div></div></td><td>'+typePill(e)+'</td>';
+    if(tab==='open')return c+'<td>'+dstr(e.open)+'</td><td>'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">₹'+fmt(e.lot*e.price_hi,0)+'</td><td>'+sub(e)+'</td><td class="num">'+trackBtn(e)+'</td>';
+    if(tab==='upcoming')return c+'<td>'+dstr(e.open)+'</td><td>'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+fmt(e.lot,0)+'</td><td class="num">₹'+fmt(e.issue_size_cr,0)+' cr</td><td class="num">'+trackBtn(e)+'</td>';
+    if(tab==='closed')return c+'<td>'+dstr(e.close)+'</td><td>'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td>'+sub(e)+'</td><td class="num">'+trackBtn(e)+'</td>';
+    if(tab==='listed'){var g=e.listing_price!=null&&e.price_hi?(e.listing_price/e.price_hi-1)*100:null;return c+'<td>'+dstr(e.listing)+'</td><td class="num">'+band(e)+'</td><td class="num">'+(e.listing_price!=null?'₹'+fmt(e.listing_price,0):'—')+'</td><td class="num gain '+(g!=null?cls(g):'')+'">'+(g!=null?pct(g):'—')+'</td><td>'+sub(e)+'</td><td class="num">'+trackBtn(e)+'</td>'}
+    return c+'<td><span class="pill '+esc(e.status)+'">'+esc(e.status)+'</span></td><td>'+dstr(e.open)+'</td><td>'+dstr(e.close)+'</td><td class="num">'+band(e)+'</td><td class="num">'+trackBtn(e)+'</td>'}
+  function render(){if(!data)return;var all=data.entries.filter(function(e){return !type||e.segment===type});
+    var n=function(s){return all.filter(function(e){return e.status===s}).length};
+    $('#nOpen').textContent=n('open');$('#nUp').textContent=n('upcoming');$('#nClosed').textContent=n('closed');$('#nListed').textContent=n('listed');$('#nTracked').textContent=all.filter(isTracked).length;
+    var rows=tab==='tracked'?all.filter(isTracked):all.filter(function(e){return e.status===tab});
+    if(tab==='listed'||tab==='closed')rows.sort(function(a,b){return (b.close||'').localeCompare(a.close||'')});
+    $('#title').textContent={open:'Open',upcoming:'Upcoming',closed:'Closed',listed:'Listed',tracked:'Tracked'}[tab]+' · IPOs';
+    $('#head').innerHTML='<tr>'+COLS[tab].map(function(c){return '<th class="'+c[1]+'">'+c[0]+'</th>'}).join('')+'</tr>';
+    $('#body').innerHTML=rows.length?rows.map(function(e){return '<tr>'+rowFor(e)+'</tr>'}).join(''):'<tr><td colspan="'+COLS[tab].length+'"><div class="empty">'+(tab==='tracked'?'Nothing tracked yet. Press Track on any issue.':'Nothing here right now.')+'</div></td></tr>';
+    $('#meta').textContent=rows.length+' issues · source: '+data.source}
+  $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-tab]');if(!b)return;tab=b.dataset.tab;$$('#tabs button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
+  $('#type').addEventListener('change',function(){type=this.value;render()});
+  $('#body').addEventListener('click',function(e){var b=e.target.closest('button[data-track]');if(!b)return;var k=b.dataset.track,i=tracked.indexOf(k);if(i>=0)tracked.splice(i,1);else tracked.push(k);try{localStorage.setItem('dd.ipo.tracked',JSON.stringify(tracked))}catch(x){}render()});
   function load(){get('/markets/ipo').then(function(d){data=d;render()}).catch(function(e){$('#meta').textContent='failed: '+e})}
-  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
     $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/chart#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
   get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
   setInterval(function(){if(!document.hidden)ticker()},10000);

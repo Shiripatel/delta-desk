@@ -12,6 +12,7 @@ window.DDAI=(function(){
   function starBtn(sym){if(!window.DDWL)return '';var on=inWl(sym);return '<button class="star" data-star="'+esc(sym)+'" aria-pressed="'+on+'" title="'+(on?'remove from':'add to')+' watchlist">'+(on?'★':'☆')+'</button>'}
   function bindStars(root){root.addEventListener('click',function(e){var b=e.target.closest('button[data-star]');if(!b||!window.DDWL)return;e.stopPropagation();
     var on=b.getAttribute('aria-pressed')==='true';(on?window.DDWL.remove(b.dataset.star):window.DDWL.add(b.dataset.star)).then(function(){b.setAttribute('aria-pressed',String(!on));b.textContent=on?'☆':'★'})})}
+  function mono(name,sym){var h=0;for(var i=0;i<sym.length;i++)h=(h*31+sym.charCodeAt(i))>>>0;var parts=(name||sym).split(/\s+/);return '<span class="mono" style="--h:'+(h%360)+'">'+esc(((parts[0]||'?')[0]+(parts[1]?parts[1][0]:'')).toUpperCase())+'</span>'}
   function ring(v,max){var p=Math.max(0,Math.min(1,v/max)),c=2*Math.PI*14;
     return '<span class="ring '+band(v)+'" title="'+v+' / '+max+'"><svg viewBox="0 0 34 34" aria-hidden="true"><circle class="bg" cx="17" cy="17" r="14"/><circle class="fg" cx="17" cy="17" r="14" stroke-dasharray="'+(c*p).toFixed(1)+' '+c.toFixed(1)+'"/></svg><b>'+v+'</b></span>'}
   function spark(pts){if(!pts||pts.length<2)return '';var W=84,H=28,lo=Math.min.apply(null,pts),hi=Math.max.apply(null,pts),rg=hi-lo||1;
@@ -24,7 +25,7 @@ window.DDAI=(function(){
     var head=document.getElementById(o.head),body=document.getElementById(o.body),meta=document.getElementById(o.meta),note=o.note&&document.getElementById(o.note);
     var data=null,key='score',dir='desc',limit=o.limit||50,index=o.index||'NIFTY50',mode=o.mode||'short';
     function render(){if(!data)return;var rows=data.entries.slice().sort(function(a,b){var x=a[key],y=b[key];x=x==null?-1e9:x;y=y==null?-1e9:y;return dir==='asc'?x-y:y-x});
-      body.innerHTML=rows.map(function(r){return '<tr><td class="num muted">'+r.rank+'</td><td class="co">'+starBtn(r.symbol)+' <a href="/chart#'+esc(r.symbol)+'/3m" title="open chart"><b>'+esc(r.symbol)+'</b></a><em>'+esc(r.name)+'</em></td><td class="muted">'+esc(r.sector)+'</td>'+
+      body.innerHTML=rows.map(function(r){return '<tr><td class="num muted">'+r.rank+'</td><td class="co"><span class="cowrap">'+mono(r.name,r.symbol)+'<span>'+starBtn(r.symbol)+' <a href="/chart#'+esc(r.symbol)+'/3m" title="open chart"><b>'+esc(r.symbol)+'</b></a><em>'+esc(r.name)+'</em></span></span></td><td class="muted">'+esc(r.sector)+'</td>'+
         '<td class="num"><b>'+(r.win_rate==null?'—':fmt(r.win_rate,1)+' %')+'</b></td><td class="num">'+ring(r.score,10)+'</td><td class="num '+cls(r.forecast_3m)+'">'+pct(r.forecast_3m)+'</td>'+
         '<td class="num '+cls(r.ret_3m)+'">'+pct(r.ret_3m)+'</td><td>'+spark(r.spark)+'</td><td class="num">'+ring(r.risk,10)+'</td><td class="num muted">'+fmt(r.weight,1)+'</td></tr>'}).join('')
         ||'<tr><td colspan="10" class="muted">no history available for this universe</td></tr>';

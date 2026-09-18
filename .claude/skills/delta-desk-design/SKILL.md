@@ -56,6 +56,16 @@ Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEX
 * Buttons are outlined, 2px radius; the only filled button is the current nav item and the kill switch.
 * Text wears ink tokens. Colour lives in dots, rings, tiles and signed numbers.
 
+## Lessons taken from Groww (principles, not the look)
+
+* Content sits in **cards** (`.card`: white-ish `--card` surface, 10px radius, hairline) on the grey ground, one card per table.
+* **Pill tabs** (`.pills`) for states such as Open / Upcoming / Closed, with a count badge; a small select for a secondary filter.
+* **Calm tables** (`table.tbl-clean`): a light header band, 14px row padding, horizontal dividers only, no vertical rules, hover highlight.
+* **Monograms** (`.mono`) in place of logos: two initials on a hue derived from the symbol, so every company gets an identity mark we own.
+* Status as soft **pills** (`.pill.open|upcoming|closed|listed|info|warn`); one action per row as a quiet `.btn` (filled `.btn.primary` only for the main action on a page).
+* Generous whitespace beats more content: fewer columns, short dates ("16 Sep 2026"), rupee formatting, no jargon in headers.
+* Our own icons only: small stroke SVGs in `currentColor` (`.ico`), never stock icon packs or screenshots of other apps.
+
 ## Charts and data marks
 
 Follow the dataviz skill: one axis, thin marks, legend for two or more series, hover tooltip, dark-mode

@@ -5,7 +5,8 @@
 .ring circle{fill:none;stroke-width:3}
 .ring .bg{stroke:var(--fill-2)}
 .ring.g .fg{stroke:var(--good)}.ring.a .fg{stroke:var(--warn)}.ring.r .fg{stroke:var(--bad)}
-table.ai td{vertical-align:middle}
+table.ai td{vertical-align:middle;padding:10px 12px}
+table.ai .cowrap{display:flex;align-items:center;gap:10px}
 table.ai .co b{font-weight:500}
 table.ai .co em{display:block;font-style:normal;font-size:11px;color:var(--ink-3)}
 table.ai th button[data-dir]::after{content:" ↓";color:var(--ink)}

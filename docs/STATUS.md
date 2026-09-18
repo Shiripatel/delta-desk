@@ -18,7 +18,7 @@ Tell Claude: "read docs/STATUS.md and continue with the next item" — this file
 |---|---|---|---|
 | Home | `/` | AI radar (buy / hold-no-trade / sell bands, short-term vs long-term mode, replay 5 sessions, trails), top-10 ranking, NIFTY 50 / BANK NIFTY / SENSEX selector, zone counts, index ticker | Yahoo, 15 min delayed; rules model v0 |
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
-| IPO | `/ipo` | open / upcoming / closed & listed tables, counts, mainboard / SME filter, subscription bar and listing gain when present | `data/ipo.json` (example rows until it exists) |
+| IPO | `/ipo` | Groww-style clean card table: pill tabs Open / Upcoming / Closed / Listed / Tracked with counts, IPO type filter, monograms, issue price, min. bid, subscription bar, listing gain; Track button keeps a personal list | `data/ipo.json` (example rows until it exists) |
 | Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals only for 3 example files |
 | Sniper | `/sniper` | F&O desk: scope tiles, today's range with plan levels and zones, chain around ATM, target board (distance in pts and σ), the shot with approve / reject, agents strip, risk meters, positions, signals, log | synthetic market (paper); Upstox adapter written, not yet run live |
 | Chart | `/chart#SYMBOL/3m` | TradingView widget by default (real-time NSE, all indicators, drawing tools); Desk chart fallback (our bars, EMA/RSI/volume) | TradingView / Yahoo |
@@ -36,7 +36,7 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. Markets stays alive but unlinked.
 * Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
-* Look: light grey Mist theme default, quiet header, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere.
+* Look: light grey Mist theme default, quiet header, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
 * Radar: three bands; short term = daily momentum, long term = weekly momentum + fundamentals.
 * Work rhythm: one deliverable per day, tests + ruff green, commit and push each day, update this file at the end of each session.
 

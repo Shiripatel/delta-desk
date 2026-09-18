@@ -14,22 +14,22 @@
   --mono:"JetBrains Mono","Fragment Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --sans:"Host Grotesk","Helvetica Neue",Arial,sans-serif;
   --header-h:56px;
-  --head:#FFFFFF;
+  --head:#FFFFFF; --card:#FFFFFF;
   color-scheme:light;
 }
 /* White: the original ground */
 :root[data-theme="white"]{
-  --head:#FEFEFE; --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
+  --head:#FEFEFE; --card:#FFFFFF; --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
   --line:#DEDEDE; --line-2:#C4C4C4; --fill:#F4F4F4; --fill-2:#EAEAEA; --flat:#EAEAEA;
 }
 /* Paper: warm off-white */
 :root[data-theme="paper"]{
-  --head:#F4EFE6; --bg:#FAF7F1; --ink:#221F1B; --ink-2:#5E5852; --ink-3:#8F8880;
+  --head:#F4EFE6; --card:#FFFDF9; --bg:#FAF7F1; --ink:#221F1B; --ink-2:#5E5852; --ink-3:#8F8880;
   --line:#E5DFD4; --line-2:#CFC7B9; --fill:#F1ECE3; --fill-2:#E7E1D6; --flat:#E7E1D6;
 }
 /* Ink: neutral dark */
 :root[data-theme="dark"], :root[data-theme="ink"]{
-  --head:#0E0E0E; --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
+  --head:#0E0E0E; --card:#1B1B1B; --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
   --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
   --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
   --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
@@ -37,7 +37,7 @@
 }
 /* Midnight: blue-black */
 :root[data-theme="midnight"]{
-  --head:#0A0E18; --bg:#0F1420; --ink:#E6EAF2; --ink-2:#A3ABBA; --ink-3:#6B7484;
+  --head:#0A0E18; --card:#151C2B; --bg:#0F1420; --ink:#E6EAF2; --ink-2:#A3ABBA; --ink-3:#6B7484;
   --line:#222B3B; --line-2:#2F3A4E; --fill:#151C2B; --fill-2:#1B2434;
   --good:#3fae57; --bad:#ef6b6b; --warn:#e3a800; --s1:#4c9be8; --s2:#e8683a;
   --dn3:#ef6b6b; --dn2:#8b3a44; --dn1:#3a2431; --flat:#1B2434; --up1:#1b3327; --up2:#256b3b; --up3:#3fae57;
@@ -46,7 +46,7 @@
 /* no stored choice + system prefers dark → Ink */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme]){
-    --head:#0E0E0E; --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
+    --head:#0E0E0E; --card:#1B1B1B; --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
     --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
     --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
     --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
@@ -144,6 +144,30 @@ section{border-bottom:1px solid var(--line)}
 .bar button{padding:6px 10px;border:1px solid var(--line-2);border-radius:2px;font-size:11px}
 .note{padding:10px 20px;font-size:11.5px;color:var(--ink-2);border-top:1px solid var(--line)}
 .note code{font-size:11px}
+
+/* ---- clean surfaces (lessons from Groww: cards on a grey ground, pill tabs, calm tables, monograms) ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.pills{display:inline-flex;gap:8px;flex-wrap:wrap}
+.pills button{padding:7px 14px;border:1px solid var(--line-2);border-radius:999px;font-size:12px;color:var(--ink-2);background:var(--card)}
+.pills button:hover{color:var(--ink);border-color:var(--ink-3)}
+.pills button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+table.tbl-clean th{background:var(--fill);color:var(--ink-2);font-size:11px;letter-spacing:.04em;text-transform:none;padding:12px 16px;border-bottom:1px solid var(--line)}
+table.tbl-clean td{padding:14px 16px;vertical-align:middle;border-bottom:1px solid var(--line);font-size:12.5px}
+table.tbl-clean tbody tr:last-child td{border-bottom:0}
+table.tbl-clean tbody tr:hover td{background:var(--fill)}
+.mono{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;font:600 12px var(--sans);letter-spacing:.02em;color:hsl(var(--h,200) 45% 30%);background:hsl(var(--h,200) 60% 92%);border:1px solid hsl(var(--h,200) 40% 80%);flex:0 0 auto}
+:root[data-theme="dark"] .mono,:root[data-theme="ink"] .mono,:root[data-theme="midnight"] .mono{color:hsl(var(--h,200) 60% 78%);background:hsl(var(--h,200) 30% 20%);border-color:hsl(var(--h,200) 30% 30%)}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--card);white-space:nowrap}
+.pill.open{background:color-mix(in srgb,var(--good) 14%,transparent);border-color:transparent;color:var(--good)}
+.pill.upcoming{background:color-mix(in srgb,var(--warn) 16%,transparent);border-color:transparent;color:var(--warn)}
+.pill.closed{background:var(--fill-2);border-color:transparent;color:var(--ink-2)}
+.pill.listed{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.pill.info{background:color-mix(in srgb,var(--s1) 12%,transparent);border-color:transparent;color:var(--s1)}
+.pill.warn{background:color-mix(in srgb,var(--s2) 14%,transparent);border-color:transparent;color:var(--s2)}
+.btn{padding:7px 14px;border:1px solid var(--line-2);border-radius:8px;font-size:12px;color:var(--ink);background:var(--card);white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.on{background:color-mix(in srgb,var(--good) 14%,transparent);border-color:transparent;color:var(--good)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
 /* ---- tiles ---------------------------------------------------------------------------------- */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}

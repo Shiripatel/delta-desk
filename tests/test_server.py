@@ -33,7 +33,7 @@ def test_pages_and_assets():
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
         ipo = c.get("/ipo").text
-        assert 'id="ipoOpen"' in ipo and 'href="/ipo" aria-current="page"' in ipo
+        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'href="/ipo" aria-current="page"' in ipo
         assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk
