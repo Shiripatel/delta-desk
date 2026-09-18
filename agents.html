@@ -79,7 +79,7 @@
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">AGENTS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/ipo">IPO</a><a href="/desk" aria-current="page">Agents</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/desk" aria-current="page">Agents</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
@@ -163,7 +163,7 @@
   function sigCls(a){return !a.available?'n':a.signal>0.15?'g':a.signal<-0.15?'r':'n'}
   function edge(x1,y1,x2,y2){var mx=(x1+x2)/2;return 'M'+x1+' '+y1+' C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2}
   function render(d){data=d;var v=d.verdict;
-    $('#symName').textContent=d.symbol+' · '+d.name+(d.sector?' · '+d.sector:'')+' · '+d.horizon_label;
+    $('#symName').innerHTML='<a href="/chart#'+esc(d.symbol)+'/3m" style="text-decoration:underline">'+esc(d.symbol)+'</a> · '+esc(d.name)+(d.sector?' · '+esc(d.sector):'')+' · '+esc(d.horizon_label);
     $('#wTech').style.width=(d.weights.technical*100)+'%';$('#wFund').style.width=(d.weights.fundamental*100)+'%';
     $('#wTechTxt').textContent=Math.round(d.weights.technical*100)+' %';$('#wFundTxt').textContent=Math.round(d.weights.fundamental*100)+' %';
     var tech=d.agents.filter(function(a){return a.group==='technical'}),fund=d.agents.filter(function(a){return a.group==='fundamental'});
@@ -201,7 +201,7 @@
   q.addEventListener('keydown',function(e){if(e.key==='Enter'){var v=q.value.trim().toUpperCase();if(v){state.symbol=v;sug.style.display='none';load()}}if(e.key==='Escape')sug.style.display='none'});
   document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
   function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
-    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/markets#/stocks"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/chart#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
   get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
   setInterval(function(){if(!document.hidden)ticker()},5000);
   load();

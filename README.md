@@ -7,6 +7,11 @@ opportunity zones, and fires one typed, risk-checked decision when the market re
 * `docs/PLAN.md` — the build plan: principles, sniper workflow, agent topology, live-data API
   comparison, SEBI retail-algo constraints, enterprise checklist, phases.
 * `home.html` — the landing page at `/`: AI radar and the top-10 ranking (NIFTY 50, BANK NIFTY, SENSEX, all).
+* `news.html` — the News page at `/news`: a continuously updating wire from public RSS feeds, each story tagged with the
+  stocks it mentions and an impact call (good / bad / no impact, lexicon rule v0 with the cues shown), filters by impact,
+  watchlist or picked stocks, a story panel, and a desk assistant that answers from the desk's own data.
+* `chart.html` — the chart page at `/chart#SYMBOL/3m`: candles, EMA 20/50, volume, RSI 14, ranges 1d to all, on
+  TradingView Lightweight Charts (open source) with our own bars. Every stock name across the app links here.
 * `ipo.html` — the IPO page at `/ipo`: open, upcoming, closed and listed issues with dates, band, lot, minimum bid, size.
 * `agents.html` — the agents page at `/desk`: the agent council. Ten narrow agents (trend, momentum, MACD, volume,
   volatility, levels, valuation, growth, quality, ownership) read one stock at one horizon (15 min to 10 years) and

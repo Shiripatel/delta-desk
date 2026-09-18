@@ -19,6 +19,16 @@ def test_pages_and_assets():
     with _client() as c:
         home = c.get("/").text
         assert "AI RADAR" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
+        for path, marker in (("/news", 'id="flow"'), ("/chart", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
+            assert marker in c.get(path).text, path
+        assert 'href="/news">News</a>' in home
+        bars = c.get("/markets/bars?symbol=NIFTY50&range=1d").json()
+        assert bars["intraday"] and bars["interval"] == "5m" and len(bars["bars"]) > 20 and {"open", "high", "low", "close", "volume"} <= set(bars["bars"][0])  # noqa: E501
+        assert c.get("/markets/radar?index=BANKNIFTY&days=3&mode=long").json()["mode"] == "long"
+        feed = c.get("/news/feed?impact=good&limit=5").json()
+        assert "counts" in feed and feed["analyzer"].startswith("lexicon")
+        chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
+        assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
         ipo = c.get("/ipo").text
         assert 'id="ipoOpen"' in ipo and 'href="/ipo" aria-current="page"' in ipo
         assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home

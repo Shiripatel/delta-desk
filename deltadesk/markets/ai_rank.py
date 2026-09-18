@@ -37,8 +37,8 @@ class HistoryProvider(Protocol):
 class SyntheticHistory:
     name = "synthetic"
 
-    def __init__(self, days: int = 66, seed: int = 5) -> None:
-        self.days, self.seed = days, seed
+    def __init__(self, days: int = 66, seed: int = 5, weekly: bool = False) -> None:
+        self.days, self.seed, self.weekly = days, seed, weekly
 
     def history(self, key: str) -> list[tuple[str, float]]:
         rng = random.Random(f"{self.seed}:{key}")
@@ -47,7 +47,7 @@ class SyntheticHistory:
         from datetime import date, timedelta
         d = date.today() - timedelta(days=int(self.days * 1.45))
         while len(out) < self.days:
-            d += timedelta(days=1)
+            d += timedelta(days=7 if self.weekly else 1)
             if d.weekday() > 4:
                 continue
             px *= math.exp(drift + rng.gauss(0, vol))
@@ -61,9 +61,10 @@ class YahooHistory:
     name = "yahoo"
     CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{sym}?range=3mo&interval=1d"
 
-    def __init__(self, ttl: float = 3600.0, workers: int = 8, timeout: float = 12.0) -> None:
+    def __init__(self, ttl: float = 3600.0, workers: int = 8, timeout: float = 12.0, range_: str = "3mo", interval: str = "1d") -> None:
         from deltadesk.markets.quotes_yahoo import YahooQuotes
         self.map_symbol = YahooQuotes.map_symbol
+        self.CHART = self.CHART.replace("range=3mo&interval=1d", f"range={range_}&interval={interval}")
         self.ttl, self.workers, self.timeout = ttl, workers, timeout
         self._cache: dict[str, tuple[float, list[tuple[str, float]]]] = {}
         self._lock = threading.Lock()
@@ -163,36 +164,66 @@ def win_rate(closes: list[float], horizon: int = 10, warmup: int = 30) -> float 
     return round(100 * hits / samples, 1) if samples >= 5 else None
 
 
+MODES = {"short": "short term · 3-month momentum on daily closes",
+         "long": "long term · 12-month momentum on weekly closes, blended with fundamentals where available"}
+
+
+def _fund_score(symbol: str) -> float | None:
+    """Average fundamental agent vote mapped to 1..10, or None when the stock has no fundamentals file."""
+    from deltadesk.markets.council import FUND, load_fundamentals
+    f, _ = load_fundamentals(symbol)
+    votes = [a["signal"] for a in (fn(f) for fn in FUND) if a["available"]]
+    return 5.5 + 4.5 * sum(votes) / len(votes) if votes else None
+
+
 class AiRanker:
-    def __init__(self, history: HistoryProvider, ttl: float = 900.0) -> None:
+    def __init__(self, history: HistoryProvider, ttl: float = 900.0, history_long: HistoryProvider | None = None) -> None:
         self.history = history
+        self.history_long = history_long or history
         self.ttl = ttl
         self._cache: dict[str, tuple[float, dict]] = {}
+
+    def _provider(self, mode: str) -> HistoryProvider:
+        return self.history_long if mode == "long" else self.history
+
+    @staticmethod
+    def _score(closes: list[float], symbol: str, mode: str):
+        f = features(closes)
+        if f is None:
+            return None
+        ai, fc, rk = score(f)
+        if mode == "long":
+            fs = _fund_score(symbol)
+            if fs is not None:
+                ai = int(round(_clip(0.6 * ai + 0.4 * fs, 1, 10)))
+        return f, ai, fc, rk
 
     def _universe(self, index: str | None) -> list:
         if index and index.upper() in INDICES and index.upper() != "INDIAVIX":
             return list(INDICES[index.upper()].constituents)
         return list(all_symbols().values())
 
-    def rank(self, index: str | None = None, limit: int = 50) -> dict:
-        key = (index or "ALL").upper()
+    def rank(self, index: str | None = None, limit: int = 50, mode: str = "short") -> dict:
+        mode = mode if mode in MODES else "short"
+        hist = self._provider(mode)
+        key = f"{(index or 'ALL').upper()}:{mode}"
         now = time.time()
         c = self._cache.get(key)
         if c and now - c[0] < self.ttl:
             data = c[1]
         else:
             cons = self._universe(index)
-            pre = getattr(self.history, "prefetch", None)
+            pre = getattr(hist, "prefetch", None)
             if pre:
                 pre([x.symbol for x in cons])
             rows = []
             for x in cons:
-                h = self.history.history(x.symbol)
+                h = hist.history(x.symbol)
                 closes = [p for _, p in h]
-                f = features(closes)
-                if f is None:
+                sc = self._score(closes, x.symbol, mode)
+                if sc is None:
                     continue
-                ai, fc, rk = score(f)
+                f, ai, fc, rk = sc
                 step = max(1, len(closes) // 24)
                 rows.append({"symbol": x.symbol, "name": x.name, "sector": x.sector, "weight": x.weight,
                              "score": ai, "forecast_3m": fc, "risk": rk, "win_rate": win_rate(closes),
@@ -203,26 +234,29 @@ class AiRanker:
             rows.sort(key=lambda r: (-r["score"], -(r["win_rate"] or 0), -r["forecast_3m"]))
             for i, r in enumerate(rows, 1):
                 r["rank"] = i
-            data = {"index": key, "source": self.history.name, "computed_at": now, "count": len(rows), "entries": rows,
-                    "note": "Rules model v0 on 3 months of daily closes. Win rate: share of 10-day windows in the last 3 months "
-                            "where the score's direction was right. Not investment advice."}
+            data = {"index": key.split(":")[0], "mode": mode, "mode_label": MODES[mode], "source": hist.name, "computed_at": now,
+                    "count": len(rows), "entries": rows,
+                    "note": ("Rules model v0. " + MODES[mode] + ". Win rate: share of 10-bar windows in the history where the score's "
+                             "direction was right. Not investment advice.")}
             self._cache[key] = (now, data)
         return {**data, "entries": data["entries"][:limit]}
 
-    def radar(self, index: str | None = None, days: int = 5) -> dict:
-        """One frame per trading day (oldest first): every stock's score, risk, forecast as of that day,
-        so the page can replay how the field moved over the last `days` sessions."""
-        key = f"radar:{(index or 'ALL').upper()}:{days}"
+    def radar(self, index: str | None = None, days: int = 5, mode: str = "short") -> dict:
+        """One frame per bar (oldest first): every stock's score, risk, forecast as of that bar, so the page
+        can replay how the field moved over the last `days` sessions (weeks in long-term mode)."""
+        mode = mode if mode in MODES else "short"
+        prov = self._provider(mode)
+        key = f"radar:{(index or 'ALL').upper()}:{days}:{mode}"
         now = time.time()
         c = self._cache.get(key)
         if c and now - c[0] < self.ttl:
             return c[1]
         cons = self._universe(index)
-        pre = getattr(self.history, "prefetch", None)
+        pre = getattr(prov, "prefetch", None)
         if pre:
             pre([x.symbol for x in cons])
-        hist = {x.symbol: [p for _, p in self.history.history(x.symbol)] for x in cons}
-        dates = {x.symbol: [d for d, _ in self.history.history(x.symbol)] for x in cons}
+        hist = {x.symbol: [p for _, p in prov.history(x.symbol)] for x in cons}
+        dates = {x.symbol: [d for d, _ in prov.history(x.symbol)] for x in cons}
         frames = []
         for back in range(days - 1, -1, -1):
             pts, asof = [], None
@@ -231,10 +265,10 @@ class AiRanker:
                 if back >= len(closes):
                     continue
                 cl = closes[: len(closes) - back]
-                f = features(cl)
-                if f is None:
+                sc = self._score(cl, x.symbol, mode)
+                if sc is None:
                     continue
-                ai, fc, rk = score(f)
+                f, ai, fc, rk = sc
                 asof = asof or dates[x.symbol][len(cl) - 1]
                 ret_1d = round((cl[-1] / cl[-2] - 1) * 100, 2) if len(cl) > 1 and cl[-2] > 0 else 0.0
                 pts.append({"symbol": x.symbol, "name": x.name, "sector": x.sector, "weight": x.weight, "score": ai,
@@ -242,9 +276,9 @@ class AiRanker:
                             "last": round(cl[-1], 2)})
             frames.append({"asof": asof, "points": pts})
         sectors = sorted({x.sector for x in cons})
-        out = {"index": (index or "ALL").upper(), "source": self.history.name, "computed_at": now, "days": days,
-               "sectors": sectors, "frames": frames,
-               "note": "Score 10 at the centre, 1 at the rim; spokes are sectors; dot size is index weight. "
-                       "Rules model v0 on daily closes. Not investment advice."}
+        out = {"index": (index or "ALL").upper(), "mode": mode, "mode_label": MODES[mode], "source": prov.name, "computed_at": now,
+               "days": days, "step": "week" if mode == "long" else "session", "sectors": sectors, "frames": frames,
+               "note": "Score 10 at the centre, 1 at the rim: 7 to 10 buy zone, 4 to 6 hold or no trade, 1 to 3 sell zone. "
+                       "Spokes are sectors; dot size is index weight. Rules model v0, " + MODES[mode] + ". Not investment advice."}
         self._cache[key] = (now, out)
         return out

@@ -30,6 +30,10 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .zones .c{font-size:10.5px;color:var(--ink-3)}
 .asof{margin-top:8px;font-size:11px;color:var(--ink-3)}
 /* ---- radar block ---- */
+.rd-ctl .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.rd-ctl .seg button{border:0;border-right:1px solid var(--line);border-radius:0;padding:6px 10px}
+.rd-ctl .seg button:last-child{border-right:0}
+.rd-ctl .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .rgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)}
 .rgrid > div{min-width:0}
 .rgrid .left{border-right:1px solid var(--line)}
@@ -60,7 +64,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">HOME · AI RADAR</span></div>
-  <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/ipo">IPO</a><a href="/desk">Agents</a></nav>
+  <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/desk">Agents</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
@@ -74,13 +78,13 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   <div class="left">
     <div class="eyebrow">[01] &nbsp;today's field</div>
     <h1>Which stocks sit in the <em>buy zone</em> today?</h1>
-    <p>Every stock is scored 1 to 10 from three months of price action: 10 at the centre of the radar, 1 at the rim. Replay the last five sessions to watch the field move. Rules model, not advice.</p>
+    <p>Every stock is scored 1 to 10 and placed on the radar: 10 at the centre, 1 at the rim, three bands: buy, hold or no trade, sell. Short term reads three months of daily price action; long term reads a year of weekly bars and blends in fundamentals where we have them. Rules model, not advice.</p>
   </div>
   <div>
     <div class="eyebrow"><span id="zoneIdx">NIFTY 50</span> · today</div>
     <div class="zones">
       <div class="g"><span class="eyebrow">buy zone · 7–10</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><span id="zBuy">—</span></div><div class="c">stocks</div></div>
-      <div class="a"><span class="eyebrow">hold · 4–6</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18"/><path d="M6 8h12"/><path d="M6 16h12"/></svg><span id="zHold">—</span></div><div class="c">stocks</div></div>
+      <div class="a"><span class="eyebrow">hold · no trade · 4–6</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18"/><path d="M6 8h12"/><path d="M6 16h12"/></svg><span id="zHold">—</span></div><div class="c">stocks</div></div>
       <div class="r"><span class="eyebrow">sell zone · 1–3</span><div class="v num"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l6 6 4-4 8 8"/><path d="M14 17h7v-7"/></svg><span id="zSell">—</span></div><div class="c">stocks</div></div>
     </div>
     <div class="asof" id="asof">—</div>
@@ -95,8 +99,8 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   <div class="rgrid">
     <div class="left">
       <div class="radar" id="rdBox"><svg id="rdSvg" viewBox="0 0 680 680" role="img" aria-label="Stocks placed by AI score: 10 at the centre, 1 at the rim; spokes are sectors"></svg><div class="tip" id="rdTip"></div></div>
-      <div class="rd-ctl"><button id="rdPlay">▶ replay 5 sessions</button><input id="rdScrub" type="range" min="0" max="4" value="4"><span id="rdDay" class="num">—</span></div>
-      <div class="rd-ctl"><div class="rd-legend"><span><i class="g"></i>7–10 buy zone</span><span><i class="a"></i>4–6 hold</span><span><i class="r"></i>1–3 sell zone</span><span><i class="w"></i>size = index weight</span></div></div>
+      <div class="rd-ctl"><span class="seg" id="rdMode"><button data-mode="short" aria-pressed="true">short term · technical</button><button data-mode="long">long term · + fundamentals</button></span><button id="rdPlay">▶ replay 5 sessions</button><input id="rdScrub" type="range" min="0" max="4" value="4"><span id="rdDay" class="num">—</span></div>
+      <div class="rd-ctl"><div class="rd-legend"><span><i class="g"></i>7–10 buy zone</span><span><i class="a"></i>4–6 hold · no trade</span><span><i class="r"></i>1–3 sell zone</span><span><i class="w"></i>size = index weight</span></div></div>
     </div>
     <div class="side">
       <h3>in the buy zone now</h3>
@@ -141,22 +145,23 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
-  var index='NIFTY50',limit=10,names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX'};
+  var index='NIFTY50',limit=10,mode='short',names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX'};
   function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
     $('#zBuy').textContent=b;$('#zHold').textContent=h;$('#zSell').textContent=s;$('#zoneIdx').textContent=names[index]}
   var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
     onFrame:function(f,i,d){zones(f);$('#asof').textContent='as of '+(f.asof||'—')+(i===d.frames.length-1?' · latest session':' · replaying session '+(i+1)+' of '+d.frames.length)+' · history: '+d.source}});
   var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',note:'aiNote',index:index,limit:limit});
-  function loadAll(){$('#rkIdx').textContent=names[index];radar.load(index);rank.load(index,limit);breadth()}
+  function loadAll(){$('#rkIdx').textContent=names[index];radar.load(index,mode);rank.load(index,limit,mode);breadth()}
+  $('#rdMode').addEventListener('click',function(e){var b=e.target.closest('button[data-mode]');if(!b)return;mode=b.dataset.mode;Array.prototype.forEach.call(document.querySelectorAll('#rdMode button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-ix]');if(!b)return;index=b.dataset.ix;
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});
-  $('#more').addEventListener('click',function(){limit=limit===10?1000:10;this.textContent=limit===10?'show all':'show top 10';rank.load(index,limit)});
+  $('#more').addEventListener('click',function(){limit=limit===10?1000:10;this.textContent=limit===10?'show all':'show top 10';rank.load(index,limit,mode)});
   function breadth(){get('/markets/index/'+index).then(function(d){var b=d.breadth;
     $('#breadth').innerHTML='<span class="up">'+b.advances+' advancing</span> · <span class="dn">'+b.declines+' declining</span> · '+b.unchanged+' flat'+(d.quote?'<br><span class="muted">'+names[index]+' '+fmt(d.quote.ltp)+' · '+pct(d.quote.change_pct)+'</span>':'')}).catch(function(){})}
   var order=['NIFTY50','BANKNIFTY','FINNIFTY','NIFTYNEXT50','SENSEX','INDIAVIX'];
   function ticker(){get('/markets/indices').then(function(list){var by={};list.forEach(function(ix){by[ix.code]=ix});
     $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;
-      return '<a href="/markets#/stocks" title="'+esc(ix.name)+'"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="tickerSrc">'+esc(window.__srcNote||'')+'</span>';
+      return '<a href="/chart#'+esc(c)+'/3m" title="chart: '+esc(ix.name)+'"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="tickerSrc">'+esc(window.__srcNote||'')+'</span>';
     }).catch(function(){})}
   get('/markets/source').then(function(s){var lbl=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');window.__srcNote=lbl;
     if(s.note)$('#foot').innerHTML='<b>Delta Desk</b> · AI radar · '+esc(s.note)+'. Nothing here is investment advice.';ticker()}).catch(ticker);

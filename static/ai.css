@@ -21,6 +21,7 @@ table.ai th button[data-dir="asc"]::after{content:" ↑"}
 .radar .ring-r{fill:none;stroke:var(--line);stroke-width:1}
 .radar .ring-r.buy{fill:var(--up1);stroke:var(--up2)}
 .radar .ring-r.sell{stroke:var(--dn2)}
+.radar .ring-r.hold{stroke:var(--line-2)}
 .radar .spoke{stroke:var(--line);stroke-width:1}
 .radar text{fill:var(--ink-3)}
 .radar .lbl{fill:var(--ink-2);font-size:10px}

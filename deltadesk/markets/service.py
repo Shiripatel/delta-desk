@@ -9,7 +9,8 @@ from datetime import date
 from deltadesk.markets import calendar as cal
 from deltadesk.markets import ipo, universe
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
-from deltadesk.markets.council import Council, SyntheticBars
+from deltadesk.markets.chat import DeskAssistant
+from deltadesk.markets.council import Council, SyntheticBars, chart_bars
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
 from deltadesk.markets.watchlist import Watchlist
@@ -21,6 +22,7 @@ class MarketsService:
         self.quotes = quotes or SyntheticQuotes()
         self.ai = ai or AiRanker(SyntheticHistory())
         self.council = council or Council(SyntheticBars())
+        self.assistant = DeskAssistant(self)
         self.watchlist = watchlist or Watchlist()
         self.news = news or NewsService()
         universe.load_cached()
@@ -194,11 +196,14 @@ class MarketsService:
     def flows() -> dict:
         return cal.flows()
 
-    def ai_rank(self, index: str | None = None, limit: int = 50) -> dict:
-        return self.ai.rank(index, limit)
+    def ai_rank(self, index: str | None = None, limit: int = 50, mode: str = "short") -> dict:
+        return self.ai.rank(index, limit, mode)
 
-    def ai_radar(self, index: str | None = None, days: int = 5) -> dict:
-        return self.ai.radar(index, days)
+    def ai_radar(self, index: str | None = None, days: int = 5, mode: str = "short") -> dict:
+        return self.ai.radar(index, days, mode)
+
+    def bars(self, symbol: str, range_key: str = "3m") -> dict:
+        return chart_bars(self.council.bars, symbol.upper(), range_key)
 
     def council_run(self, symbol: str, horizon: str = "1d") -> dict:
         return self.council.run(symbol, horizon)

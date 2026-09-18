@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.filters{display:flex;gap:10px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
+.filters .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.filters .seg button{padding:5px 11px;border-right:1px solid var(--line);font-size:11px}
+.filters .seg button:last-child{border-right:0}
+.filters .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.filters .seg button.g[aria-pressed="true"]{background:var(--good)}.filters .seg button.r[aria-pressed="true"]{background:var(--bad)}
+.search{position:relative;min-width:220px;flex:1;max-width:360px}
+.search input{width:100%;padding:6px 9px;border:1px solid var(--line-2);border-radius:3px;background:var(--bg);font-size:12px}
+.search .sug{position:absolute;left:0;right:0;top:100%;z-index:6;background:var(--bg);border:1px solid var(--line-2);max-height:240px;overflow:auto;display:none}
+.search .sug button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);font-size:12px}
+.search .sug button:hover{background:var(--fill)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border:1px solid var(--line-2);border-radius:3px;font-size:11px}
+.chip button{color:var(--ink-3);padding:0}
+.chip button:hover{color:var(--bad)}
+.live{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:11px;color:var(--ink-3)}
+/* flow */
+.wire{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,1fr)}
+.wire > div{min-width:0}
+.wire .left{border-right:1px solid var(--line);max-height:calc(100vh - 150px);overflow:auto}
+.item{display:grid;grid-template-columns:52px 1fr auto;gap:12px;padding:10px 20px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start}
+.item:hover,.item[aria-selected="true"]{background:var(--fill)}
+.item.new{animation:in .8s ease-out}
+@keyframes in{from{background:color-mix(in srgb,var(--accent) 22%,transparent)}to{background:transparent}}
+.item .t{font-size:11px;color:var(--ink-3);padding-top:2px}
+.item .h{font:500 13.5px/1.35 var(--sans);letter-spacing:-.01em}
+.item .s{font-size:11px;color:var(--ink-3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sym{display:inline-block;padding:1px 6px;border:1px solid var(--line-2);border-radius:2px;font-size:10.5px;letter-spacing:.04em}
+.imp{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:2px;border:1px solid var(--line-2);white-space:nowrap}
+.imp i{display:inline-block;width:7px;height:7px;border-radius:50%}
+.imp.good{border-color:var(--good);color:var(--good)}.imp.good i{background:var(--good)}
+.imp.bad{border-color:var(--bad);color:var(--bad)}.imp.bad i{background:var(--bad)}
+.imp.neutral{color:var(--ink-3)}.imp.neutral i{background:var(--ink-3)}
+/* detail + chat */
+.detail{padding:16px 20px;border-bottom:1px solid var(--line)}
+.detail h3{margin:0 0 6px;font:500 18px/1.25 var(--sans);letter-spacing:-.02em}
+.detail .meta{font-size:11px;color:var(--ink-3);margin-bottom:10px}
+.detail p{margin:0 0 10px;font-size:12.5px;color:var(--ink-2)}
+.detail .why{font-size:11.5px;color:var(--ink-2);padding:8px 10px;background:var(--fill);border-radius:2px}
+.detail .rel{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.detail .rel a{padding:6px 10px;border:1px solid var(--line);border-radius:3px;font-size:11.5px}
+.detail .rel a:hover{background:var(--fill)}
+.detail .open{display:inline-block;margin-top:10px;font-size:12px;text-decoration:underline}
+.chat{display:flex;flex-direction:column;height:min(520px,60vh)}
+.chat .log{flex:1;overflow:auto;padding:12px 20px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:92%;padding:8px 11px;border-radius:3px;font-size:12.5px;line-height:1.5}
+.msg.u{align-self:flex-end;background:var(--ink);color:var(--bg)}
+.msg.a{align-self:flex-start;background:var(--fill);border:1px solid var(--line)}
+.msg .src{display:block;margin-top:6px;font-size:10.5px;color:var(--ink-3)}
+.msg .src a{text-decoration:underline}
+.chat form{display:flex;gap:8px;padding:10px 20px;border-top:1px solid var(--line)}
+.chat input{flex:1;padding:8px 10px;border:1px solid var(--line-2);border-radius:3px;background:var(--bg);font-size:12.5px}
+.chat button{padding:8px 14px;border:1px solid var(--ink);border-radius:3px;background:var(--ink);color:var(--bg);font-size:12px}
+.chat .hint{padding:6px 20px 10px;font-size:11px;color:var(--ink-3)}
+.chat .hint button{text-decoration:underline;color:var(--ink-2);margin-right:10px;padding:0}
+@media (max-width:1000px){.wire{grid-template-columns:1fr}.wire .left{border-right:0;max-height:none;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">NEWS</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/news" aria-current="page">News</a><a href="/ipo">IPO</a><a href="/desk">Agents</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+
+<section>
+  <div class="filters">
+    <span class="seg" id="impSeg"><button data-imp="" aria-pressed="true">all</button><button data-imp="good" class="g">good</button><button data-imp="bad" class="r">bad</button><button data-imp="neutral">no impact</button></span>
+    <span class="seg" id="scope"><button data-scope="all" aria-pressed="true">everything</button><button data-scope="watch">my watchlist</button><button data-scope="pick">picked stocks</button></span>
+    <div class="search"><input id="q" placeholder="add a stock to filter · e.g. Reliance, TCS" autocomplete="off"><div class="sug" id="sug"></div></div>
+    <div class="chips" id="chips"></div>
+    <span class="live"><span class="dot on"></span><span id="liveMeta">connecting</span></span>
+  </div>
+  <div class="wire">
+    <div class="left" id="flow"></div>
+    <div>
+      <div class="detail" id="detail"><div class="eyebrow">[01] &nbsp;story</div><h3>Pick a headline</h3><p>The flow on the left updates itself. Click a story for the impact reasoning, the stocks it touches, and to ask the assistant about it.</p></div>
+      <div class="chat">
+        <div class="eyebrow" style="padding:10px 20px 0">[02] &nbsp;ask the desk</div>
+        <div class="log" id="log"><div class="msg a">Ask about a stock or the selected story. I answer from the desk's own data: quote, the agent council at the horizon you name, and the tagged headlines. Rules model v0, no external model yet.</div></div>
+        <div class="hint"><button data-q="What does the council say about this stock for the short term?">council · short term</button><button data-q="Is this stock worth holding long term?">long term</button><button data-q="Why is this news good or bad?">why this news?</button><button data-q="What is the latest news on this stock?">latest news</button></div>
+        <form id="chatForm"><input id="chatIn" placeholder="e.g. how does this news affect HDFC Bank this week?" autocomplete="off"><button type="submit">ask</button></form>
+      </div>
+    </div>
+  </div>
+  <div class="note" id="note">Public RSS feeds, refreshed continuously. Impact is a transparent lexicon rule (v0); the cues it used are shown on every story. Nothing here is investment advice.</div>
+</section>
+</main>
+
+<footer><div class="wrap"><div>Delta Desk · news wire. Nothing here is investment advice.</div><div>DD.NEWS.0S1</div></div></footer>
+
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function post(u,body){return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+
+  var state={impact:'',scope:'all',picks:[],selected:null,seen:{},lastTs:0,watch:[]};
+  try{state.picks=JSON.parse(localStorage.getItem('dd.news.picks')||'[]')}catch(e){}
+  function ago(ts){if(!ts)return '';var s=Math.max(0,(Date.now()/1000-ts));return s<60?'now':s<3600?Math.floor(s/60)+'m':s<86400?Math.floor(s/3600)+'h':Math.floor(s/86400)+'d'}
+  function symbolsParam(){if(state.scope==='watch')return state.watch;if(state.scope==='pick')return state.picks;return []}
+  function renderChips(){$('#chips').innerHTML=state.picks.map(function(s){return '<span class="chip">'+esc(s)+'<button data-rm="'+esc(s)+'" title="remove">✕</button></span>'}).join('')}
+  $('#chips').addEventListener('click',function(e){var b=e.target.closest('button[data-rm]');if(!b)return;state.picks=state.picks.filter(function(x){return x!==b.dataset.rm});save();renderChips();reload()});
+  function save(){try{localStorage.setItem('dd.news.picks',JSON.stringify(state.picks))}catch(e){}}
+  function impBadge(h){return '<span class="imp '+h.impact+'" title="'+esc(h.reason)+'"><i></i>'+(h.impact==='neutral'?'no impact':h.impact)+' · '+Math.round(h.confidence*100)+'%</span>'}
+  function row(h,isNew){return '<div class="item'+(isNew?' new':'')+'" data-id="'+esc(h.id)+'" aria-selected="'+(state.selected===h.id)+'"><span class="t num">'+ago(h.ts)+'</span><div><div class="h">'+esc(h.title)+'</div><div class="s">'+esc(h.source)+(h.symbols.length?' '+h.symbols.map(function(s){return '<a class="sym" href="/chart#'+esc(s)+'/3m" title="chart">'+esc(s)+'</a>'}).join(' '):'')+(h.topics.length?' <span class="muted">'+esc(h.topics.join(' · ').toLowerCase())+'</span>':'')+'</div></div>'+impBadge(h)+'</div>'}
+  function render(d,initial){var flow=$('#flow');var syms=symbolsParam();
+    if(initial){flow.innerHTML=d.entries.map(function(h){state.seen[h.id]=1;return row(h,false)}).join('')||'<div class="note">no headlines match'+(d.errors&&Object.keys(d.errors).length?' · some feeds unreachable':'')+'</div>'}
+    else{var fresh=d.entries.filter(function(h){return !state.seen[h.id]});if(fresh.length){fresh.reverse().forEach(function(h){state.seen[h.id]=1});flow.insertAdjacentHTML('afterbegin',fresh.reverse().map(function(h){return row(h,true)}).join(''))}}
+    $('#liveMeta').textContent=d.total+' stories · '+d.counts.good+' good · '+d.counts.bad+' bad · '+d.counts.neutral+' no impact · '+(d.fetched_at?'refreshed '+new Date(d.fetched_at*1000).toTimeString().slice(0,5):'')+(syms.length?' · filter: '+syms.join(', '):'')+' · '+d.analyzer}
+  function url(){var q=[];var syms=symbolsParam();if(syms.length)q.push('symbols='+encodeURIComponent(syms.join(',')));if(state.impact)q.push('impact='+state.impact);q.push('limit=120');return '/news/feed?'+q.join('&')}
+  function reload(){state.seen={};get(url()).then(function(d){render(d,true)}).catch(function(e){$('#liveMeta').textContent='failed: '+e})}
+  function poll(){if(document.hidden)return;get(url()).then(function(d){render(d,false)}).catch(function(){})}
+  $('#impSeg').addEventListener('click',function(e){var b=e.target.closest('button[data-imp]');if(!b)return;state.impact=b.dataset.imp;$$('#impSeg button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});reload()});
+  $('#scope').addEventListener('click',function(e){var b=e.target.closest('button[data-scope]');if(!b)return;state.scope=b.dataset.scope;$$('#scope button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    if(state.scope==='watch'&&!state.watch.length){get('/markets/watchlist').then(function(w){var first=Object.keys(w.lists)[0];state.watch=(w.lists[first]||[]).map(function(r){return r.key});reload()})}else reload()});
+  var q=$('#q'),sug=$('#sug'),timer=null;
+  q.addEventListener('input',function(){clearTimeout(timer);var v=q.value.trim();if(!v){sug.style.display='none';return}
+    timer=setTimeout(function(){get('/markets/search?q='+encodeURIComponent(v)).then(function(rs){rs=rs.filter(function(r){return r.kind==='stock'||r.kind==='index'});sug.innerHTML=rs.map(function(r){return '<button data-key="'+esc(r.key)+'"><span><b>'+esc(r.key)+'</b> <span class="muted">'+esc(r.name)+'</span></span></button>'}).join('')||'<button disabled class="muted">no match</button>';sug.style.display='block'})},120)});
+  sug.addEventListener('click',function(e){var b=e.target.closest('button[data-key]');if(!b)return;if(state.picks.indexOf(b.dataset.key)<0)state.picks.push(b.dataset.key);save();renderChips();q.value='';sug.style.display='none';
+    state.scope='pick';$$('#scope button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.scope==='pick'))});reload()});
+  document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
+
+  /* detail */
+  $('#flow').addEventListener('click',function(e){if(e.target.closest('a.sym'))return;var it=e.target.closest('.item');if(!it)return;select(it.dataset.id)});
+  function select(id){state.selected=id;$$('.item').forEach(function(x){x.setAttribute('aria-selected',String(x.dataset.id===id))});
+    get('/news/item?id='+encodeURIComponent(id)).then(function(h){if(!h){return}
+      $('#detail').innerHTML='<div class="eyebrow">[01] &nbsp;story</div><h3>'+esc(h.title)+'</h3><div class="meta">'+esc(h.source)+(h.published?' · '+esc(h.published.replace('T',' ').slice(0,16)):'')+'</div>'+(h.description?'<p>'+esc(h.description)+'</p>':'')+
+        '<div class="why">'+impBadge(h)+' &nbsp;'+esc(h.reason)+'</div>'+(h.symbols.length?'<div class="rel">'+h.symbols.map(function(s){return '<a href="/chart#'+esc(s)+'/3m"><b>'+esc(s)+'</b> · chart →</a><a href="/desk#'+esc(s)+'/1d">council →</a>'}).join('')+'</div>':'')+(h.link?'<a class="open" href="'+esc(h.link)+'" target="_blank" rel="noopener">open the full article ↗</a>':'');
+      if(h.symbols.length)$('#chatIn').placeholder='ask about '+h.symbols[0]+' or this story…'})}
+
+  /* chat */
+  function say(cls,text,srcs){var d=document.createElement('div');d.className='msg '+cls;d.innerHTML=esc(text)+(srcs&&srcs.length?'<span class="src">sources: '+srcs.map(function(s){return s.kind==='news'?'<a href="'+esc(s.link||'#')+'" target="_blank" rel="noopener">'+esc(s.title)+'</a>':s.kind==='council'?'council '+esc(s.symbol)+' · '+esc(s.horizon)+' · '+esc(s.stance):s.kind==='quote'?'quote '+esc(s.symbol):esc(s.kind)}).join(' · ')+'</span>':'');var log=$('#log');log.appendChild(d);log.scrollTop=log.scrollHeight}
+  function ask(text){if(!text)return;say('u',text);var sel=state.selected;var sym=state.picks.length&&state.scope==='pick'?state.picks[0]:null;
+    post('/chat',{question:text,news_id:sel,symbol:sym}).then(function(r){say('a',r.answer,r.sources)}).catch(function(e){say('a','failed: '+e)})}
+  $('#chatForm').addEventListener('submit',function(e){e.preventDefault();var v=$('#chatIn').value.trim();$('#chatIn').value='';ask(v)});
+  $('.chat .hint').addEventListener('click',function(e){var b=e.target.closest('button[data-q]');if(!b)return;ask(b.dataset.q)});
+
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});$('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/chart#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},10000);
+  renderChips();reload();setInterval(poll,20000);
+})();
+</script>
+</body>
+</html>

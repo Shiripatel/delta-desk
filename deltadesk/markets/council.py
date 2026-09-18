@@ -64,15 +64,24 @@ class BarsProvider(Protocol):
     def bars(self, symbol: str, horizon: str) -> list[Bar]: ...
 
 
+CHART_RANGES: dict[str, tuple[str, str]] = {"1d": ("1d", "5m"), "5d": ("5d", "15m"), "1m": ("1mo", "1h"), "3m": ("3mo", "1d"),
+                                            "6m": ("6mo", "1d"), "1y": ("1y", "1d"), "5y": ("5y", "1wk"), "all": ("max", "1mo")}
+STEP = {"5m": 300, "15m": 900, "1h": 3600, "1d": 86400, "1wk": 7 * 86400, "1mo": 30 * 86400}
+
+
 class SyntheticBars:
     name = "synthetic"
 
+    def bars_for(self, symbol: str, rng_: str, itv: str) -> list[Bar]:
+        return self._gen(symbol, f"{rng_}:{itv}", STEP.get(itv, 86400), {"1d": 75, "5d": 125, "1mo": 150, "3mo": 65, "6mo": 125, "1y": 250}.get(rng_, 160))  # noqa: E501
+
     def bars(self, symbol: str, horizon: str) -> list[Bar]:
-        rng = random.Random(f"{symbol}:{horizon}")
-        n = 160
+        return self._gen(symbol, horizon, {"15m": 900, "1h": 3600, "1d": 86400, "1w": 86400, "1mo": 7 * 86400, "3mo": 7 * 86400}.get(horizon, 30 * 86400), 160)  # noqa: E501
+
+    def _gen(self, symbol: str, seed: str, step: int, n: int) -> list[Bar]:
+        rng = random.Random(f"{symbol}:{seed}")
         px = rng.uniform(100, 3000)
-        drift, vol = rng.gauss(0.0006, 0.002), rng.uniform(0.008, 0.02)
-        step = {"15m": 900, "1h": 3600, "1d": 86400, "1w": 86400, "1mo": 7 * 86400, "3mo": 7 * 86400}.get(horizon, 30 * 86400)
+        drift, vol = rng.gauss(0.0006, 0.002), rng.uniform(0.008, 0.02) * (0.25 if step < 3600 else 1.0)
         t0 = time.time() - n * step
         out = []
         for i in range(n):
@@ -96,8 +105,11 @@ class YahooBars:
 
     def bars(self, symbol: str, horizon: str) -> list[Bar]:
         rng_, itv, _, _ = HORIZONS[horizon]
-        ttl = 300 if itv in ("15m", "1h") else 3600
-        key = (symbol, horizon)
+        return self.bars_for(symbol, rng_, itv)
+
+    def bars_for(self, symbol: str, rng_: str, itv: str) -> list[Bar]:
+        ttl = 120 if itv in ("5m", "15m", "1h") else 3600
+        key = (symbol, f"{rng_}:{itv}")
         now = time.time()
         with self._lock:
             c = self._cache.get(key)
@@ -343,3 +355,16 @@ class Council:
                 "bars": summary, "sources": {"bars": self.bars.name, "fundamentals": f_src},
                 "note": "Each agent votes between -1 and +1 with a confidence; the verdict is the horizon-weighted vote. "
                         "Short horizons lean on technical agents, long horizons on fundamentals. Rules model v0, not advice."}
+
+
+def chart_bars(provider: BarsProvider, symbol: str, range_key: str = "3m") -> dict:
+    """OHLCV for the chart page. Intraday ranges carry epoch seconds; daily and coarser carry dates."""
+    rng_, itv = CHART_RANGES.get(range_key, CHART_RANGES["3m"])
+    bars = provider.bars_for(symbol, rng_, itv) if hasattr(provider, "bars_for") else []
+    meta = all_symbols().get(symbol.upper())
+    from deltadesk.markets.universe import GLOBAL_BY_KEY, INDICES
+    name = meta.name if meta else INDICES[symbol].name if symbol in INDICES else GLOBAL_BY_KEY[symbol][1] if symbol in GLOBAL_BY_KEY else symbol  # noqa: E501
+    return {"symbol": symbol.upper(), "name": name, "range": range_key, "interval": itv, "intraday": itv in ("5m", "15m", "1h"),
+            "source": provider.name, "delayed": provider.name == "yahoo",
+            "bars": [{"ts": b.ts, "open": round(b.open, 2), "high": round(b.high, 2), "low": round(b.low, 2), "close": round(b.close, 2),
+                      "volume": int(b.volume)} for b in bars]}

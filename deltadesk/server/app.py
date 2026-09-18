@@ -10,12 +10,19 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from deltadesk.markets import universe
 from deltadesk.markets.service import MarketsService
 from deltadesk.pipeline import Pipeline
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+class ChatIn(BaseModel):
+    question: str = ""
+    symbol: str | None = None
+    news_id: str | None = None
 
 
 def _dump(x):
@@ -44,6 +51,14 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/desk")
     async def desk():
         return FileResponse(ROOT / "agents.html")
+
+    @app.get("/news")
+    async def news_page():
+        return FileResponse(ROOT / "news.html")
+
+    @app.get("/chart")
+    async def chart_page():
+        return FileResponse(ROOT / "chart.html")
 
     @app.get("/ipo")
     async def ipo_page():
@@ -162,16 +177,36 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
     @app.get("/markets/ai")
-    async def m_ai(index: str | None = None, limit: int = 50):
-        return JSONResponse(await asyncio.to_thread(markets.ai_rank, index, limit))
+    async def m_ai(index: str | None = None, limit: int = 50, mode: str = "short"):
+        return JSONResponse(await asyncio.to_thread(markets.ai_rank, index, limit, mode))
+
+    @app.get("/markets/bars")
+    async def m_bars(symbol: str = "NIFTY50", range: str = "3m"):  # noqa: A002
+        return JSONResponse(await asyncio.to_thread(markets.bars, symbol, range))
+
+    @app.get("/news/feed")
+    async def n_feed(symbols: str = "", impact: str = "", since: float = 0.0, limit: int = 80):
+        syms = [x for x in symbols.split(",") if x]
+        return JSONResponse(await asyncio.to_thread(markets.news.feed, syms or None, impact or None, since, limit))
+
+    @app.get("/news/item")
+    async def n_item(id: str):  # noqa: A002
+        out = await asyncio.to_thread(markets.news.item, id)
+        if out is None:
+            raise HTTPException(404, "unknown story")
+        return JSONResponse(out)
+
+    @app.post("/chat")
+    async def chat(body: ChatIn):
+        return JSONResponse(await asyncio.to_thread(markets.assistant.answer, body.question, body.symbol, body.news_id))
 
     @app.get("/markets/council")
     async def m_council(symbol: str = "HDFCBANK", horizon: str = "1d"):
         return JSONResponse(await asyncio.to_thread(markets.council_run, symbol, horizon))
 
     @app.get("/markets/radar")
-    async def m_radar(index: str | None = None, days: int = 5):
-        return JSONResponse(await asyncio.to_thread(markets.ai_radar, index, max(2, min(10, days))))
+    async def m_radar(index: str | None = None, days: int = 5, mode: str = "short"):
+        return JSONResponse(await asyncio.to_thread(markets.ai_radar, index, max(2, min(10, days)), mode))
 
     @app.post("/markets/watchlist/{name}")
     async def m_watchlist_create(name: str):
