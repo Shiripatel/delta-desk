@@ -17,7 +17,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
 | `/news` | `news.html` | News (live wire, impact calls, assistant) |
 | `/ipo` | `ipo.html` | IPO |
-| `/chart` | `chart.html` | (chart for any symbol: `/chart#SYMBOL/3m`; every stock name links here) |
+| `/analysis` | `analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; the chart is one tab inside it, Desk chart by default; `/chart` redirects) |
 | `/markets` | `markets.html` | (full market-analysis surface, not in the nav for now) |
 | `/desk` | `agents.html` | Agents (the agent council: stock + horizon → verdict) |
 | `/sniper` | `sniper.html` | Sniper (F&O desk: scope, range with zones, chain, targets, the shot, risk) |
@@ -55,6 +55,10 @@ Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEX
 * Tables: uppercase 11px headers, right-aligned `.num` columns, sortable headers are `<button data-k>` with `data-dir` arrows.
 * Buttons are outlined, 2px radius; the only filled button is the current nav item and the kill switch.
 * Text wears ink tokens. Colour lives in dots, rings, tiles and signed numbers.
+
+## Tables
+
+Table headers sit on `--thead`, a tone one step darker than the card and far lighter than the header band, in 600 weight ink, with a `--line-2` rule under them; the table card has a `--line-2` outer border so the frame is visible against the ground. Do not restyle headers per page.
 
 ## Lessons taken from moomoo (principles, not the look)
 

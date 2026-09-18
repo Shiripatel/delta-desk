@@ -161,7 +161,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   var order=['NIFTY50','BANKNIFTY','FINNIFTY','NIFTYNEXT50','SENSEX','INDIAVIX'];
   function ticker(){get('/markets/indices').then(function(list){var by={};list.forEach(function(ix){by[ix.code]=ix});
     $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;
-      return '<a href="/chart#'+esc(c)+'/3m" title="chart: '+esc(ix.name)+'"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="tickerSrc">'+esc(window.__srcNote||'')+'</span>';
+      return '<a href="/analysis#'+esc(c)+'/3m" title="analyse: '+esc(ix.name)+'"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="tickerSrc">'+esc(window.__srcNote||'')+'</span>';
     }).catch(function(){})}
   get('/markets/source').then(function(s){var lbl=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');window.__srcNote=lbl;
     if(s.note)$('#foot').innerHTML='<b>Delta Desk</b> · AI radar · '+esc(s.note)+'. Nothing here is investment advice.';ticker()}).catch(ticker);

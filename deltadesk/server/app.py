@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -92,9 +92,13 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def news_page():
         return FileResponse(ROOT / "news.html")
 
+    @app.get("/analysis")
+    async def analysis_page():
+        return FileResponse(ROOT / "analysis.html")
+
     @app.get("/chart")
     async def chart_page():
-        return FileResponse(ROOT / "chart.html")
+        return RedirectResponse("/analysis", status_code=307)
 
     @app.get("/forex")
     async def forex_page():

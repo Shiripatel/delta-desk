@@ -25,7 +25,7 @@ window.DDAI=(function(){
     var head=document.getElementById(o.head),body=document.getElementById(o.body),meta=document.getElementById(o.meta),note=o.note&&document.getElementById(o.note);
     var data=null,key='score',dir='desc',limit=o.limit||50,index=o.index||'NIFTY50',mode=o.mode||'short';
     function render(){if(!data)return;var rows=data.entries.slice().sort(function(a,b){var x=a[key],y=b[key];x=x==null?-1e9:x;y=y==null?-1e9:y;return dir==='asc'?x-y:y-x});
-      body.innerHTML=rows.map(function(r){return '<tr><td class="num muted">'+r.rank+'</td><td class="co"><span class="cowrap">'+mono(r.name,r.symbol)+'<span>'+starBtn(r.symbol)+' <a href="/chart#'+esc(r.symbol)+'/3m" title="open chart"><b>'+esc(r.symbol)+'</b></a><em>'+esc(r.name)+'</em></span></span></td><td class="muted">'+esc(r.sector)+'</td>'+
+      body.innerHTML=rows.map(function(r){return '<tr><td class="num muted">'+r.rank+'</td><td class="co"><span class="cowrap">'+mono(r.name,r.symbol)+'<span>'+starBtn(r.symbol)+' <a href="/analysis#'+esc(r.symbol)+'/3m" title="open analysis"><b>'+esc(r.symbol)+'</b></a><em>'+esc(r.name)+'</em></span></span></td><td class="muted">'+esc(r.sector)+'</td>'+
         '<td class="num"><b>'+(r.win_rate==null?'—':fmt(r.win_rate,1)+' %')+'</b></td><td class="num">'+ring(r.score,10)+'</td><td class="num '+cls(r.forecast_3m)+'">'+pct(r.forecast_3m)+'</td>'+
         '<td class="num '+cls(r.ret_3m)+'">'+pct(r.ret_3m)+'</td><td>'+spark(r.spark)+'</td><td class="num">'+ring(r.risk,10)+'</td><td class="num muted">'+fmt(r.weight,1)+'</td></tr>'}).join('')
         ||'<tr><td colspan="10" class="muted">no history available for this universe</td></tr>';
@@ -71,7 +71,7 @@ window.DDAI=(function(){
       if(movers){var mv=f.points.filter(function(p){return first[p.symbol]!=null}).map(function(p){return {s:p.symbol,a:first[p.symbol],b:p.score,d:p.score-first[p.symbol]}}).filter(function(x){return x.d}).sort(function(x,y){return Math.abs(y.d)-Math.abs(x.d)}).slice(0,8);
         movers.innerHTML=mv.map(function(x){return '<tr><td><b>'+esc(x.s)+'</b></td><td class="num muted">'+x.a+'</td><td class="num '+(x.d>0?'up':'dn')+'">'+x.b+' ('+(x.d>0?'+':'')+x.d+')</td></tr>'}).join('')||'<tr><td colspan="3" class="muted">no score changes in the window</td></tr>'}
       if(picks){var top=f.points.filter(function(p){return p.score>=7}).sort(function(a,b){return b.score-a.score||b.weight-a.weight}).slice(0,8);
-        picks.innerHTML=top.map(function(p){return '<div class="pick"><span class="cowrap">'+mono(p.name,p.symbol)+'<span>'+starBtn(p.symbol)+' <a href="/chart#'+esc(p.symbol)+'/3m"><b>'+esc(p.symbol)+'</b></a> <em>'+esc(p.name)+'</em></span></span>'+ring(p.score,10)+'</div>'}).join('')||'<div class="muted" style="padding:8px 0">nothing in the buy zone in this universe today</div>'}
+        picks.innerHTML=top.map(function(p){return '<div class="pick"><span class="cowrap">'+mono(p.name,p.symbol)+'<span>'+starBtn(p.symbol)+' <a href="/analysis#'+esc(p.symbol)+'/3m"><b>'+esc(p.symbol)+'</b></a> <em>'+esc(p.name)+'</em></span></span>'+ring(p.score,10)+'</div>'}).join('')||'<div class="muted" style="padding:8px 0">nothing in the buy zone in this universe today</div>'}
       if(o.onFrame)o.onFrame(f,frame,rd)}
     function stop(){clearInterval(timer);timer=null;if(play){play.textContent='▶ replay '+days+' '+(rd&&rd.step==='week'?'weeks':'sessions');play.classList.remove('on')}}
     function load(ix,md){if(ix!=null)index=ix;if(md!=null)mode=md;stop();if(meta)meta.textContent='computing… (first run fetches history per symbol)';
@@ -84,7 +84,7 @@ window.DDAI=(function(){
       tip.style.display='block';tip.innerHTML='<b>'+esc(p.symbol)+'</b> '+esc(p.name)+'<br>score '+p.score+' · low-risk '+p.risk+' · forecast 3M '+pct(p.forecast_3m)+'<br>last '+fmt(p.last)+' · 1d '+pct(p.ret_1d)+' · 1M '+pct(p.ret_1m)+' · wt '+fmt(p.weight,1)+' %<br>click: chart'+(window.DDWL?' · shift-click: watchlist':'');
       var b=box.getBoundingClientRect();tip.style.left=(e.clientX-b.left+14)+'px';tip.style.top=(e.clientY-b.top+14)+'px'});
     svg.addEventListener('mouseleave',function(){tip.style.display='none'});
-    svg.addEventListener('click',function(e){var g=e.target.closest('.pt');if(!g)return;var s=g.dataset.sym;if(e.shiftKey&&window.DDWL){(inWl(s)?window.DDWL.remove(s):window.DDWL.add(s)).then(draw);return}location.href='/chart#'+encodeURIComponent(s)+'/3m'});
+    svg.addEventListener('click',function(e){var g=e.target.closest('.pt');if(!g)return;var s=g.dataset.sym;if(e.shiftKey&&window.DDWL){(inWl(s)?window.DDWL.remove(s):window.DDWL.add(s)).then(draw);return}location.href='/analysis#'+encodeURIComponent(s)+'/3m'});
     if(picks)bindStars(picks);
     document.addEventListener('dd:watchlist',function(){if(rd)draw()});
     return {load:load,refresh:draw,data:function(){return rd}};

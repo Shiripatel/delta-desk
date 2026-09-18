@@ -11,7 +11,7 @@ opportunity zones, and fires one typed, risk-checked decision when the market re
 * `news.html` — the News page at `/news`: a continuously updating wire from public RSS feeds, each story tagged with the
   stocks it mentions and an impact call (good / bad / no impact, lexicon rule v0 with the cues shown), filters by impact,
   watchlist or picked stocks, a story panel, and a desk assistant that answers from the desk's own data.
-* `chart.html` — the chart page at `/chart#SYMBOL/3m`. Default engine is the full TradingView chart (real-time NSE data,
+* `analysis.html` — the analysis page (overview, chart, agents, news, levels) at `/analysis#SYMBOL/3m`. Default engine is the full TradingView chart (real-time NSE data,
   all its indicators and drawing tools); the Desk chart (our bars on Lightweight Charts, EMA/RSI/volume) is the offline
   fallback. Every stock name across the app links here.
 * `sniper.html` — the F&O sniper desk at `/sniper`: scope tiles, today's range with plan levels and zones, chain around

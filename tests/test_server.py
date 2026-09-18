@@ -28,7 +28,7 @@ def test_pages_and_assets():
     with _client() as c:
         home = c.get("/").text
         assert "LLM agents" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
-        for path, marker in (("/news", 'id="flow"'), ("/chart", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
+        for path, marker in (("/news", 'id="flow"'), ("/analysis", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
             assert marker in c.get(path).text, path
         assert 'href="/news">News</a>' in home and 'href="/sniper">Sniper</a>' in home
         dom = c.get("/markets/domains").json()
@@ -46,7 +46,9 @@ def test_pages_and_assets():
         assert c.delete("/alerts/" + a["rule"]["id"]).json()["ok"]
         lim = c.get("/limits").json()
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
-        assert "TradingView" in c.get("/chart").text and "tvSymbol" in c.get("/chart").text
+        an = c.get("/analysis").text
+        assert "TradingView" in an and "tvSymbol" in an and 'id="pane-overview"' in an and 'id="lvBody"' in an
+        assert c.get("/chart", follow_redirects=False).status_code == 307 and "/analysis" in c.get("/chart", follow_redirects=False).headers["location"]  # noqa: E501
         bars = c.get("/markets/bars?symbol=NIFTY50&range=1d").json()
         assert bars["intraday"] and bars["interval"] == "5m" and len(bars["bars"]) > 20 and {"open", "high", "low", "close", "volume"} <= set(bars["bars"][0])  # noqa: E501
         assert c.get("/markets/radar?index=BANKNIFTY&days=3&mode=long").json()["mode"] == "long"
