@@ -7,52 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="/static/design.css">
 <link rel="stylesheet" href="/static/watchlist.css">
 <link rel="stylesheet" href="/static/ai.css">
 <style>
-:root{
-  --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
-  --line:#DEDEDE; --line-2:#C4C4C4; --fill:#F4F4F4; --fill-2:#EAEAEA;
-  --accent:#F386A1; --accent-deep:#D45BB6;
-  --good:#008300; --bad:#e34948; --warn:#c98500;
-  --s1:#2a78d6; --s2:#eb6834;            /* two-series categorical: FII / DII, calls / puts */
-  /* diverging heat-map ramp: two poles + neutral midpoint, equal steps per arm.
-     red/green sits in the CVD floor band, so every tile also carries a signed label,
-     and the "colour-safe" toggle swaps the up pole to blue (passes clean). */
-  --dn3:#e34948; --dn2:#f0a3a3; --dn1:#f9dcdc; --flat:#EAEAEA; --up1:#d9efd9; --up2:#9fd49f; --up3:#008300;
-  --tile-ink-strong:#fff;
-  --mono:"JetBrains Mono","Fragment Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:"Host Grotesk","Helvetica Neue",Arial,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-    --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-    --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
-    --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-  --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-  --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
-  --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
-  color-scheme:dark;
-}
-:root[data-safe="1"]{ --up1:#dbe8f9; --up2:#9cc0ee; --up3:#2a78d6; --good:#2a78d6 }
-@media (prefers-color-scheme: dark){ :root[data-safe="1"]:not([data-theme="light"]){ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 } }
-:root[data-theme="dark"][data-safe="1"]{ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 }
 
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font:300 13px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-button,input,select{font:inherit;color:inherit;background:none;border:0}
-button{cursor:pointer}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.num{font-variant-numeric:tabular-nums}
 .wrap{max-width:1360px;margin:0 auto;border-inline:1px solid var(--line)}
 .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .tag{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:2px 6px;border:1px solid var(--line-2);color:var(--ink-2);border-radius:2px;white-space:nowrap}
@@ -62,20 +21,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .up{color:var(--good)}.dn{color:var(--bad)}.muted{color:var(--ink-3)}
 /* header + mega menu */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:stretch;justify-content:space-between;flex-wrap:wrap;position:relative}
-.brand{display:flex;align-items:center;gap:12px;padding:14px 20px;border-right:1px solid var(--line)}
-.brand b{font:600 15px/1 var(--sans);letter-spacing:-.01em}
-.nav{display:flex;align-items:center;gap:22px;padding:0 20px;flex:1;min-width:0;overflow-x:auto}
-.nav a,.nav button{font-size:12px;color:var(--ink-2);white-space:nowrap;padding:0}
-.nav a:hover,.nav a[aria-current],.nav button[aria-expanded="true"]{color:var(--ink)}
 .nav button.ma{color:var(--accent-deep)}
-.tools{display:flex;align-items:stretch;border-left:1px solid var(--line)}
-.tool{padding:8px 16px;border-right:1px solid var(--line);font-size:11px;line-height:1.35;color:var(--ink-2)}
-.tool strong{display:block;color:var(--ink);font-weight:400;white-space:nowrap}
-.tool button{padding:4px 8px;border:1px solid var(--line-2);font-size:11px;border-radius:2px;margin-top:2px}
-.tool button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.mega{position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:1px solid var(--line);border-top:1px solid var(--line);display:none;z-index:6}
+.mega{position:absolute;left:-1px;right:-1px;top:100%;background:var(--bg);border-bottom:1px solid var(--line);border-top:1px solid var(--line);display:none;z-index:6}
 .mega[data-open="1"]{display:block}
 .mega .cols{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:40px;padding:22px 20px 26px}
 .mega h5{margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--line);font:300 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
@@ -166,15 +113,11 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">MARKETS</span></div>
-  <nav class="nav">
-    <a href="/">radar</a><a href="/desk">desk</a>
-    <button class="ma" id="maBtn" aria-expanded="false" aria-controls="mega">market analysis ▾</button>
-    <a href="#/stocks" data-view="stocks">quotes</a><a href="#/heatmap" data-view="heatmap">heat map</a><a href="#/screener" data-view="screener">screener</a><a href="#/watchlist" data-view="watchlist">watchlist</a><a href="#/ai" data-view="ai">ai picks</a><a href="#/radar" data-view="radar">radar</a><a href="#/ipo" data-view="ipo">ipo</a><a href="#/news" data-view="news">news</a>
-  </nav>
-  <div class="tools">
-    <div class="tool">Clock<strong id="clock" class="num">—</strong></div>
-    <div class="tool">Feed<strong><span class="dot" id="feedDot"></span><span id="feedName">connecting</span></strong></div>
-    <div class="tool">Colour<button id="safe" aria-pressed="false" title="Swap the up pole to blue for red/green colour-vision deficiency">colour-safe</button></div>
+  <nav class="nav"><a href="/">Home</a><a href="/markets" aria-current="page">Markets</a><a href="/desk">Agents</a><button class="ma" id="maBtn" aria-expanded="false" aria-controls="mega">market analysis ▾</button></nav>
+  <div class="status">
+    <span id="feedName" title="quote source"><span class="dot" id="feedDot"></span>connecting</span>
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
   <div class="mega" id="mega"><div class="cols">
     <div><h5>Real-time quotes</h5>
@@ -448,7 +391,7 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
       return '<button role="tab" data-code="'+esc(ix.code)+'" aria-pressed="'+(ix.code===active)+'"><span class="eyebrow">'+esc(ix.name)+' <span class="muted">'+esc(ix.exchange)+(ix.fno?' · lot '+ix.lot_size:'')+'</span></span>'+
         '<div class="n num">'+(q.ltp!=null?fmt(q.ltp):'—')+'</div><div class="c num '+c+'">'+(q.change!=null?sgn(q.change)+' · '+pct(q.change_pct):'—')+'</div></button>'}).join('');
     $$('.strip').forEach(function(s){s.innerHTML=html});
-    $('#feedDot').className='dot on';$('#feedName').textContent=window.__src||'quotes';}
+    $('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(window.__src||'quotes');}
   document.addEventListener('click',function(e){var b=e.target.closest('.strip button[data-code]');if(!b)return;active=b.dataset.code;
     $$('.strip button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.code===active))});loadIndex()});
 
@@ -484,7 +427,7 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
     $$('.ixTitle').forEach(function(x){x.textContent=d.name});$$('.ixSub').forEach(function(x){x.textContent=(q.ltp!=null?fmt(q.ltp)+' · '+pct(q.change_pct)+' · ':'')+d.constituents.length+' constituents · feed key '+d.feed_key});
     if(view==='stocks'){renderTable();renderMovers()}if(view==='heatmap')renderHeat()})}
   function loadStocks(){get('/markets/indices').then(renderStrip).catch(offline);loadIndex();if(!wl)get('/markets/watchlist').then(renderWatch)}
-  function offline(){$('#feedDot').className='dot';$('#feedName').textContent='offline'}
+  function offline(){$('#feedName').innerHTML='<span class="dot" id="feedDot"></span>offline'}
 
   /* options */
   function loadOptions(){get('/markets/options').then(function(d){if(!d.ready){$('#optMeta').textContent=d.note;return}var st=d.stats||{};
@@ -578,7 +521,7 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   loaders.radar=loadRadar;
 
   /* boot + polling */
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');$('#feedName').textContent=window.__src;$('#feedDot').className='dot on';var f=document.querySelector('footer .wrap div');if(f&&s.note)f.textContent='Delta Desk · markets · quotes: '+s.note+'. Nothing here is investment advice.'}).catch(function(){});
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');$('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>'+esc(window.__src);var f=document.querySelector('footer .wrap div');if(f&&s.note)f.textContent='Delta Desk · markets · quotes: '+s.note+'. Nothing here is investment advice.'}).catch(function(){});
   route();
   setInterval(function(){if(document.hidden)return;if(view==='stocks'||view==='heatmap'){get('/markets/indices').then(renderStrip).catch(offline);loadIndex()}else if(['futures','etf','forex','watchlist','options'].indexOf(view)>=0)loaders[view]()},3000);
 })();

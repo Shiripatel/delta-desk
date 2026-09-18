@@ -7,82 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="/static/design.css">
 <link rel="stylesheet" href="/static/ai.css">
 <style>
-:root{
-  --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
-  --line:#DEDEDE; --line-2:#C4C4C4; --fill:#F4F4F4; --fill-2:#EAEAEA;
-  --accent:#F386A1; --accent-deep:#D45BB6;
-  --good:#008300; --bad:#e34948; --warn:#c98500; --s1:#2a78d6; --s2:#eb6834;
-  --dn3:#e34948; --dn2:#f0a3a3; --dn1:#f9dcdc; --flat:#EAEAEA; --up1:#d9efd9; --up2:#9fd49f; --up3:#008300;
-  --mono:"JetBrains Mono","Fragment Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:"Host Grotesk","Helvetica Neue",Arial,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-    --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-    --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
-    --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-  --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-  --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
-  --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
-  color-scheme:dark;
-}
-:root[data-safe="1"]{ --up1:#dbe8f9; --up2:#9cc0ee; --up3:#2a78d6; --good:#2a78d6 }
-@media (prefers-color-scheme: dark){ :root[data-safe="1"]:not([data-theme="light"]){ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 } }
-:root[data-theme="dark"][data-safe="1"]{ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 }
 
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink)}
-body{font:300 13px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-button,select{font:inherit;color:inherit;background:none;border:0}
-button{cursor:pointer}
-button:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.num{font-variant-numeric:tabular-nums}
-.wrap{max-width:1360px;margin:0 auto;border-inline:1px solid var(--line)}
-.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.tag{display:inline-block;font-size:10.5px;letter-spacing:.06em;padding:2px 6px;border:1px solid var(--line-2);color:var(--ink-2);border-radius:2px;white-space:nowrap}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--line-2);vertical-align:middle;margin-right:6px}
-.dot.on{background:var(--good);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 .up{color:var(--good)}.dn{color:var(--bad)}.muted{color:var(--ink-3)}
 
-/* ---- header: one row, three zones, everything 56px tall and vertically centred ---- */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:56px;padding:0 20px}
-.brand{display:flex;align-items:center;gap:10px;justify-self:start}
-.brand b{font:600 15px/1 var(--sans);letter-spacing:-.01em}
-.brand .tag{margin-left:2px}
-.nav{display:flex;align-items:center;gap:2px;justify-self:center;border:1px solid var(--line);border-radius:3px;padding:2px}
-.nav a{font-size:12px;color:var(--ink-2);padding:6px 14px;border-radius:2px;white-space:nowrap}
-.nav a:hover{color:var(--ink)}
-.nav a[aria-current]{background:var(--ink);color:var(--bg)}
-.status{display:flex;align-items:center;gap:8px;justify-self:end}
-.status > *{display:inline-flex;align-items:center;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:3px;font-size:11px;color:var(--ink-2);white-space:nowrap;background:var(--bg)}
-.status .num{color:var(--ink)}
-.status button{cursor:pointer}
-.status button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-/* ---- ticker strip under the header ---- */
-.ticker{display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
-.ticker::-webkit-scrollbar{display:none}
-.ticker a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;padding:9px 16px;border-right:1px solid var(--line);font-size:12px}
-.ticker a:hover{background:var(--fill)}
-.ticker .n{color:var(--ink-2);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-.ticker .v{color:var(--ink)}
-.ticker .c{font-size:11px}
-.ticker .src{margin-left:auto;padding:9px 16px;font-size:11px;color:var(--ink-3);white-space:nowrap;border-left:1px solid var(--line);border-right:0}
-
 /* ---- hero ---- */
-section{border-bottom:1px solid var(--line)}
 .hero{display:grid;grid-template-columns:1.25fr 1fr;align-items:stretch}
 .hero > div{padding:34px 20px 26px;min-width:0}
 .hero .left{border-right:1px solid var(--line)}
@@ -97,16 +28,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .zones .g i{background:var(--good)}.zones .a i{background:var(--warn)}.zones .r i{background:var(--bad)}
 .zones .c{font-size:11px;color:var(--ink-3)}
 .asof{margin-top:12px;font-size:11.5px;color:var(--ink-3)}
-/* ---- universe tabs ---- */
-.tabs{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line)}
-.tabs button{padding:11px 18px;border-right:1px solid var(--line);font-size:12px;color:var(--ink-2);white-space:nowrap}
-.tabs button[aria-pressed="true"]{color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent-deep)}
-.tabs .meta{margin-left:auto;padding:11px 20px;font-size:11px;color:var(--ink-3);white-space:nowrap}
 /* ---- radar block ---- */
-.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:10px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.sec-head h2{margin:0;font:300 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
-.sec-head h2 i{font-style:normal;color:var(--ink-3);margin-right:10px}
-.sec-head .meta{font-size:11px;color:var(--ink-3)}
 .rgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)}
 .rgrid > div{min-width:0}
 .rgrid .left{border-right:1px solid var(--line)}
@@ -120,14 +42,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .side td{padding:6px 0;border-bottom:1px solid var(--line)}
 .side td.num,.side th.num{text-align:right}
 .side .block{margin-top:18px}
-/* ---- ranking ---- */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{font-weight:400;text-align:left;color:var(--ink-3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-th button{color:inherit;letter-spacing:inherit;text-transform:inherit;font-size:inherit;padding:0}
-td{padding:7px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-td.num,th.num{text-align:right}
-tbody tr:hover td{background:var(--fill)}
 .more{display:block;width:100%;padding:12px;text-align:center;font-size:12px;color:var(--ink-2);border-top:1px solid var(--line)}
 .more:hover{color:var(--ink);background:var(--fill)}
 /* ---- how it works ---- */
@@ -137,20 +51,15 @@ tbody tr:hover td{background:var(--fill)}
 .how b{display:block;font:600 14px/1.2 var(--sans);margin-bottom:6px}
 .how b::before{content:"✢ ";color:var(--accent-deep)}
 .how span{font-size:12px;color:var(--ink-2)}
-.note{padding:10px 20px;font-size:11.5px;color:var(--ink-2)}
-footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 20px;font-size:11px;color:var(--ink-3)}
 @media (max-width:1000px){
-  .top .wrap{grid-template-columns:1fr auto;height:auto;padding:10px 16px;row-gap:8px}
-  .nav{grid-column:1 / -1;justify-self:stretch;overflow-x:auto}
-  .status .clock{display:none}
   .hero,.rgrid{grid-template-columns:1fr}.hero .left,.rgrid .left{border-right:0;border-bottom:1px solid var(--line)}.how{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">AI RADAR</span></div>
-  <nav class="nav"><a href="/" aria-current="page">radar</a><a href="#ranking">ranking</a><a href="/markets">markets</a><a href="/desk">desk</a></nav>
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">HOME · AI RADAR</span></div>
+  <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/markets">Markets</a><a href="/desk">Agents</a></nav>
   <div class="status">
     <span id="feedName" title="quote and history source"><span class="dot" id="feedDot"></span>connecting</span>
     <span class="clock num" id="clock">—</span>

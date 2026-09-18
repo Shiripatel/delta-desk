@@ -2,32 +2,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="/static/design.css">
 <link rel="stylesheet" href="/static/watchlist.css">
 <style>
-:root{
-  --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
-  --line:#DEDEDE; --line-2:#C4C4C4; --fill:#F4F4F4; --fill-2:#EAEAEA;
-  --accent:#F386A1; --accent-deep:#D45BB6;
-  --s1:#2a78d6; --s2:#eb6834;            /* calls / puts */
-  --good:#008300; --bad:#e34948; --warn:#c98500;
-  --mono:"JetBrains Mono","Fragment Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:"Host Grotesk","Helvetica Neue",Arial,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-    --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-    --s1:#3987e5; --s2:#d95926; --good:#3fb950; --bad:#e66767; --warn:#e0a100;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
-  --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424;
-  --s1:#3987e5; --s2:#d95926; --good:#3fb950; --bad:#e66767; --warn:#e0a100;
-  color-scheme:dark;
-}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font:300 13px/1.5 var(--mono);-webkit-font-smoothing:antialiased;padding-inline:0}
@@ -208,7 +185,7 @@ footer b{display:block;font:600 14px/1 var(--sans);color:var(--ink);margin-botto
   <div class="wrap">
     <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">DD.FNO.0S1</span></div>
     <nav class="nav" aria-label="Sections">
-      <a href="/">radar</a><a href="/markets">markets</a><a href="#pipeline">pipeline</a><a href="#signals">signals</a><a href="#market">market</a><a href="#positions">positions</a><a href="#log">log</a>
+      <a href="/">Home</a><a href="/markets">Markets</a><a href="/desk" aria-current="page">Agents</a><a href="#pipeline">pipeline</a><a href="#signals">signals</a><a href="#market">market</a><a href="#positions">positions</a><a href="#log">log</a>
     </nav>
     <div class="tools">
       <div class="tool">Clock Tool 1.1<strong id="clock" class="num">—</strong></div>
