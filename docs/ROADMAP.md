@@ -11,11 +11,11 @@ green, README or `docs/` touched if behaviour changed, no secrets in the diff.
 
 | day | deliverable | done when |
 |---|---|---|
-| 1 | Repo on GitHub, CI (lint, tests, page scripts), Dockerfile, branch protection on `main` | first green run on GitHub Actions |
-| 2 | Upstox login job: OAuth code exchange, token stored in `.env`, daily refresh script, `deltadesk login upstox` | token obtained on a real account, expiry handled |
-| 3 | Upstox instrument master loader: download `complete.json.gz`, map NIFTY/BANKNIFTY chain, index and futures keys | `deltadesk instruments --feed upstox` prints today's chain tokens |
-| 4 | Upstox WebSocket V3 adapter: protobuf decode, `Tick` mapping, reconnect and resubscribe | ticks flow into `FeedAgent` during market hours; `/markets/options` shows the real chain |
-| 5 | Upstox quote provider for the markets page (REST quotes, 500 keys per call, 3 s poll) plus `ltpc` WebSocket for the watchlist | heat map and watchlist move with the real market |
+| 1 ✅ | Repo on GitHub, CI (lint, tests, page scripts), Dockerfile, branch protection on `main` | first green run on GitHub Actions |
+| 2 ✅ code | Upstox login job: OAuth code exchange, token cached under `data/`, `deltadesk login upstox` | token obtained on a real account, expiry handled |
+| 3 ✅ | Upstox instrument master loader (`NSE.json.gz`, validated against the live file), chain, index and futures keys | `deltadesk instruments` prints today's chain tokens |
+| 4 ✅ code | Upstox WebSocket V3 adapter via the SDK streamer: `Tick` mapping, auto-reconnect | ticks flow into `FeedAgent` during market hours; `/markets/options` shows the real chain (verify on a live session) |
+| 5 ✅ code | Upstox REST quote provider for the markets page and watchlists (500 keys per call, 2 s cache); Kite-style watchlist pane on both pages | heat map and watchlist move with the real market (verify on a live session) |
 
 ## Sprint 2 · Days 6–10 · persistence and replay
 

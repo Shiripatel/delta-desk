@@ -49,6 +49,20 @@ official constituent CSVs into `data/constituents/`). Hand-maintained inputs liv
 
 Execution stays in paper mode until backtest and calibration numbers justify live routing.
 
+## Live data with Upstox (free)
+
+1. Open an Upstox account (free) and create an API app at https://account.upstox.com/developer/apps
+   with redirect URL `http://127.0.0.1:8765/upstox/callback`. Put the key and secret in `.env`
+   (see `.env.example`) and set `DD_FEED=upstox`.
+2. `uv sync --extra upstox`, then every trading day: `uv run deltadesk login upstox` (browser login,
+   token cached under `data/` until 03:30 IST next day).
+3. `uv run deltadesk instruments` shows what the desk will subscribe to (index, VIX, near future,
+   weekly chain around ATM: about 90 keys, inside the free limit). `uv run deltadesk serve` then runs
+   the desk on the live chain and the markets page on live quotes.
+
+The watchlist pane on the left of both pages (search with Ctrl+K, multiple named lists, live quotes)
+is served from `static/` and stored in `data/watchlist.json`.
+
 ## Feeds
 
 Quotes on the markets page come from `deltadesk/markets/quotes.py`. Synthetic by default; the module

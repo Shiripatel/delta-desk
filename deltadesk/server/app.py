@@ -9,6 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from deltadesk.markets import universe
 from deltadesk.markets.service import MarketsService
@@ -33,6 +34,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         task.cancel()
 
     app = FastAPI(title="Delta Desk", lifespan=lifespan)
+    app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
     # ---- pages ----------------------------------------------------------------------------
     @app.get("/")

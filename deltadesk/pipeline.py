@@ -60,6 +60,10 @@ class Pipeline:
         instruments = await self.feed.instruments(self.s.underlying)
         await self.feed.subscribe([i.token for i in instruments])
         self.feed_agent = FeedAgent(self.s, self.feed, instruments)
+        lots = [i.lot_size for i in instruments if i.kind.value in ("CE", "PE") and i.lot_size > 1]
+        if lots and lots[0] != self.s.lot_size:
+            self._emit("log", f"feed: lot size {lots[0]} from instrument master (config said {self.s.lot_size})")
+            self.s.lot_size = lots[0]
         self.prev_bars = await self.feed.history(self.s.underlying)
         day = datetime.now(UTC).date()
         self.plan = self.planner.step(day, self.prev_bars)

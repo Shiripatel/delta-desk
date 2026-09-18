@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="/static/watchlist.css">
 <style>
 :root{
   --bg:#FEFEFE; --ink:#1E1E1E; --ink-2:#5A5A5A; --ink-3:#8A8A8A;
@@ -218,6 +219,7 @@ footer b{display:block;font:600 14px/1 var(--sans);color:var(--ink);margin-botto
     </div>
   </div>
 </header>
+<div class="shell"><aside class="wlpane" id="wlPane" aria-label="watchlist"></aside><div class="center">
 
 <main class="wrap">
 
@@ -368,6 +370,8 @@ footer b{display:block;font:600 14px/1 var(--sans);color:var(--ink);margin-botto
 
 </main>
 
+</div></div>
+<button class="wltoggle" id="wlToggle">watchlist</button>
 <footer>
   <div class="wrap">
     <div><b>Delta Desk</b>Version 0.01 · paper mode · F&amp;O agent orchestration prototype<br>All figures on this page are illustrative examples. Nothing here is investment advice.</div>
@@ -623,3 +627,4 @@ footer b{display:block;font:600 14px/1 var(--sans);color:var(--ink);margin-botto
   connect();
 })();
 </script>
+<script src="/static/watchlist.js"></script>

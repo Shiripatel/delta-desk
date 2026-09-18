@@ -48,12 +48,32 @@ def _build(args) -> Pipeline:
     return Pipeline(settings, feed, on_event=_printer(args.verbose))
 
 
+def _instruments(args) -> None:
+    settings = Settings(**({"underlying": args.underlying} if args.underlying else {}))
+    feed = make_feed(settings)
+
+    async def go():
+        await feed.connect()
+        rows = await feed.instruments(settings.underlying)
+        for i in rows:
+            print(f"{i.token:32s} {i.symbol:30s} {i.kind.value:4s} {i.strike or '':>8} {i.expiry or ''} lot {i.lot_size}")
+        print(f"{len(rows)} instruments from feed {feed.name}")
+        await feed.close()
+
+    asyncio.run(go())
+
+
 def main() -> None:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
     p = argparse.ArgumentParser(prog="deltadesk")
     sub = p.add_subparsers(dest="cmd", required=True)
+    lg = sub.add_parser("login", help="broker login; caches today's access token under data/")
+    lg.add_argument("broker", choices=["upstox"])
+    lg.add_argument("--no-browser", action="store_true")
+    im = sub.add_parser("instruments", help="show what the feed would subscribe to today")
+    im.add_argument("--underlying", default=None)
     for name in ("run", "serve"):
         q = sub.add_parser(name)
         q.add_argument("--scenario", default="range", choices=["range", "trend_up", "trend_down"])
@@ -68,6 +88,15 @@ def main() -> None:
             q.add_argument("--port", type=int, default=8000)
             q.add_argument("--host", default="127.0.0.1")
     args = p.parse_args()
+    if args.cmd == "login":
+        from dotenv import load_dotenv
+        load_dotenv()
+        from deltadesk.auth.upstox_login import login
+        login(open_browser=not args.no_browser)
+        return
+    if args.cmd == "instruments":
+        _instruments(args)
+        return
     pipe = _build(args)
     if args.cmd == "run":
         asyncio.run(pipe.run(args.cycles))

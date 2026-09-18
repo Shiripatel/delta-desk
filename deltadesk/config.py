@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     feed: Literal["synthetic", "replay", "kite", "upstox", "dhan"] = "synthetic"
     mode: Literal["paper", "live"] = "paper"
     underlying: str = "NIFTY"
-    lot_size: int = 75
+    lot_size: int = 65                  # NIFTY lot; overridden by the instrument master at start
     strike_step: float = 50.0
     strikes_each_side: int = 20
     cycle_seconds: float = 2.0

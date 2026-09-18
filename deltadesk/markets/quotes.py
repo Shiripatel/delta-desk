@@ -165,6 +165,13 @@ class SyntheticQuotes:
 
 
 def make_quotes(feed: str) -> QuoteProvider:
-    if feed == "synthetic":
-        return SyntheticQuotes()
-    raise NotImplementedError(f"quote provider for feed {feed!r} is a phase-1 task; see the module docstring")
+    """Quote provider matching DD_FEED. Falls back to synthetic with a warning when a broker is not ready."""
+    if feed == "upstox":
+        try:
+            from deltadesk.markets.quotes_upstox import UpstoxQuotes
+            return UpstoxQuotes()
+        except Exception as e:  # noqa: BLE001 - missing token or SDK: keep the page alive
+            print(f"warning: Upstox quotes unavailable ({e}); using synthetic quotes")
+    elif feed != "synthetic":
+        print(f"warning: no quote provider for feed {feed!r}; using synthetic quotes")
+    return SyntheticQuotes()
