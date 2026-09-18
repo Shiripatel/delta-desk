@@ -46,4 +46,5 @@
   var tg=document.getElementById('wlToggle');if(tg)tg.addEventListener('click',function(){pane.dataset.open=pane.dataset.open==='1'?'0':'1'});
 
   load();setInterval(function(){if(!document.hidden)load()},3000);
+  get('/markets/source').then(function(s){var c=$('#wlCnt');c.title=s.note||'';if(s.delay_min)c.textContent+=' · '+s.delay_min+'m delayed'}).catch(function(){});
 })();

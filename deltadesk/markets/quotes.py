@@ -166,6 +166,9 @@ class SyntheticQuotes:
 
 def make_quotes(feed: str) -> QuoteProvider:
     """Quote provider matching DD_FEED. Falls back to synthetic with a warning when a broker is not ready."""
+    if feed == "yahoo":
+        from deltadesk.markets.quotes_yahoo import YahooQuotes
+        return YahooQuotes()
     if feed == "upstox":
         try:
             from deltadesk.markets.quotes_upstox import UpstoxQuotes

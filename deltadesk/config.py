@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="DD_", env_file=".env", extra="ignore")
 
     feed: Literal["synthetic", "replay", "kite", "upstox", "dhan"] = "synthetic"
+    quotes: Literal["synthetic", "yahoo", "upstox"] | None = None   # markets-page quotes; defaults to the feed
     mode: Literal["paper", "live"] = "paper"
     underlying: str = "NIFTY"
     lot_size: int = 65                  # NIFTY lot; overridden by the instrument master at start

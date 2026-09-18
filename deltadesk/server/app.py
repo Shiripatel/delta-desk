@@ -86,13 +86,19 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             pipeline.bus.unsubscribe("*", q)
 
     # ---- markets: real-time quotes ----------------------------------------------------------
+    @app.get("/markets/source")
+    async def m_source():
+        q = markets.quotes
+        return JSONResponse({"name": q.name, "delay_min": getattr(q, "delay_min", 0), "note": getattr(q, "note", ""),
+                             "errors": len(getattr(q, "errors", {}) or {}), "history": markets.ai.history.name})
+
     @app.get("/markets/indices")
     async def m_indices():
-        return JSONResponse(markets.indices())
+        return JSONResponse(await asyncio.to_thread(markets.indices))
 
     @app.get("/markets/index/{code}")
     async def m_index(code: str):
-        out = markets.index(code)
+        out = await asyncio.to_thread(markets.index, code)
         if out is None:
             raise HTTPException(404, f"unknown index {code}")
         return JSONResponse(out)
@@ -110,22 +116,22 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.get("/markets/futures")
     async def m_futures():
-        return JSONResponse(markets.futures())
+        return JSONResponse(await asyncio.to_thread(markets.futures))
 
     @app.get("/markets/etf")
     async def m_etf():
-        return JSONResponse(markets.etfs())
+        return JSONResponse(await asyncio.to_thread(markets.etfs))
 
     @app.get("/markets/forex")
     async def m_forex():
-        return JSONResponse(markets.forex())
+        return JSONResponse(await asyncio.to_thread(markets.forex))
 
     # ---- markets: tools --------------------------------------------------------------------
     @app.get("/markets/screener")
     async def m_screener(index: str | None = None, sector: str | None = None, chg_min: float | None = None,
                          chg_max: float | None = None, px_min: float | None = None, px_max: float | None = None,
                          sort: str = "change_pct", desc: bool = True, limit: int = 100):
-        return JSONResponse(markets.screener(index, sector, chg_min, chg_max, px_min, px_max, sort, desc, limit))
+        return JSONResponse(await asyncio.to_thread(markets.screener, index, sector, chg_min, chg_max, px_min, px_max, sort, desc, limit))
 
     @app.get("/markets/search")
     async def m_search(q: str = ""):
@@ -133,7 +139,15 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.get("/markets/watchlist")
     async def m_watchlist():
-        return JSONResponse(markets.watchlists())
+        return JSONResponse(await asyncio.to_thread(markets.watchlists))
+
+    @app.get("/markets/ai")
+    async def m_ai(index: str | None = None, limit: int = 50):
+        return JSONResponse(await asyncio.to_thread(markets.ai_rank, index, limit))
+
+    @app.get("/markets/radar")
+    async def m_radar(index: str | None = None, days: int = 5):
+        return JSONResponse(await asyncio.to_thread(markets.ai_radar, index, max(2, min(10, days))))
 
     @app.post("/markets/watchlist/{name}")
     async def m_watchlist_create(name: str):

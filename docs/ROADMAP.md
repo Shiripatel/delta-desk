@@ -67,6 +67,11 @@ green, README or `docs/` touched if behaviour changed, no secrets in the diff.
 | 29 | Mumbai VPS deployment with Docker, systemd, static IP, backups of `data/` | desk survives a reboot |
 | 30 | Review: paper versus expectations, calibration, decide on first live week | written decision in `docs/` |
 
+## Done outside the plan
+
+* Yahoo Finance delayed quotes (`DD_QUOTES=yahoo`): real prices on the markets page with no account.
+* AI ranking table and AI radar with 5-day replay, on a rules model v0 (to be replaced by Sprint 3 calibration).
+
 ## Standing backlog (pull in when a day frees up)
 
 * Bank Nifty and Sensex chains alongside NIFTY (multi-underlying pipeline).

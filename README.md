@@ -49,6 +49,23 @@ official constituent CSVs into `data/constituents/`). Hand-maintained inputs liv
 
 Execution stays in paper mode until backtest and calibration numbers justify live routing.
 
+## Real prices without an account: Yahoo Finance (15 min delayed)
+
+Set `DD_QUOTES=yahoo` in `.env` (or run `DD_QUOTES=yahoo uv run deltadesk serve`). The markets page,
+heat map, screener and watchlists then show real NSE prices for stocks, ETFs, the main indices and
+currency pairs, about 15 minutes late, with a "delayed" label in the header. Index futures and the
+option chain are not on Yahoo, so the desk itself stays on the synthetic market until a broker feed is
+configured. NIFTY Midcap Select has no Yahoo symbol and shows no quote.
+
+## AI ranking and radar
+
+Two views on the markets page rank the universe with a transparent rules model (v0) over three months
+of daily closes: **AI picks** (rank, past win rate of the score over 10-day windows, score ring 1 to 10,
+3-month forecast, 3-month sparkline, low-risk ring, add to watchlist) and **radar** (a bullseye with score
+10 at the centre and 1 at the rim, sectors as spokes, dot size by index weight, and a play button that
+replays the last five sessions). With `DD_QUOTES=yahoo` the history is real; otherwise synthetic. The
+rules are in `deltadesk/markets/ai_rank.py` and are the placeholder that Sprint 3's calibration replaces.
+
 ## Live data with Upstox (free)
 
 1. Open an Upstox account (free) and create an API app at https://account.upstox.com/developer/apps

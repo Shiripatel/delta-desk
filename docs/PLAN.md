@@ -103,6 +103,7 @@ pushes them (Upstox does).
 | Angel One SmartAPI | free | 3 connections, 1,000 tokens each | 20-depth on WS 2.0 | free | Adequate for one underlying's chain. |
 | Fyers API v3 | free | small per-connection symbol cap in older docs (50); verify current | yes | free; partners with TrueData | |
 | TrueData, Global Datafeeds | paid vendor, roughly ₹1.5k to 2.5k per month retail (verify) | full-market, tick-by-tick | yes | yes, deep history | Exchange-authorised vendors, independent of your broker. Use for research history and as a second feed for redundancy. |
+| Yahoo Finance (unofficial chart endpoint) | free, no account | one request per symbol, cached 60 s | none | daily history | About 15 min delayed. Stocks, ETFs, main indices, currency pairs. No futures, no option chain. Wired as `DD_QUOTES=yahoo` for the markets page. |
 | nseindia.com scraping | free | none | none | none | Against NSE terms, rate-limited, breaks often. Not for production. |
 
 Recommendation:

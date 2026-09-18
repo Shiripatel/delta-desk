@@ -8,6 +8,7 @@ from datetime import date
 
 from deltadesk.markets import calendar as cal
 from deltadesk.markets import ipo, universe
+from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
 from deltadesk.markets.watchlist import Watchlist
@@ -15,8 +16,9 @@ from deltadesk.markets.watchlist import Watchlist
 
 class MarketsService:
     def __init__(self, quotes: QuoteProvider | None = None, watchlist: Watchlist | None = None,
-                 news: NewsService | None = None) -> None:
+                 news: NewsService | None = None, ai: AiRanker | None = None) -> None:
         self.quotes = quotes or SyntheticQuotes()
+        self.ai = ai or AiRanker(SyntheticHistory())
         self.watchlist = watchlist or Watchlist()
         self.news = news or NewsService()
         universe.load_cached()
@@ -171,6 +173,12 @@ class MarketsService:
     @staticmethod
     def flows() -> dict:
         return cal.flows()
+
+    def ai_rank(self, index: str | None = None, limit: int = 50) -> dict:
+        return self.ai.rank(index, limit)
+
+    def ai_radar(self, index: str | None = None, days: int = 5) -> dict:
+        return self.ai.radar(index, days)
 
     def headlines(self, force: bool = False) -> dict:
         return self.news.headlines(force=force)
