@@ -43,7 +43,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.get("/desk")
     async def desk():
-        return FileResponse(ROOT / "index.html")
+        return FileResponse(ROOT / "agents.html")
+
+    @app.get("/prototype")
+    async def prototype():
+        return FileResponse(ROOT / "prototype" / "index.html")
 
     @app.get("/markets")
     async def markets_page():

@@ -16,7 +16,8 @@ new shared thing, add it to `design.css` and use it from every page.
 |---|---|---|
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
 | `/markets` | `markets.html` | Markets |
-| `/desk` | `index.html` | Agents |
+| `/desk` | `agents.html` | Agents |
+| `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is the segmented control in the header, same three items on every page, `aria-current="page"`
 on the current one. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
@@ -36,7 +37,9 @@ on the current one. Section anchors go in the page body (tabs, `.sec-head`), not
 `<header class="top"><div class="wrap">` with three zones in one 56px row:
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
 2. `.nav` segmented control (Home · Markets · Agents),
-3. `.status` pills of equal height: data source with a `.dot`, clock (`.clock`), colour-safe toggle, and on the Agents page the paper/live `.seg` switch.
+3. `.status` pills of equal height: data source with a `.dot`, clock (`.clock`), colour-safe toggle, and on the Agents page the paper/live `.seg` switch and the `.kill` button.
+
+The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
 
 Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEXT 50, SENSEX, VIX) with the data source at the right end.
 

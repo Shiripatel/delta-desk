@@ -89,7 +89,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section id="radar">
   <div class="tabs" id="tabs">
-    <button data-ix="NIFTY50" aria-pressed="true">NIFTY 50</button><button data-ix="NIFTYNEXT50">NEXT 50</button><button data-ix="BANKNIFTY">BANK</button><button data-ix="FINNIFTY">FIN SERVICE</button><button data-ix="MIDCPNIFTY">MIDCAP SELECT</button><button data-ix="">ALL</button>
+    <button data-ix="NIFTY50" aria-pressed="true">NIFTY 50</button><button data-ix="BANKNIFTY">BANK NIFTY</button><button data-ix="SENSEX">SENSEX</button><button data-ix="">ALL</button>
     <span class="meta" id="rdMeta">—</span>
   </div>
   <div class="rgrid">
@@ -109,7 +109,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 </section>
 
 <section id="ranking">
-  <div class="sec-head"><h2><i>[02]</i>ranking · <span id="rkIdx">NIFTY 50</span></h2><span class="meta" id="aiMeta">—</span></div>
+  <div class="sec-head"><h2><i>[02]</i>top 10 · <span id="rkIdx">NIFTY 50</span></h2><span class="meta" id="aiMeta">—</span></div>
   <div class="tbl-wrap"><table class="ai">
     <thead id="aiHead"><tr><th class="num">rank</th><th>company</th><th>sector</th><th class="num"><button data-k="win_rate">past win rate<br><small>10d · last 3M</small></button></th><th class="num"><button data-k="score" data-dir="desc">AI score</button></th><th class="num"><button data-k="forecast_3m">forecast 3M</button></th><th class="num"><button data-k="ret_3m">past 3M</button></th><th>chart · 3M</th><th class="num"><button data-k="risk">low risk</button></th><th class="num"><button data-k="weight">wt %</button></th></tr></thead>
     <tbody id="aiBody"></tbody>
@@ -141,7 +141,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
   safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
 
-  var index='NIFTY50',limit=25,names={NIFTY50:'NIFTY 50',NIFTYNEXT50:'NIFTY NEXT 50',BANKNIFTY:'NIFTY BANK',FINNIFTY:'NIFTY FIN SERVICE',MIDCPNIFTY:'NIFTY MIDCAP SELECT','':'ALL INDICES'};
+  var index='NIFTY50',limit=10,names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX','':'ALL INDICES'};
   function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
     $('#zBuy').innerHTML='<i></i>'+b;$('#zHold').innerHTML='<i></i>'+h;$('#zSell').innerHTML='<i></i>'+s;$('#zoneIdx').textContent=names[index]}
   var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
@@ -150,7 +150,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   function loadAll(){$('#rkIdx').textContent=names[index];radar.load(index);rank.load(index,limit);breadth()}
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-ix]');if(!b)return;index=b.dataset.ix;
     Array.prototype.forEach.call(document.querySelectorAll('#tabs button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});
-  $('#more').addEventListener('click',function(){limit=limit===25?1000:25;this.textContent=limit===25?'show all':'show top 25';rank.load(index,limit)});
+  $('#more').addEventListener('click',function(){limit=limit===10?1000:10;this.textContent=limit===10?'show all':'show top 10';rank.load(index,limit)});
   function breadth(){if(!index){$('#breadth').textContent='pick one index for breadth';return}get('/markets/index/'+index).then(function(d){var b=d.breadth;
     $('#breadth').innerHTML='<span class="up">'+b.advances+' advancing</span> · <span class="dn">'+b.declines+' declining</span> · '+b.unchanged+' flat'+(d.quote?'<br><span class="muted">'+names[index]+' '+fmt(d.quote.ltp)+' · '+pct(d.quote.change_pct)+'</span>':'')}).catch(function(){})}
   var order=['NIFTY50','BANKNIFTY','FINNIFTY','NIFTYNEXT50','SENSEX','INDIAVIX'];

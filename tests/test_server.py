@@ -20,10 +20,11 @@ def test_pages_and_assets():
         home = c.get("/").text
         assert "AI RADAR" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
         desk = c.get("/desk").text
-        assert "agent pipeline" in desk and 'id="wlPane"' in desk
+        assert "agent pipeline" in desk and 'id="pipe"' in desk and "/static/design.css" in desk and "wlPane" not in desk
         mk = c.get("/markets").text
-        assert "DDAI.radar(" in mk and "DDAI.ranking(" in mk and "/static/ai.css" in mk
-        for path in ("/static/ai.js", "/static/ai.css", "/static/watchlist.js", "/static/watchlist.css"):
+        assert "DDAI.radar(" in mk and "DDAI.ranking(" in mk and "/static/ai.css" in mk and "wlPane" not in mk
+        assert 'data-ix="SENSEX"' in home and "limit=10" in home
+        for path in ("/static/ai.js", "/static/ai.css", "/static/design.css", "/static/watchlist.js", "/static/watchlist.css"):
             assert c.get(path).status_code == 200, path
         src = c.get("/markets/source").json()
         assert src["name"] == "synthetic" and src["history"] == "synthetic"

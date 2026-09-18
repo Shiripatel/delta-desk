@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <link rel="stylesheet" href="/static/design.css">
-<link rel="stylesheet" href="/static/watchlist.css">
 <link rel="stylesheet" href="/static/ai.css">
 <style>
 
@@ -144,7 +143,6 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
     </div>
   </div></div>
 </div></header>
-<div class="shell"><aside class="wlpane" id="wlPane" aria-label="watchlist"></aside><div class="center">
 
 <main class="wrap">
 
@@ -346,8 +344,6 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 
 </main>
 
-</div></div>
-<button class="wltoggle" id="wlToggle">watchlist</button>
 <footer><div class="wrap"><div><b>Delta Desk</b> · markets · quotes are synthetic until a broker feed is configured (DD_FEED). Nothing here is investment advice.</div><div>DD.MKT.0S2</div></div></footer>
 
 <script>
@@ -526,7 +522,6 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
   setInterval(function(){if(document.hidden)return;if(view==='stocks'||view==='heatmap'){get('/markets/indices').then(renderStrip).catch(offline);loadIndex()}else if(['futures','etf','forex','watchlist','options'].indexOf(view)>=0)loaders[view]()},3000);
 })();
 </script>
-<script src="/static/watchlist.js"></script>
 <script src="/static/ai.js"></script>
 </body>
 </html>

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="/static/design.css">
+<style>
+/* pipeline strip */
+.pipe{display:grid;grid-template-columns:repeat(8,1fr)}
+.node{padding:12px 14px;border-right:1px solid var(--line);min-width:0}
+.node:last-child{border-right:0}
+.node .nm{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.node .nm b{font-weight:500}
+.node .nm .ver{font-size:10px;color:var(--ink-3)}
+.node .sum{margin-top:6px;font-size:11.5px;color:var(--ink-2);min-height:2.6em;overflow:hidden;text-overflow:ellipsis}
+.node .ms{margin-top:6px;font-size:10.5px;color:var(--ink-3)}
+.node.err{background:color-mix(in srgb,var(--bad) 8%,transparent)}
+/* two columns */
+.two{display:grid;grid-template-columns:1.1fr 1fr}
+.two > div{min-width:0}
+.two .left{border-right:1px solid var(--line)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+.kv div{padding:10px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.kv .v{font:500 17px/1.1 var(--sans);letter-spacing:-.02em;margin-top:4px}
+.chart{padding:12px 14px}
+.chart svg{width:100%;height:auto;display:block;font:300 10.5px var(--mono)}
+.chart .grid line{stroke:var(--line)}
+.chart text{fill:var(--ink-3)}
+.chart .zone.f{fill:var(--warn);opacity:.10}.chart .zone.b{fill:var(--s1);opacity:.10}.chart .zone.p{fill:var(--good);opacity:.06}
+.chart .zone.armed{opacity:.28}
+.chart .lvl{stroke:var(--ink-3);stroke-dasharray:3 4}
+.chart .px{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
+.zones{font-size:12px}
+.zones div{display:grid;grid-template-columns:22px 1fr auto auto;gap:10px;align-items:center;padding:7px 14px;border-bottom:1px solid var(--line)}
+.zones .id{font-weight:500}
+.zones .rng{color:var(--ink-3);font-size:11px}
+.zones .st{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.zones .st.armed{color:var(--accent-deep)}
+.zones .st.fired{color:var(--good)}
+/* decision card */
+pre{margin:0;font:300 12px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word}
+.code{background:var(--fill);border-bottom:1px solid var(--line);padding:14px}
+.k{color:var(--ink-3)}.s{color:var(--accent-deep)}.n{color:var(--s1)}.b{color:var(--good)}
+.conf{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.conf .big{font:500 34px/1 var(--sans);letter-spacing:-.03em}
+.conf .barx{flex:1;height:6px;background:var(--fill-2);position:relative;border-radius:1px}
+.conf .barx i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:1px}
+.conf .barx em{position:absolute;top:-4px;height:14px;width:1px;background:var(--accent-deep)}
+.act button{padding:4px 9px;border:1px solid var(--line-2);border-radius:2px;font-size:11px;margin-right:4px}
+.act button.ok{border-color:var(--good);color:var(--good)}
+.cpill{display:inline-flex;align-items:center;gap:6px}
+.cpill i{display:inline-block;width:40px;height:5px;background:var(--fill-2);border-radius:1px;position:relative}
+.cpill i b{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:1px}
+.cpill.low i b{background:var(--warn)}
+.side{font-size:12px}
+.side.sell{color:var(--bad)}.side.buy{color:var(--good)}
+.why{max-width:38ch;font-size:11.5px;color:var(--ink-2)}
+/* positions + log */
+.kill{padding:0 12px;border:1px solid var(--bad);color:var(--bad);border-radius:3px;font-size:11px;letter-spacing:.06em}
+.kill:hover{background:var(--bad);color:#fff}
+.log{max-height:280px;overflow:auto;font-size:11.5px}
+.log div{display:grid;grid-template-columns:70px 90px 1fr;gap:12px;padding:5px 14px;border-bottom:1px solid var(--line)}
+.log .t{color:var(--ink-3)}
+.log .a{color:var(--accent-deep)}
+.pnl.up{color:var(--good)}.pnl.dn{color:var(--bad)}
+@media (max-width:1100px){.pipe{grid-template-columns:repeat(4,1fr)}.node:nth-child(4){border-right:0}.node:nth-child(-n+4){border-bottom:1px solid var(--line)}}
+@media (max-width:900px){.two{grid-template-columns:1fr}.two .left{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">AGENTS</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/markets">Markets</a><a href="/desk" aria-current="page">Agents</a></nav>
+  <div class="status">
+    <span class="seg" id="mode"><button id="mPaper" aria-pressed="true">PAPER</button><button id="mLive" class="live" aria-pressed="false">LIVE</button></span>
+    <span id="feedName"><span class="dot" id="feedDot"></span>connecting</span>
+    <span class="clock num" id="clock">—</span>
+    <button class="kill" id="kill" title="Flatten every position and disarm all zones">✕ kill switch</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+
+<section id="pipeline">
+  <div class="sec-head"><h2><i>[01]</i>agent pipeline · <span id="und">NIFTY</span></h2><span class="meta" id="pipeMeta">waiting for the first cycle</span></div>
+  <div class="pipe" id="pipe"></div>
+</section>
+
+<section>
+  <div class="two">
+    <div class="left">
+      <div class="sec-head"><h2><i>[02]</i>today's plan &amp; market read</h2><span class="meta" id="planMeta">—</span></div>
+      <div class="kv" id="kv"></div>
+      <div class="chart" id="chart"></div>
+      <div class="zones" id="zones"></div>
+    </div>
+    <div>
+      <div class="sec-head"><h2><i>[03]</i>latest typed decision</h2><span class="meta" id="decisionTag">none yet · the sniper is waiting</span></div>
+      <div class="conf"><span class="big num" id="confBig">—</span><span class="barx"><i id="confBar" style="width:0"></i><em id="confThr" style="left:65%"></em></span><span class="muted" style="font-size:11px">threshold <span id="thr">0.65</span></span></div>
+      <div class="code"><pre id="decisionJson">{ }</pre></div>
+      <div class="sec-head"><h2><i>[04]</i>signals today</h2><span class="meta" id="sigMeta">0 emitted</span></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>id</th><th>structure</th><th class="num">conf</th><th>why</th><th>state</th></tr></thead>
+        <tbody id="sigBody"><tr><td colspan="5" class="muted">no signals yet</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><h2><i>[05]</i>positions &amp; P&amp;L</h2><span class="meta" id="posMeta">paper account</span></div>
+  <div class="kv" id="pnlKv"></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>instrument</th><th class="num">qty</th><th class="num">avg</th><th class="num">ltp</th><th class="num">Δ</th><th class="num">Θ / day</th><th class="num">P&amp;L</th></tr></thead>
+    <tbody id="posBody"><tr><td colspan="7" class="muted">no open positions · the sniper is waiting</td></tr></tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="sec-head"><h2><i>[06]</i>agent log</h2><span class="meta">newest last · <span id="logCount">0</span> lines</span></div>
+  <div class="log" id="logBox"></div>
+</section>
+</main>
+
+<footer><div class="wrap"><div>Delta Desk · agents · paper mode · every figure comes from the running pipeline. Nothing here is investment advice.</div><div>DD.AGENTS.0S1</div></div></footer>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
+  function hhmmss(iso){var m=/T(\d\d:\d\d:\d\d)/.exec(iso||'');return m?m[1]:''}
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function post(u){return fetch(u,{method:'POST'}).then(function(r){return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+
+  /* log */
+  var box=$('#logBox'),count=0;
+  function log(agent,msg,t){var d=document.createElement('div');d.innerHTML='<span class="t num">'+esc(t||new Date().toTimeString().slice(0,8))+'</span><span class="a">'+esc(agent)+'</span><span>'+esc(msg)+'</span>';
+    box.appendChild(d);while(box.children.length>400)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;$('#logCount').textContent=++count}
+
+  /* pipeline */
+  var AGENTS=['feed','planner','regime','chain','sniper','strategy','risk','exec'],last={};
+  function renderPipe(c){var by={};c.agents.forEach(function(a){by[a.name]=a});
+    $('#pipe').innerHTML=AGENTS.map(function(n){var a=by[n]||last[n];if(a)last[n]=a;var ok=!a||a.ok;
+      return '<div class="node'+(ok?'':' err')+'"><div class="nm"><b>'+n+'.agent</b><span class="ver">'+(a?esc(a.version):'')+'</span></div><div class="sum">'+(a?esc(a.error||a.summary||'idle'):(n==='planner'?'pre-market plan ready':'idle'))+'</div><div class="ms num">'+(a?'<span class="dot '+(ok?'on':'')+'"></span>'+a.ms.toFixed(1)+' ms':'<span class="dot"></span>waiting')+'</div></div>'}).join('');
+    var ok=c.agents.filter(function(a){return a.ok}).length;$('#pipeMeta').textContent='last cycle '+hhmmss(c.ts)+' IST · '+(c.ms/1000).toFixed(2)+' s · '+ok+' / '+c.agents.length+' agents ok'}
+
+  /* plan + chart */
+  var plan=null,snap=null,stats=null,regime=null;
+  function renderPlan(){if(!plan)return;var z=plan.zones;
+    $('#zones').innerHTML=z.map(function(x){var st=x.fired_at?'fired '+hhmmss(x.fired_at):x.armed?'armed':'watching';
+      return '<div><span class="tag">'+esc(x.kind)+'</span><span><span class="id">'+esc(x.id)+'</span> <span class="rng num">'+fmt(x.lo,0)+' – '+fmt(x.hi,0)+' · '+esc(x.structures[0]||'')+'</span></span><span class="rng">'+esc(x.compatible.join(', '))+'</span><span class="st '+(x.fired_at?'fired':x.armed?'armed':'')+'">'+st+'</span></div>'}).join('');
+    $('#planMeta').textContent='PDH '+fmt(plan.pdh,0)+' · PDL '+fmt(plan.pdl,0)+' · CPR '+fmt(plan.bc,0)+'–'+fmt(plan.tc,0)+' · bias '+plan.bias.toLowerCase()}
+  function renderKv(){var s=snap||{},st=stats||{},r=regime||{};
+    var rows=[['spot',s.spot!=null?fmt(s.spot):'—'],['future',s.fut!=null?fmt(s.fut):'—'],['India VIX',s.vix!=null?fmt(s.vix):'—'],['regime',r.regime?esc(r.regime)+' · '+r.p.toFixed(2):'—'],['ATM IV',st.atm_iv!=null?fmt(st.atm_iv*100,1)+' %':'—'],['expected move',st.expected_move_pts!=null?'±'+fmt(st.expected_move_pts,0):'—'],['PCR (OI)',st.pcr_oi!=null?fmt(st.pcr_oi):'—'],['max pain',st.max_pain!=null?fmt(st.max_pain,0):'—']];
+    $('#kv').innerHTML=rows.map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num">'+x[1]+'</div></div>'}).join('')}
+  function renderChart(){if(!snap||!snap.bars_1m||snap.bars_1m.length<2)return;var W=760,H=240,L=54,R=12,T=12,B=24,bars=snap.bars_1m;
+    var lo=Math.min.apply(null,bars.map(function(b){return b.low})),hi=Math.max.apply(null,bars.map(function(b){return b.high}));
+    if(plan){lo=Math.min(lo,plan.pdl);hi=Math.max(hi,plan.pdh)}var pad=(hi-lo)*0.06||10;lo-=pad;hi+=pad;
+    var x=function(i){return L+(i/(bars.length-1))*(W-L-R)},y=function(v){return T+(1-(v-lo)/(hi-lo))*(H-T-B)};
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Today\'s spot with plan levels and zones"><g class="grid">';
+    var step=Math.pow(10,Math.floor(Math.log10(hi-lo)))/2;for(var g=Math.ceil(lo/step)*step;g<hi;g+=step)s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(g)+'" y2="'+y(g)+'"/><text x="'+(L-8)+'" y="'+(y(g)+3.5)+'" text-anchor="end">'+fmt(g,0)+'</text>';
+    s+='</g>';
+    if(plan){plan.zones.forEach(function(z){var k=z.kind==='FADE'?'f':z.kind==='BREAK'?'b':'p';s+='<rect class="zone '+k+(z.armed?' armed':'')+'" x="'+L+'" y="'+y(z.hi)+'" width="'+(W-L-R)+'" height="'+Math.max(1,y(z.lo)-y(z.hi))+'"><title>'+esc(z.id)+'</title></rect>'});
+      [['PDH',plan.pdh],['PDL',plan.pdl],['PDC',plan.pdc]].forEach(function(l){s+='<line class="lvl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(l[1])+'" y2="'+y(l[1])+'"/><text x="'+(W-R)+'" y="'+(y(l[1])-3)+'" text-anchor="end">'+l[0]+' '+fmt(l[1],0)+'</text>'})}
+    var d='';bars.forEach(function(b,i){d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(b.close).toFixed(1)+' '});
+    s+='<path class="px" d="'+d+'"/>';
+    var lab=[0,Math.floor(bars.length/2),bars.length-1];lab.forEach(function(i){s+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="'+(i===0?'start':i===bars.length-1?'end':'middle')+'">'+hhmmss(bars[i].ts).slice(0,5)+'</text>'});
+    s+='</svg>';$('#chart').innerHTML=s}
+
+  /* decisions */
+  var decisions={},threshold=0.65;
+  function hl(obj){return esc(JSON.stringify(obj,null,2)).replace(/&quot;([^&]*)&quot;(?=:)/g,'<span class="k">"$1"</span>').replace(/:\s*&quot;([^&]*)&quot;/g,': <span class="s">"$1"</span>').replace(/:\s*(-?\d+(\.\d+)?)/g,': <span class="n">$1</span>').replace(/:\s*(true|false|null)/g,': <span class="b">$1</span>')}
+  function stateCell(d){if(d.state==='awaiting_approval')return '<span class="act"><button class="ok" data-act="approve">approve</button><button data-act="reject">reject</button></span>';
+    var c={executed:'exec',rejected:'rej',held:'held',vetoed:'rej',expired:'held',approved:'exec'}[d.state]||'held';return '<span class="state '+c+'">'+esc(d.state.replace('_',' '))+'</span>'}
+  function renderDecision(d){decisions[d.id]=d;threshold=d.threshold||threshold;var t=d.trade;
+    var tb=$('#sigBody');if(tb.querySelector('td.muted'))tb.innerHTML='';var tr=tb.querySelector('tr[data-id="'+d.id+'"]');if(!tr){tr=document.createElement('tr');tr.dataset.id=d.id;tb.insertBefore(tr,tb.firstChild)}
+    var legs=t.legs.map(function(l){return l.side+' '+l.lots+'x '+l.symbol+' @ '+l.limit}).join(' · ');
+    tr.innerHTML='<td>'+esc(d.id)+'</td><td><span class="side '+(t.legs[0]&&t.legs[0].side==='BUY'?'buy':'sell')+'">'+esc(t.structure.replace(/_/g,' '))+'</span><br><span class="muted" style="font-size:11px">'+esc(legs)+'</span></td><td class="num"><span class="cpill'+(t.confidence<threshold?' low':'')+'"><i><b style="width:'+Math.round(t.confidence*100)+'%"></b></i>'+t.confidence.toFixed(2)+'</span></td><td class="why">'+esc(t.why)+(d.risk.reasons.length?' <b>veto:</b> '+esc(d.risk.reasons.join('; ')):'')+'</td><td>'+stateCell(d)+'</td>';
+    var all=Object.keys(decisions).map(function(k){return decisions[k]}),n=function(s){return all.filter(function(x){return x.state===s}).length};
+    $('#sigMeta').textContent=all.length+' emitted · '+n('executed')+' executed · '+n('held')+' held · '+n('vetoed')+' vetoed · '+n('awaiting_approval')+' awaiting';
+    $('#decisionTag').textContent=d.id+' · '+d.state.replace('_',' ')+' · valid until '+hhmmss(t.valid_until)+' IST';$('#thr').textContent=threshold;
+    $('#confBig').textContent=t.confidence.toFixed(2);$('#confBar').style.width=Math.round(t.confidence*100)+'%';$('#confThr').style.left=Math.round(threshold*100)+'%';
+    $('#decisionJson').innerHTML=hl({action:t.legs[0]?t.legs[0].side:'',structure:t.structure,legs:t.legs.map(function(l){return l.side+' '+l.lots+'x '+l.symbol+' @ '+l.limit}),lot_size:t.lot_size,stop:t.stop,target:t.target,regime:t.regime,confidence:t.confidence,risk_ok:d.risk.risk_ok,margin_after:Math.round(d.risk.margin_after),max_loss:Math.round(d.risk.max_loss),state:d.state})}
+  $('#sigBody').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;post('/decisions/'+b.closest('tr').dataset.id+'/'+b.dataset.act).then(renderDecision)});
+
+  /* orders */
+  function renderOrders(o){var pnl=o.realised+o.unrealised;
+    $('#pnlKv').innerHTML=[['day P&L',(pnl>=0?'+':'−')+'₹'+fmt(Math.abs(Math.round(pnl)),0),cls(pnl)],['realised','₹'+fmt(Math.round(o.realised),0),cls(o.realised)],['unrealised','₹'+fmt(Math.round(o.unrealised),0),cls(o.unrealised)],['open positions',o.positions.length,''],['fills today',o.fills_today.length,'']].map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num pnl '+x[2]+'">'+x[1]+'</div></div>'}).join('');
+    $('#posMeta').textContent=o.mode+' account · as of '+hhmmss(o.ts)+' IST';
+    $('#posBody').innerHTML=o.positions.length?o.positions.map(function(q){var pl=(q.ltp-q.avg)*q.qty;return '<tr><td>'+esc(q.symbol)+' · '+(q.qty>0?'long':'short')+'</td><td class="num">'+(q.qty>0?'+':'')+q.qty+'</td><td class="num">'+fmt(q.avg)+'</td><td class="num">'+fmt(q.ltp)+'</td><td class="num">'+q.delta.toFixed(2)+'</td><td class="num">'+fmt(Math.round(q.theta_day*q.qty),0)+'</td><td class="num pnl '+cls(pl)+'">'+(pl>=0?'+':'')+fmt(Math.round(pl),0)+'</td></tr>'}).join(''):'<tr><td colspan="7" class="muted">no open positions · the sniper is waiting</td></tr>';
+    $('#mPaper').setAttribute('aria-pressed',String(o.mode==='paper'));$('#mLive').setAttribute('aria-pressed',String(o.mode==='live'))}
+  $('#kill').addEventListener('click',function(){if(!confirm('Flatten all positions and disarm every zone?'))return;post('/kill').then(function(d){if(d&&d.positions)renderOrders(d);log('risk','KILL SWITCH sent')})});
+  $('#mLive').addEventListener('click',function(){log('exec','live routing is not enabled in this build (paper only)')});
+
+  /* stream */
+  var handlers={log:function(m){var a=/^(planner|sniper|feed|regime|chain|strategy|risk|exec)\b/.exec(m);log(a?a[1]:(/^S-\d+/.test(m)?'exec':'desk'),String(m).replace(/^([a-z]+): /,''))},
+    plan:function(p){plan=p;renderPlan();renderChart()},snapshot:function(s){snap=s;$('#und').textContent=s.underlying;renderKv();renderChart()},regime:function(r){regime=r;renderKv()},chain:function(c){stats=c;renderKv()},
+    trigger:function(t){log('sniper',t.zone.id+' fired · q='+t.quality.toFixed(2)+' · '+t.why);if(plan)renderPlan()},
+    decision:renderDecision,orders:renderOrders,cycle:function(c){renderPipe(c);if(plan)renderPlan()}};
+  function connect(){var ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/stream');
+    ws.onopen=function(){$('#feedName').innerHTML='<span class="dot on" id="feedDot"></span>stream connected'};
+    ws.onmessage=function(ev){try{var m=JSON.parse(ev.data);var h=handlers[m.topic];if(h)h(m.data)}catch(e){}};
+    ws.onclose=function(){$('#feedName').innerHTML='<span class="dot" id="feedDot"></span>reconnecting';setTimeout(connect,3000)}}
+  connect();
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/markets#/stocks"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src" id="src"></span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker();var el=$('#src');if(el)el.textContent=window.__src}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},5000);
+})();
+</script>
+</body>
+</html>
