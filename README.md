@@ -4,6 +4,7 @@ Sniper-style F&O (futures and options) trading desk run by a pipeline of agents.
 index options, paper mode by default. The desk prepares a plan from the previous session, arms
 opportunity zones, and fires one typed, risk-checked decision when the market reaches them.
 
+* `docs/STATUS.md` — **start here**: where we are, what is real, what is next. Updated at the end of every session.
 * `docs/PLAN.md` — the build plan: principles, sniper workflow, agent topology, live-data API
   comparison, SEBI retail-algo constraints, enterprise checklist, phases.
 * `home.html` — the landing page at `/`: AI radar and the top-10 ranking (NIFTY 50, BANK NIFTY, SENSEX, all).

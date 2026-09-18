@@ -1,0 +1,58 @@
+# Delta Desk — where we are (start here tomorrow)
+
+Updated: 2026-09-18 (end of day 1). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+
+## Resume in three commands
+
+```
+cd C:\Users\shiri\Downloads\delta-desk
+uv run pytest -q                                   # 35 tests
+set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120     # then open http://127.0.0.1:8000/
+```
+
+Tell Claude: "read docs/STATUS.md and continue with the next item" — this file is the memory.
+
+## What exists (all on the shared design system, five themes, Home · News · IPO · Agents · Sniper)
+
+| page | route | what it does | data today |
+|---|---|---|---|
+| Home | `/` | AI radar (buy / hold-no-trade / sell bands, short-term vs long-term mode, replay 5 sessions, trails), top-10 ranking, NIFTY 50 / BANK NIFTY / SENSEX selector, zone counts, index ticker | Yahoo, 15 min delayed; rules model v0 |
+| News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
+| IPO | `/ipo` | open / upcoming / closed & listed tables, counts, mainboard / SME filter, subscription bar and listing gain when present | `data/ipo.json` (example rows until it exists) |
+| Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals only for 3 example files |
+| Sniper | `/sniper` | F&O desk: scope tiles, today's range with plan levels and zones, chain around ATM, target board (distance in pts and σ), the shot with approve / reject, agents strip, risk meters, positions, signals, log | synthetic market (paper); Upstox adapter written, not yet run live |
+| Chart | `/chart#SYMBOL/3m` | TradingView widget by default (real-time NSE, all indicators, drawing tools); Desk chart fallback (our bars, EMA/RSI/volume) | TradingView / Yahoo |
+| Markets | `/markets` | the full market-analysis surface (overview, stocks, options, futures, ETF, forex, screener, heat map, earnings, flows, calendar, trending, watchlist). Not in the nav for now | Yahoo / files |
+
+Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/markets/`; the F&O pipeline in `deltadesk/agents/` + `pipeline.py`; feeds in `deltadesk/feeds/` (synthetic, kite, upstox); tests in `tests/`.
+
+## What is real and what is placeholder
+
+* Real: Yahoo quotes and bars (delayed), RSS headlines, NSE constituent CSVs, Upstox instrument master, TradingView chart, all maths (Greeks, indicators, scoring rules).
+* Placeholder, clearly tagged in the UI: IPO rows, earnings dates, FII/DII flows, holidays, fundamentals (3 example files). Each reads a `data/*.json` file the moment one exists; schemas are in the module docstrings.
+* Rules v0 everywhere an "AI" label appears (radar score, council votes, news impact, assistant). Designed so a trained model or an LLM slots in behind the same endpoints.
+
+## Decisions taken with the user
+
+* Product focus: Home (radar + table), News, IPO, Agents, Sniper. Markets stays alive but unlinked.
+* Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
+* Look: light grey Mist theme default, quiet header, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere.
+* Radar: three bands; short term = daily momentum, long term = weekly momentum + fundamentals.
+* Work rhythm: one deliverable per day, tests + ruff green, commit and push each day, update this file at the end of each session.
+
+## Next up, in order (pick from the top)
+
+1. **IPO tracker, Chittorgarh-style but concise:** mainboard / SME tabs, subscription by QIB / NII / retail, GMP as a labelled crowd signal, allotment and listing dates, performance table (listing gain vs today). Then an **IPO agent** that gives a stance from DRHP facts (fresh vs OFS, dilution, use of proceeds, P/E vs peers), subscription momentum, GMP trend and news sentiment. Needs a data job for NSE/BSE subscription and DRHP filings; GMP hand-fed with a caveat.
+2. **Fundamentals source** so the council's right half lights up for every stock (NSE annual results or a licensed API into `data/fundamentals/<SYMBOL>.json`).
+3. **Options agents + per-agent accuracy badges** on the council (IV rank, OI walls, max pain, expected move; track each agent's past calls and let weights learn).
+4. **LLM behind the same endpoints:** news impact analyser, "why" text, assistant. Needs an API key; interface already isolated (`Analyzer`, `DeskAssistant`).
+5. **Alerts:** Telegram on verdict flips, new bad-impact story on a watchlist stock, sniper decisions, kill switch.
+6. **Upstox live session:** create the Upstox app, `deltadesk login upstox`, run the sniper on the real chain during market hours; then the recorder and replay (roadmap days 6–7).
+7. Radar trails toggle, compare two stocks on the council, mobile pass, GitHub Pages demo.
+
+## Known rough edges
+
+* NIFTY Midcap Select has no Yahoo symbol (no quote). India 10-year G-sec yield has no free source.
+* News tagging is alias-based; obscure company names may go untagged. Impact lexicon is deliberately simple.
+* TradingView widget needs internet; its NSE data is real-time but layouts are per TradingView login.
+* Branch protection on `main` is unavailable on GitHub Free for private repos.
