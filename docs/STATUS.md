@@ -20,7 +20,7 @@ Tell Claude: "read docs/STATUS.md and continue with the next item" — this file
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
 | IPO | `/ipo` | Groww-style clean card table: pill tabs Open / Upcoming / Closed / Listed / Tracked with counts, IPO type filter, monograms, issue price, min. bid, subscription bar, listing gain; Track button keeps a personal list | `data/ipo.json` (example rows until it exists) |
 | Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals only for 3 example files |
-| Sniper | `/sniper` | F&O desk: scope tiles, today's range with plan levels and zones, chain around ATM, target board (distance in pts and σ), the shot with approve / reject, agents strip, risk meters, positions, signals, log | synthetic market (paper); Upstox adapter written, not yet run live |
+| Sniper | `/sniper` | five-step flow with a live stepper (Plan → Watch → Arm → Shoot → Manage): levels and zones, scope tiles, range chart with zones, chain around ATM, target board (pts and σ), the shot with approve / reject, risk meters, positions, agents, log | synthetic market (paper); Upstox adapter written, not yet run live |
 | Forex | `/forex` | INR crosses, world majors, a colour map of pairs, currency-strength meter, all pairs table; every pair links to its chart | Yahoo, delayed |
 | Beta | `/beta` | waitlist sign-up (name, email, phone, interests, experience, WhatsApp consent) into `data/waitlist.jsonl`; free alerts: price move, price above/below, council verdict flip, bad news; WhatsApp Cloud API or Telegram when configured, dry-run log otherwise; evaluated every 60 s | files under `data/` |
 | Legal | `/legal` | disclaimer, risk disclosure, terms, privacy, data sources, contact; the same footer is injected on every page | static |
@@ -39,7 +39,8 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. Markets stays alive but unlinked.
 * Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
-* Look: light grey Mist theme default, quiet header, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
+* Look: light grey Mist theme default, filled dark header band with "Join beta" as the only call to action (no beta strip on pages), compact hero written in LLM / AI-agent terms, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
+* Sniper page is a five-step flow (Plan → Watch → Arm → Shoot → Manage) with a live stepper; keep any new agent output inside one of those steps.
 * Radar: three bands; short term = daily momentum, long term = weekly momentum + fundamentals.
 * Work rhythm: one deliverable per day, tests + ruff green, commit and push each day, update this file at the end of each session.
 

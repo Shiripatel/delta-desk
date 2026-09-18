@@ -27,7 +27,7 @@ def _client():
 def test_pages_and_assets():
     with _client() as c:
         home = c.get("/").text
-        assert "AI RADAR" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
+        assert "LLM agents" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
         for path, marker in (("/news", 'id="flow"'), ("/chart", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
             assert marker in c.get(path).text, path
         assert 'href="/news">News</a>' in home and 'href="/sniper">Sniper</a>' in home
@@ -60,7 +60,7 @@ def test_pages_and_assets():
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text
-        assert 'id="targets"' in sn and 'id="pipe"' in sn and 'id="oc"' in sn
+        assert 'id="stepper"' in sn and 'id="targets"' in sn and 'id="pipe"' in sn and 'id="oc"' in sn
         cn = c.get("/markets/council?symbol=HDFCBANK&horizon=1h").json()
         assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
         mk = c.get("/markets").text

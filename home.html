@@ -16,11 +16,11 @@
 
 /* ---- hero ---- */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;align-items:stretch}
-.hero > div{padding:18px 20px 16px;min-width:0}
+.hero > div{padding:14px 20px 12px;min-width:0}
 .hero .left{border-right:1px solid var(--line)}
-h1{margin:0 0 8px;font:500 clamp(24px,3vw,36px)/1.08 var(--sans);letter-spacing:-.03em;text-wrap:balance}
+h1{margin:0 0 6px;font:600 clamp(20px,2.2vw,26px)/1.15 var(--sans);letter-spacing:-.02em;text-wrap:balance}
 h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent) 62%)}
-.hero p{max-width:62ch;margin:0;font-size:12.5px;color:var(--ink-2)}
+.hero p{max-width:60ch;margin:0;font-size:12.5px;color:var(--ink-2)}
 .zones{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);margin-top:6px}
 .zones div{padding:8px 12px;border-right:1px solid var(--line)}
 .zones div:last-child{border-right:0}
@@ -30,8 +30,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .zones .c{font-size:10.5px;color:var(--ink-3)}
 .asof{margin-top:8px;font-size:11px;color:var(--ink-3)}
 /* ---- radar block ---- */
-.betabar-in{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 20px;font-size:12px;color:var(--ink-2);flex-wrap:wrap}
-.betabar-in b{color:var(--ink);font-weight:500}
 .rd-ctl .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
 .rd-ctl .seg button{border:0;border-right:1px solid var(--line);border-radius:0;padding:6px 10px}
 .rd-ctl .seg button:last-child{border-right:0}
@@ -78,9 +76,9 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section class="hero">
   <div class="left">
-    <div class="eyebrow">[01] &nbsp;today's field</div>
-    <h1>Which stocks sit in the <em>buy zone</em> today?</h1>
-    <p>Every stock is scored 1 to 10 and placed on the radar: 10 at the centre, 1 at the rim, three bands: buy, hold or no trade, sell. Short term reads three months of daily price action; long term reads a year of weekly bars and blends in fundamentals where we have them. Rules model, not advice.</p>
+    <div class="eyebrow">[01] &nbsp;AI radar · agentic desk for Indian markets</div>
+    <h1>LLM agents scan the index. <em>Buy zone</em>, hold, sell: today.</h1>
+    <p>An AI agent scores every stock 1 to 10 and places it on the radar. Switch short term (technical) or long term (fundamentals), replay five sessions. Not advice.</p>
   </div>
   <div>
     <div class="eyebrow"><span id="zoneIdx">NIFTY 50</span> · today</div>
@@ -92,8 +90,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
     <div class="asof" id="asof">—</div>
   </div>
 </section>
-
-<section class="betabar"><div class="betabar-in"><span><b>Private beta.</b> We are onboarding in small batches. Leave your email and get free WhatsApp or Telegram alerts when a stock moves, a verdict flips or bad news lands.</span><a class="btn primary" href="/beta">Join the beta</a></div></section>
 
 <section id="radar">
   <div class="tabs" id="tabs">
@@ -126,7 +122,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 </section>
 
 <section>
-  <div class="sec-head"><h2><i>[03]</i>how the score works</h2><span class="meta">rules model v0 · replaced by a calibrated model as the journal grows</span></div>
+  <div class="sec-head"><h2><i>[03]</i>how the score works</h2><span class="meta">rules model v0 · <a href="/desk" style="text-decoration:underline">agent council</a> · <a href="/sniper" style="text-decoration:underline">F&amp;O sniper</a></span></div>
   <div class="how">
     <div><b>AI score 1–10</b><span>Momentum over 3 months, 1 month and 2 weeks, plus how clean the trend is (R² of the price path), minus a penalty for deep drawdowns.</span></div>
     <div><b>Past win rate</b><span>The same rule was scored on every day of the last three months. Win rate is how often the direction it called was right ten sessions later.</span></div>

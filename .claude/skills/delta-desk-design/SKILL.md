@@ -24,7 +24,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
-The header is a quiet band (`--head`, slightly off the ground per theme); status items on the right are borderless text. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 
@@ -83,7 +83,7 @@ validated. Shared marks live in `static/ai.css` / `static/ai.js`: score rings (`
 
 ## Copy
 
-* Sentence case, short labels, no exclamation marks. Numbers are Indian-formatted (`en-IN`), rupees with ₹.
+* Copy speaks in the product's terms: "LLM agents", "AI agent", "council", "radar", "sniper"; heroes are two lines at most. Sentence case, short labels, no exclamation marks. Numbers are Indian-formatted (`en-IN`), rupees with ₹.
 * Every page's `<footer>` is replaced by `static/nav.js` with the standard legal footer (disclaimer line, SEBI note, copyright, links to `/legal`). Leave an empty `<footer><div class="wrap"></div></footer>` in new pages. The header gets a "Join beta" pill the same way. Every page still ends with "Nothing here is investment advice." Anything modelled or sampled is tagged
   `example data`, `computed`, `delayed` or `rules model v0` in the UI.
 
