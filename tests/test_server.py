@@ -57,6 +57,7 @@ def test_pages_and_assets():
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
+        assert c.get("/ipo").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/nav.js").headers["cache-control"]
         gl = c.get("/global").text
         assert 'id="map"' in gl and 'id="regions"' in gl and 'href="/global" aria-current="page"' in gl
         g = c.get("/markets/global").json()

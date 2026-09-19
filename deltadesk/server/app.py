@@ -80,6 +80,17 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     app = FastAPI(title="Delta Desk", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
 
+    @app.middleware("http")
+    async def cache_policy(request, call_next):
+        """Pages always revalidate (a stale cached page shows an old nav); static assets may be cached for a minute."""
+        resp = await call_next(request)
+        path = request.url.path
+        if path.startswith("/static/"):
+            resp.headers["Cache-Control"] = "public, max-age=60"
+        elif resp.headers.get("content-type", "").startswith("text/html"):
+            resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
     # ---- pages ----------------------------------------------------------------------------
     @app.get("/")
     async def home():
