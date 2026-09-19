@@ -74,13 +74,13 @@ class MarketsService:
 
     def indicators(self) -> list[dict]:
         """India indices plus the global indicators people watch: rupee, gold, silver, crude, crypto, US yields, world indices."""
-        keys = ["NIFTY50", "BANKNIFTY", "SENSEX", "INDIAVIX"] + [g[0] for g in universe.GLOBAL]
+        keys = ["NIFTY50", "BANKNIFTY", "SENSEX", "INDIAVIX"] + list(universe.INDICATORS)
         q = self.quotes.quotes(keys)
         out = []
         for k in keys[:4]:
             ix = universe.INDICES[k]
             out.append({"key": k, "name": ix.name, "group": "india", "unit": "index", "decimals": 2, "quote": q[k].json() if k in q else None})  # noqa: E501
-        for g in universe.GLOBAL:
+        for g in (universe.GLOBAL_BY_KEY[k] for k in universe.INDICATORS):
             out.append({"key": g[0], "name": g[1], "group": g[5], "unit": g[4], "decimals": g[3], "quote": q[g[0]].json() if g[0] in q else None})  # noqa: E501
         return out
 
@@ -209,6 +209,28 @@ class MarketsService:
     @staticmethod
     def watchlist_presets() -> list[dict]:
         return presets()
+
+    def global_market(self) -> dict:
+        """World map read model: key indices placed by city, grouped by region, plus futures, commodities, FX, bonds, crypto."""
+        keys = [m[0] for m in universe.WORLD_MAP] + [k for _, ks in universe.GLOBAL_SECTIONS for k in ks]
+        q = self.quotes.quotes(sorted(set(keys)))
+
+        def item(k: str) -> dict:
+            if k in universe.INDICES:
+                name, dec, unit = universe.INDICES[k].name, 2, "index"
+            elif k in universe.GLOBAL_BY_KEY:
+                g = universe.GLOBAL_BY_KEY[k]
+                name, dec, unit = g[1], g[3], g[4]
+            elif k in universe.FX_WORLD_BY_KEY:
+                f = universe.FX_WORLD_BY_KEY[k]
+                name, dec, unit = f[1], f[3], f"{f[4]}/{f[5]}"
+            else:
+                name, dec, unit = k, 2, ""
+            return {"key": k, "name": name, "decimals": dec, "unit": unit, "quote": q[k].json() if k in q else None}
+        markers = [{**item(m[0]), "city": m[1], "lat": m[2], "lon": m[3], "region": m[4]} for m in universe.WORLD_MAP]
+        return {"regions": [{"code": c, "name": n} for c, n in universe.REGIONS], "markers": markers,
+                "sections": [{"name": n, "items": [item(k) for k in ks]} for n, ks in universe.GLOBAL_SECTIONS],
+                "source": self.quotes.name, "delay_min": getattr(self.quotes, "delay_min", 0)}
 
     # ---- calendars, flows, ipo, news ---------------------------------------------------------
     def ipos(self) -> dict:

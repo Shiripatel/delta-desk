@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Global market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:18px 20px 28px}
+.page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
+.page .lead{font-size:12.5px;color:var(--ink-2);margin:0 0 14px}
+.toolrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolrow .meta{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.maprow{display:grid;grid-template-columns:1fr 300px;gap:12px}
+.maprow > *{min-width:0}
+.map{position:relative;padding:8px}
+.map svg{width:100%;height:auto;display:block;font:500 11px var(--sans)}
+.map .land{fill:var(--ink-3);opacity:.28}
+.map .mk{cursor:pointer}
+.map .mk circle{stroke:var(--card);stroke-width:1.5}
+.map .mk.up circle{fill:var(--good)}.map .mk.dn circle{fill:var(--bad)}.map .mk.flat circle{fill:var(--ink-3)}
+.map .mk.dim{opacity:.28}
+.map .mk text{fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:3px;stroke-linejoin:round}
+.map .mk text.c{font-weight:600}
+.map .mk.up text.c{fill:var(--good)}.map .mk.dn text.c{fill:var(--bad)}
+.map .mk.dim text{display:none}
+.side h3,.card h3{margin:0;padding:11px 16px;border-bottom:1px solid var(--line);font:600 13px/1.2 var(--sans);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.side h3 span,.card h3 span{font-weight:400;font-size:11px;color:var(--ink-3)}
+.side .row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 16px;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer}
+.side .row:hover{background:var(--fill)}
+.side .row b{font-weight:600;display:block}
+.side .row small{color:var(--ink-3);font-size:11px}
+.side .row .v{text-align:right;font-weight:600}
+.side .row .c{display:block;font-size:11px;font-weight:500}
+.up{color:var(--good)}.dn{color:var(--bad)}
+.sec{margin-top:14px}
+.sec h2{margin:0 0 8px;font:600 14px/1.2 var(--sans)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.cards a{display:block;padding:11px 13px;background:var(--card);border:1px solid var(--line);border-radius:10px;color:inherit}
+.cards a:hover{border-color:var(--ink-3)}
+.cards .n{font-size:11.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cards .v{font:600 16px/1.1 var(--sans);letter-spacing:-.02em;margin-top:5px}
+.cards .c{font-size:11.5px;margin-top:3px;font-weight:500}
+.cards .u{font-size:10.5px;color:var(--ink-3);margin-top:2px}
+.note{font-size:11.5px;color:var(--ink-3);margin-top:14px}
+@media (max-width:900px){.maprow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">GLOBAL</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global" aria-current="page">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+<div class="page">
+  <h1>Global market</h1>
+  <p class="lead">The key indices of each region on one map, then the futures, commodities, currencies, bonds and crypto that move Indian markets overnight. Click anything for its analysis page. Not advice.</p>
+
+  <div class="toolrow"><div class="pills" id="regions"></div><span class="meta" id="meta">—</span></div>
+
+  <div class="maprow">
+    <div class="card map" id="map"></div>
+    <div class="card side"><h3 id="sideTitle">World <span id="sideMeta"></span></h3><div id="side"></div></div>
+  </div>
+
+  <div id="sections"></div>
+  <div class="note" id="note">Quotes from the configured source; world indices and futures are delayed by the same amount as Indian quotes. Nothing here is investment advice.</div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.005?'up':x<-0.005?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+
+  /* ---- a stylised dotted world map: coarse continent outlines rasterised to a dot grid ---- */
+  var LAND=[
+    [[-168,66],[-160,70],[-140,70],[-125,72],[-110,73],[-95,74],[-85,70],[-80,63],[-70,60],[-62,58],[-55,52],[-66,45],[-70,42],[-75,36],[-80,32],[-81,26],[-83,29],[-90,30],[-97,28],[-97,21],[-90,19],[-87,16],[-84,10],[-79,9],[-78,7],[-85,12],[-93,16],[-105,20],[-110,23],[-117,32],[-124,40],[-124,48],[-131,55],[-140,60],[-150,61],[-158,58],[-165,61]],
+    [[-78,7],[-72,12],[-62,11],[-52,5],[-50,0],[-44,-2],[-35,-6],[-38,-13],[-40,-20],[-48,-26],[-53,-34],[-58,-39],[-65,-45],[-68,-52],[-70,-55],[-74,-50],[-74,-40],[-71,-30],[-70,-20],[-76,-14],[-81,-5],[-80,0]],
+    [[-55,60],[-45,60],[-40,65],[-22,70],[-20,76],[-30,83],[-55,82],[-70,78],[-60,72],[-52,65]],
+    [[-9,36],[-9,43],[-2,43],[-4,48],[-1,49],[2,51],[4,53],[9,54],[8,57],[6,58],[5,61],[7,63],[13,66],[16,69],[22,70],[29,71],[33,69],[41,66],[44,68],[60,69],[70,73],[80,73],[100,77],[110,74],[130,72],[150,70],[170,69],[180,66],[180,62],[170,60],[163,60],[160,55],[157,52],[155,57],[150,59],[143,54],[137,48],[133,43],[130,42],[129,38],[129,35],[126,34],[126,38],[122,40],[121,37],[122,31],[120,27],[114,22],[110,20],[108,16],[109,11],[105,9],[104,11],[100,13],[99,8],[103,1],[101,3],[100,6],[98,10],[97,16],[94,20],[90,22],[87,21],[85,19],[80,15],[78,8],[75,10],[73,15],[72,20],[68,23],[62,25],[57,26],[50,30],[48,29],[51,26],[56,26],[58,23],[55,17],[52,16],[45,13],[43,15],[39,21],[35,28],[33,31],[36,36],[30,36],[27,37],[26,40],[23,37],[21,38],[19,40],[18,40],[16,38],[16,40],[12,44],[9,44],[7,43],[3,43],[0,41],[-2,37],[-6,36]],
+    [[-17,15],[-17,21],[-13,28],[-9,32],[-5,36],[10,37],[11,33],[19,31],[25,32],[32,31],[34,28],[37,22],[39,15],[43,11],[51,12],[48,4],[41,-2],[40,-10],[35,-20],[33,-26],[30,-32],[20,-35],[18,-33],[15,-27],[12,-17],[13,-10],[9,-2],[9,4],[5,6],[-2,5],[-8,5],[-13,8],[-17,12]],
+    [[114,-22],[114,-34],[118,-35],[124,-33],[130,-32],[137,-35],[140,-38],[146,-39],[150,-37],[153,-30],[153,-25],[146,-19],[142,-11],[136,-12],[131,-12],[126,-14],[122,-17]],
+    [[130,31],[131,34],[135,34],[140,36],[142,40],[141,45],[145,44],[142,42],[141,38],[137,35],[133,33]],
+    [[-6,50],[-1,51],[2,52],[0,54],[-2,56],[-4,58],[-6,56],[-5,53]],[[-10,52],[-6,52],[-6,55],[-10,54]],
+    [[95,5],[105,-6],[106,-5],[98,3]],[[109,1],[117,7],[119,1],[116,-4],[110,-3]],[[105,-6],[114,-8],[114,-7],[106,-6]],[[131,-1],[141,-3],[150,-10],[140,-9],[134,-4]],[[120,18],[122,18],[126,7],[122,6],[120,14]],
+    [[44,-12],[50,-15],[47,-25],[44,-22]],[[166,-46],[172,-42],[178,-38],[174,-36],[170,-44]],[[-24,64],[-14,65],[-16,66],[-22,66]]];
+  function inside(poly,x,y){var ok=false;for(var i=0,j=poly.length-1;i<poly.length;j=i++){var xi=poly[i][0],yi=poly[i][1],xj=poly[j][0],yj=poly[j][1];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))ok=!ok}return ok}
+  var W=1000,H=430,LON0=-170,LON1=180,LAT0=-56,LAT1=80;
+  function X(lon){return (lon-LON0)/(LON1-LON0)*W}
+  function Y(lat){return (LAT1-lat)/(LAT1-LAT0)*H}
+  var dots='';(function(){var step=2.6;for(var lat=LAT0;lat<=LAT1;lat+=step)for(var lon=LON0;lon<=LON1;lon+=step){for(var k=0;k<LAND.length;k++){if(inside(LAND[k],lon,lat)){dots+='<circle class="land" cx="'+X(lon).toFixed(1)+'" cy="'+Y(lat).toFixed(1)+'" r="2.1"/>';break}}}})();
+
+  var data=null,region='world',ORDER={us:['SPX','NDX','DJI','RUT','VIX','TSX','BVSP'],eu:['FTSE','DAX','CAC','STOXX50'],cn:['SSE','HSI'],jp:['N225','KOSPI','TWII','STI','ASX'],in:['NIFTY50','SENSEX','BANKNIFTY']};
+  var LABEL={SPX:'S&P 500',NDX:'Nasdaq',DJI:'Dow',RUT:'Russell',VIX:'VIX',TSX:'TSX',BVSP:'Bovespa',FTSE:'FTSE',DAX:'DAX',CAC:'CAC',STOXX50:'Stoxx 50',SSE:'Shanghai',HSI:'Hang Seng',N225:'Nikkei',KOSPI:'KOSPI',TWII:'Taiwan',STI:'STI',ASX:'ASX',NIFTY50:'NIFTY',SENSEX:'SENSEX',BANKNIFTY:'BANK NIFTY'};
+  var SHOW={world:['SPX','TSX','BVSP','FTSE','DAX','SSE','HSI','N225','KOSPI','ASX','NIFTY50'],us:['SPX','NDX','DJI','RUT','VIX','TSX','BVSP'],eu:['FTSE','DAX','CAC','STOXX50'],cn:['SSE','HSI'],jp:['N225','KOSPI','TWII','STI','ASX'],in:['NIFTY50','SENSEX','BANKNIFTY']};
+  var OFF={SPX:[8,-8],NDX:[8,6],DJI:[8,20],RUT:[8,34],VIX:[-60,-6],TSX:[8,-22],BVSP:[8,4],FTSE:[-52,-8],DAX:[8,8],CAC:[-44,10],STOXX50:[8,22],SSE:[8,-6],HSI:[8,8],N225:[8,-4],KOSPI:[-52,-12],TWII:[8,10],STI:[8,4],ASX:[8,4],NIFTY50:[8,-8],SENSEX:[8,6],BANKNIFTY:[8,20]};
+  function chg(q){return q&&q.change_pct!=null?q.change_pct:null}
+  function renderMap(){if(!data)return;var show=SHOW[region]||SHOW.world,by={};data.markers.forEach(function(m){by[m.key]=m});
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="world map with key indices">'+dots;
+    var seen={};show.forEach(function(k){var m=by[k];if(!m||!m.city)return;var c=chg(m.quote),o=OFF[k]||[8,4],x=X(m.lon),y=Y(m.lat);var dim=region!=='world'&&m.region!==region;
+      if(!seen[m.city]){seen[m.city]=1;s+='<g class="mk '+(c==null?'flat':c>0.005?'up':c<-0.005?'dn':'flat')+(dim?' dim':'')+'" data-key="'+esc(k)+'"><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5"/></g>'}
+      s+='<g class="mk '+(c==null?'flat':c>0.005?'up':c<-0.005?'dn':'flat')+(dim?' dim':'')+'" data-key="'+esc(k)+'"><text x="'+(x+o[0]).toFixed(1)+'" y="'+(y+o[1]).toFixed(1)+'">'+esc(LABEL[k]||k)+'</text><text class="c" x="'+(x+o[0]).toFixed(1)+'" y="'+(y+o[1]+12).toFixed(1)+'">'+(c==null?'—':pct(c))+'</text></g>'});
+    $('#map').innerHTML=s+'</svg>'}
+  function card(it){var q=it.quote||{},c=chg(q);return '<a href="/analysis#'+esc(it.key)+'/3m"><div class="n">'+esc(it.name)+'</div><div class="v num">'+(q.ltp!=null?fmt(q.ltp,it.decimals):'—')+'</div><div class="c num '+cls(c||0)+'">'+(q.change!=null?(q.change>0?'+':'')+fmt(q.change,it.decimals)+' · ':'')+pct(c)+'</div><div class="u">'+esc(it.unit||'')+'</div></a>'}
+  function renderSide(){if(!data)return;var by={};data.markers.forEach(function(m){by[m.key]=m});var keys=region==='world'?SHOW.world:ORDER[region];var rn=(data.regions.filter(function(r){return r.code===region})[0]||{}).name||'World';
+    $('#sideTitle').innerHTML=esc(rn)+' <span id="sideMeta">'+keys.length+' indices</span>';
+    $('#side').innerHTML=keys.map(function(k){var m=by[k];if(!m)return '';var q=m.quote||{},c=chg(q);return '<div class="row" data-key="'+esc(k)+'"><span><b>'+esc(m.name)+'</b><small>'+esc(m.city)+'</small></span><span class="v num">'+(q.ltp!=null?fmt(q.ltp,m.decimals):'—')+'<span class="c '+cls(c||0)+'">'+(q.change!=null?(q.change>0?'+':'')+fmt(q.change,m.decimals)+' · ':'')+pct(c)+'</span></span></div>'}).join('')}
+  function renderSections(){if(!data)return;var by={};data.markers.forEach(function(m){by[m.key]=m});var keys=region==='world'?SHOW.world:ORDER[region];
+    var html='<div class="sec"><h2>Indices · '+esc((data.regions.filter(function(r){return r.code===region})[0]||{}).name||'World')+'</h2><div class="cards">'+keys.map(function(k){return by[k]?card(by[k]):''}).join('')+'</div></div>';
+    data.sections.forEach(function(sec){html+='<div class="sec"><h2>'+esc(sec.name)+'</h2><div class="cards">'+sec.items.map(card).join('')+'</div></div>'});
+    $('#sections').innerHTML=html}
+  function render(){renderMap();renderSide();renderSections();$$('#regions button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.r===region))});
+    var quoted=data.markers.filter(function(m){return m.quote}).length;$('#meta').textContent=quoted+' of '+data.markers.length+' indices quoted · '+data.source+(data.delay_min?' · ~'+data.delay_min+' min delayed':'')}
+  function load(){get('/markets/global').then(function(d){data=d;if(!$('#regions').children.length)$('#regions').innerHTML=d.regions.map(function(r){return '<button data-r="'+esc(r.code)+'">'+esc(r.name)+'</button>'}).join('');render()}).catch(function(e){$('#meta').textContent='failed: '+e})}
+  $('#regions').addEventListener('click',function(e){var b=e.target.closest('button[data-r]');if(!b)return;region=b.dataset.r;location.hash=region;render()});
+  document.addEventListener('click',function(e){var g=e.target.closest('.mk[data-key],.row[data-key]');if(g)location.href='/analysis#'+encodeURIComponent(g.dataset.key)+'/3m'});
+  var h=location.hash.replace('#','');if(h&&SHOW[h])region=h;
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},10000);
+  load();setInterval(function(){if(!document.hidden)load()},15000);
+})();
+</script>
+</body>
+</html>

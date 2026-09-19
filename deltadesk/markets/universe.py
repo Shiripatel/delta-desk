@@ -189,8 +189,47 @@ GLOBAL = [
     ("DJI", "Dow Jones", "^DJI", 0, "index", "global", 51778.0),
     ("N225", "Nikkei 225", "^N225", 0, "index", "global", 65172.0),
     ("HSI", "Hang Seng", "^HSI", 0, "index", "global", 24805.0),
+    ("RUT", "Russell 2000", "^RUT", 0, "index", "global", 2410.0),
+    ("VIX", "CBOE VIX", "^VIX", 2, "index", "global", 16.4),
+    ("TSX", "S&P/TSX composite", "^GSPTSE", 0, "index", "global", 33090.0),
+    ("BVSP", "Bovespa", "^BVSP", 0, "index", "global", 138200.0),
+    ("FTSE", "FTSE 100", "^FTSE", 0, "index", "global", 9120.0),
+    ("DAX", "DAX 40", "^GDAXI", 0, "index", "global", 24380.0),
+    ("CAC", "CAC 40", "^FCHI", 0, "index", "global", 7810.0),
+    ("STOXX50", "Euro Stoxx 50", "^STOXX50E", 0, "index", "global", 5460.0),
+    ("SSE", "Shanghai composite", "000001.SS", 0, "index", "global", 3890.0),
+    ("KOSPI", "KOSPI", "^KS11", 0, "index", "global", 3410.0),
+    ("TWII", "Taiwan weighted", "^TWII", 0, "index", "global", 25620.0),
+    ("STI", "Straits Times", "^STI", 0, "index", "global", 4310.0),
+    ("ASX", "S&P/ASX 200", "^AXJO", 0, "index", "global", 8850.0),
+    ("ESF", "S&P 500 futures", "ES=F", 0, "index", "futures", 7660.0),
+    ("NQF", "Nasdaq 100 futures", "NQ=F", 0, "index", "futures", 28340.0),
+    ("YMF", "Dow futures", "YM=F", 0, "index", "futures", 51900.0),
+    ("NKDF", "Nikkei 225 futures", "NKD=F", 0, "index", "futures", 65100.0),
+    ("WTI", "WTI crude", "CL=F", 2, "$ / bbl", "commodity", 99.4),
+    ("COPPER", "Copper", "HG=F", 3, "$ / lb", "commodity", 5.12),
+    ("US5Y", "US 5-year yield", "^FVX", 3, "%", "rates", 4.42),
+    ("US30Y", "US 30-year yield", "^TYX", 3, "%", "rates", 5.21),
+    ("SOL", "Solana", "SOL-USD", 2, "$", "crypto", 91.0),
 ]
 GLOBAL_BY_KEY = {g[0]: g for g in GLOBAL}
+# the short list the news ticker and hot-topic strips show (the rest of GLOBAL feeds the Global page)
+INDICATORS = ["USDINR", "DXY", "GOLD", "SILVER", "BRENT", "NATGAS", "BTC", "ETH", "US10Y", "SPX", "NDX", "DJI", "N225", "HSI"]
+# world map: key, city, lat, lon, region
+WORLD_MAP = [
+    ("SPX", "New York", 40.7, -74.0, "us"), ("NDX", "New York", 40.7, -74.0, "us"), ("DJI", "New York", 40.7, -74.0, "us"),
+    ("RUT", "New York", 40.7, -74.0, "us"), ("VIX", "Chicago", 41.9, -87.6, "us"), ("TSX", "Toronto", 43.7, -79.4, "us"),
+    ("BVSP", "São Paulo", -23.5, -46.6, "us"),
+    ("FTSE", "London", 51.5, -0.1, "eu"), ("DAX", "Frankfurt", 50.1, 8.7, "eu"), ("CAC", "Paris", 48.9, 2.3, "eu"), ("STOXX50", "Frankfurt", 50.1, 8.7, "eu"),  # noqa: E501
+    ("SSE", "Shanghai", 31.2, 121.5, "cn"), ("HSI", "Hong Kong", 22.3, 114.2, "cn"),
+    ("N225", "Tokyo", 35.7, 139.7, "jp"), ("KOSPI", "Seoul", 37.6, 127.0, "jp"), ("TWII", "Taipei", 25.0, 121.5, "jp"),
+    ("STI", "Singapore", 1.3, 103.8, "jp"), ("ASX", "Sydney", -33.9, 151.2, "jp"),
+    ("NIFTY50", "Mumbai", 19.1, 72.9, "in"), ("SENSEX", "Mumbai", 19.1, 72.9, "in"), ("BANKNIFTY", "Mumbai", 19.1, 72.9, "in"),
+]
+REGIONS = [("world", "World"), ("us", "United States"), ("eu", "Europe"), ("cn", "China & Hong Kong"), ("jp", "Japan & Asia"), ("in", "India")]  # noqa: E501
+GLOBAL_SECTIONS = [("Index futures", ["ESF", "NQF", "YMF", "NKDF"]), ("Commodities", ["GOLD", "SILVER", "BRENT", "WTI", "COPPER", "NATGAS"]),  # noqa: E501
+                   ("Forex", ["USDINR", "DXY", "EURUSD", "USDJPY", "USDCNY", "GBPUSD"]), ("Bonds", ["US5Y", "US10Y", "US30Y"]),
+                   ("Crypto", ["BTC", "ETH", "SOL"])]
 # world majors: key, name, yahoo symbol, decimals, base, quote, seed
 FX_WORLD = [
     ("EURUSD", "Euro / US dollar", "EURUSD=X", 4, "EUR", "USD", 1.085), ("GBPUSD", "Pound / US dollar", "GBPUSD=X", 4, "GBP", "USD", 1.34),

@@ -16,6 +16,7 @@ new shared thing, add it to `design.css` and use it from every page.
 |---|---|---|
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
 | `/watchlist` | `watchlist.html` | Watchlist |
+| `/global` | `global.html` | Global |
 | `/news` | `news.html` | News (live wire, impact calls, assistant) |
 | `/ipo`, `/ipo/<slug>` | `ipo.html` | IPO |
 | `/analysis` | `analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; the chart is one tab inside it: a single line of closes with range buttons, no third-party widget; `/chart` redirects) |
@@ -25,7 +26,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
-The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. Keep the right side to the minimum: clock, theme, and on the Sniper page the kill switch. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same eight links on every page, in this order: Home, Watchlist, News, IPO, Forex, Global, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: clock, theme, and on the Sniper page the kill switch. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 

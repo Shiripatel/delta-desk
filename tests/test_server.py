@@ -57,6 +57,15 @@ def test_pages_and_assets():
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
+        gl = c.get("/global").text
+        assert 'id="map"' in gl and 'id="regions"' in gl and 'href="/global" aria-current="page"' in gl
+        g = c.get("/markets/global").json()
+        assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
+        assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
+        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global"):
+            body = c.get(page).text
+            for h in ("/watchlist", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper"):
+                assert 'href="' + h + '"' in body, (page, h)
         wl = c.get("/watchlist").text
         assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
         assert c.get("/markets/watchlist/presets").json()[0]["code"] == "NIFTY50"

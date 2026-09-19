@@ -157,6 +157,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def alerts_run():
         return JSONResponse(await asyncio.to_thread(alerts.evaluate))
 
+    @app.get("/global")
+    async def global_page():
+        return FileResponse(ROOT / "global.html")
+
     @app.get("/watchlist")
     async def watchlist_page():
         return FileResponse(ROOT / "watchlist.html")
@@ -288,6 +292,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/watchlist")
     async def m_watchlist():
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
+
+    @app.get("/markets/global")
+    async def m_global():
+        return JSONResponse(await asyncio.to_thread(markets.global_market))
 
     @app.get("/markets/watchlist/presets")
     async def m_watchlist_presets():
