@@ -160,6 +160,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def ipo_page():
         return FileResponse(ROOT / "ipo.html")
 
+    @app.get("/ipo/{slug}")
+    async def ipo_detail_page(slug: str):
+        return FileResponse(ROOT / "ipo_detail.html")
+
     @app.get("/sniper")
     async def sniper():
         return FileResponse(ROOT / "sniper.html")
@@ -345,7 +349,18 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.get("/markets/ipo")
     async def m_ipo():
-        return JSONResponse(markets.ipos())
+        return JSONResponse(await asyncio.to_thread(markets.ipos))
+
+    @app.get("/markets/ipo-performance")
+    async def m_ipo_perf(year: int | None = None, segment: str = ""):
+        return JSONResponse(await asyncio.to_thread(markets.ipo_performance, year, segment))
+
+    @app.get("/markets/ipo/{slug}")
+    async def m_ipo_detail(slug: str):
+        out = await asyncio.to_thread(markets.ipo_detail, slug)
+        if out is None:
+            raise HTTPException(404, f"unknown ipo {slug}")
+        return JSONResponse(out)
 
     @app.post("/markets/refresh-constituents")
     async def m_refresh():

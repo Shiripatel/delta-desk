@@ -57,7 +57,16 @@ def test_pages_and_assets():
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
         ipo = c.get("/ipo").text
-        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'href="/ipo" aria-current="page"' in ipo
+        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'href="/ipo" aria-current="page"' in ipo and 'id="perfBody"' in ipo
+        det = c.get("/ipo/meridian").text
+        assert 'id="timeline"' in det and 'id="agent"' in det and 'id="fin"' in det
+        lst = c.get("/markets/ipo").json()
+        assert lst["stats"]["open"] >= 0 and {"slug", "status", "min_investment"} <= set(lst["entries"][0])
+        d = c.get("/markets/ipo/" + lst["entries"][0]["slug"]).json()
+        assert d["agent"]["model"] == "rules v0" and len(d["agent"]["checks"]) == 5 and len(d["timeline"]) == 6
+        assert c.get("/markets/ipo/nope").status_code == 404
+        perf = c.get("/markets/ipo-performance").json()
+        assert perf["summary"]["count"] == len(perf["rows"]) and "avg_listing_gain" in perf["summary"]
         assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk

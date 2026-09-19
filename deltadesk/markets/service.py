@@ -207,9 +207,18 @@ class MarketsService:
         return {"lists": {name: [row(k) for k in keys_] for name, keys_ in self.watchlist.lists.items()}}
 
     # ---- calendars, flows, ipo, news ---------------------------------------------------------
-    @staticmethod
-    def ipos() -> dict:
-        return ipo.load()
+    def ipos(self) -> dict:
+        return ipo.load(quotes=self.quotes.quotes)
+
+    def ipo_detail(self, slug: str) -> dict | None:
+        try:
+            heads = [{"title": h.get("title", ""), "description": h.get("description", ""), "impact": h.get("impact")} for h in self.news.feed(limit=400)["entries"]]  # noqa: E501
+        except Exception:  # noqa: BLE001 - news is optional for the agent
+            heads = []
+        return ipo.detail(slug, quotes=self.quotes.quotes, headlines=heads)
+
+    def ipo_performance(self, year: int | None = None, segment: str | None = None) -> dict:
+        return ipo.performance(year, segment or None, quotes=self.quotes.quotes)
 
     @staticmethod
     def calendar() -> dict:

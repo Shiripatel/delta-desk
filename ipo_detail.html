@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · IPO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:14px 20px 28px}
+.crumb{font-size:11.5px;color:var(--ink-3);margin-bottom:10px}
+.crumb a{text-decoration:underline}
+/* head */
+.head{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.head .who{display:flex;align-items:center;gap:12px;min-width:0}
+.head .who .logo{width:44px;height:44px;font-size:15px}
+.head .who .logo img{width:44px;height:44px}
+.head h1{margin:0;font:600 20px/1.15 var(--sans);letter-spacing:-.02em}
+.head .sub{font-size:11.5px;color:var(--ink-3);margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.head .act{display:flex;gap:8px;align-items:center}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.facts div{padding:10px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.facts .v{font:600 16px/1.1 var(--sans);letter-spacing:-.02em;margin-top:4px}
+.facts .v small{font:400 11px var(--sans);color:var(--ink-3)}
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(6,1fr);position:relative;padding:16px 16px 14px}
+.tl::before{content:"";position:absolute;left:calc(8.33% + 16px);right:calc(8.33% + 16px);top:29px;height:2px;background:var(--line-2)}
+.tl div{text-align:center;position:relative;padding:0 6px}
+.tl i{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--card);border:2px solid var(--line-2);font-style:normal;font:600 11px var(--sans);color:var(--ink-3);position:relative;z-index:1}
+.tl b{display:block;font:600 11.5px/1.2 var(--sans);margin-top:8px}
+.tl span{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
+.tl .done i{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.tl .today i{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent-deep) 22%,transparent)}
+.tl .today b{color:var(--accent-deep)}
+/* layout */
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:12px}
+.grid2 > *{min-width:0}
+.card{margin-bottom:12px}
+.card h3{margin:0;padding:11px 16px;border-bottom:1px solid var(--line);font:600 13px/1.2 var(--sans);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card h3 span{font-weight:400;font-size:11px;color:var(--ink-3)}
+.body{padding:12px 16px;font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.body p{margin:0 0 8px}
+.kv{display:grid;grid-template-columns:1fr 1fr}
+.kv div{display:flex;justify-content:space-between;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+.kv div:nth-child(odd){border-right:1px solid var(--line)}
+.kv span{color:var(--ink-3)}.kv b{font-weight:600;text-align:right}
+/* subscription */
+.subs div{display:grid;grid-template-columns:110px 1fr 70px;gap:12px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+.subs i{display:block;height:8px;background:var(--fill-2);border-radius:999px;position:relative;overflow:hidden}
+.subs i b{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:999px}
+.subs .t{font-weight:600;text-align:right}
+.subs .total i b{background:var(--ink)}
+/* agent */
+.verdict{display:flex;gap:20px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.verdict .big{font:600 30px/1 var(--display);letter-spacing:-.03em;color:var(--ink)}
+.stance{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:600;font-size:12px}
+.stance.positive{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+.stance.cautious{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.stance.neutral{background:var(--fill-2);color:var(--ink-2)}
+.checks div{display:grid;grid-template-columns:110px 1fr 130px;gap:12px;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+.checks b{font-weight:600}.checks span{color:var(--ink-2)}
+.vbar{position:relative;width:100px;height:6px;background:var(--fill-2);border-radius:999px;display:inline-block;vertical-align:middle}
+.vbar::before{content:"";position:absolute;left:50%;top:-3px;width:1px;height:12px;background:var(--line-2)}
+.vbar i{position:absolute;top:0;bottom:0;border-radius:999px}
+.vbar i.up{left:50%;background:var(--good)}.vbar i.dn{right:50%;background:var(--bad)}
+.checks small{color:var(--ink-3);margin-left:6px}
+/* financials */
+.fin{padding:10px 16px}
+.fin svg{width:100%;height:auto;display:block;font:400 10.5px var(--sans)}
+.fin text{fill:var(--ink-3)}
+.fin .rev{fill:var(--s1)}.fin .pat{fill:var(--ink)}
+.fin .lg{display:flex;gap:14px;font-size:11px;color:var(--ink-3);margin-top:6px}
+.fin .lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+/* two column lists */
+.two{display:grid;grid-template-columns:1fr 1fr}
+.two > div{padding:10px 16px}
+.two > div:first-child{border-right:1px solid var(--line)}
+.two h4{margin:0 0 6px;font:600 12px/1.2 var(--sans)}
+.two h4.s{color:var(--good)}.two h4.r{color:var(--bad)}
+.two ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+.two li{margin:0 0 5px}
+ul.plain{margin:0;padding:10px 16px 10px 32px;font-size:12.5px;color:var(--ink-2)}
+ul.plain li{margin:0 0 5px}
+.nl div{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:9px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+.nl a{font-weight:500}.nl .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+.note{padding:10px 16px;font-size:11.5px;color:var(--ink-3)}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}.head{grid-template-columns:1fr}.tl{grid-template-columns:repeat(3,1fr);row-gap:14px}.tl::before{display:none}.two{grid-template-columns:1fr}.two > div:first-child{border-right:0;border-bottom:1px solid var(--line)}.kv{grid-template-columns:1fr}.kv div:nth-child(odd){border-right:0}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">IPO</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/news">News</a><a href="/ipo" aria-current="page">IPO</a><a href="/forex">Forex</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status"><span class="clock num" id="clock">—</span></div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+<div class="page">
+  <div class="crumb"><a href="/ipo">IPO</a> · <span id="crumb">—</span></div>
+
+  <div class="card">
+    <div class="head">
+      <div class="who"><span id="logo"></span><div><h1 id="nm">—</h1><div class="sub" id="subl"></div></div></div>
+      <div class="act"><button class="btn" id="track">Track</button><a class="btn" id="rhp" href="#" target="_blank" rel="noopener" hidden>RHP</a></div>
+    </div>
+    <div class="facts" id="facts"></div>
+    <div class="tl" id="timeline"></div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="card"><h3>IPO agent <span id="agentMeta">rules v0</span></h3><div class="verdict" id="verdict"><span class="note">loading…</span></div><div class="checks" id="agent"></div><div class="note" id="agentNote"></div></div>
+      <div class="card"><h3>About the company <span id="aboutMeta"></span></h3><div class="body" id="about"></div></div>
+      <div class="card"><h3>Financials <span>₹ crore · from the RHP</span></h3><div class="tbl-wrap flush"><table><thead id="finHead"></thead><tbody id="fin"></tbody></table></div><div class="fin" id="finChart"></div></div>
+      <div class="card"><h3>Strengths and risks <span>as stated in the offer document</span></h3><div class="two"><div><h4 class="s">Strengths</h4><ul id="strengths"></ul></div><div><h4 class="r">Risks</h4><ul id="risks"></ul></div></div></div>
+      <div class="card"><h3>Objectives of the issue</h3><ul class="plain" id="objectives"></ul></div>
+    </div>
+    <div>
+      <div class="card"><h3>Subscription <span id="subMeta">times subscribed</span></h3><div class="subs" id="subs"></div></div>
+      <div class="card"><h3>Issue details</h3><div class="kv" id="details"></div></div>
+      <div class="card"><h3>Key ratios <span>at the top of the band</span></h3><div class="kv" id="kpis"></div></div>
+      <div class="card"><h3>People and managers</h3><div class="kv" id="people"></div></div>
+      <div class="card"><h3>On the wire <span id="newsMeta"></span></h3><div class="nl" id="news"></div></div>
+    </div>
+  </div>
+  <div class="note" id="foot">—</div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dstr(iso){if(!iso)return 'to be announced';var d=new Date(iso+'T00:00:00');return isNaN(d)?esc(iso):d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()}
+  function rupee(v,d){return v==null?'—':'₹'+fmt(v,d==null?2:d)}
+  var slug=decodeURIComponent(location.pathname.split('/').pop()||''),tracked=[];
+  try{tracked=JSON.parse(localStorage.getItem('dd.ipo.tracked')||'[]')}catch(e){}
+  function render(e){document.title='Delta Desk · '+e.name+' IPO';$('#crumb').textContent=e.name;
+    $('#logo').innerHTML=window.DDUI?window.DDUI.logo(e.symbol||e.name,e.name,e.domain):'';$('#nm').textContent=e.name+' IPO';
+    var st={open:'open',upcoming:'upcoming',closed:'closed',listed:'listed'}[e.status]||'';
+    $('#subl').innerHTML='<span class="pill '+(e.segment==='SME'?'warn':'info')+'">'+esc(e.segment)+'</span><span class="pill '+st+'">'+esc(e.status)+'</span><span>'+esc(e.symbol||'')+' · '+esc(e.exchange||'')+' · '+esc(e.sector||'')+(e.example?' · <b>example data, fictional</b>':'')+'</span>';
+    var key=e.symbol||e.name,on=tracked.indexOf(key)>=0;var tb=$('#track');tb.textContent=on?'Tracking':'Track';tb.className='btn'+(on?' on':'');
+    tb.onclick=function(){var i=tracked.indexOf(key);if(i>=0)tracked.splice(i,1);else tracked.push(key);try{localStorage.setItem('dd.ipo.tracked',JSON.stringify(tracked))}catch(x){}render(e)};
+    if(e.docs&&e.docs.rhp){var r=$('#rhp');r.href=e.docs.rhp;r.hidden=false}
+    var band=e.price_lo===e.price_hi?rupee(e.price_hi,0):rupee(e.price_lo,0)+' – '+fmt(e.price_hi,0);
+    var facts=[['Price band',band],['Lot size',fmt(e.lot,0)+'<small> shares</small>'],['Min. investment',rupee(e.min_investment,0)],['Issue size','₹'+fmt(e.issue_size_cr,0)+'<small> cr</small>'],['Bidding',dstr(e.open).replace(' '+new Date().getFullYear(),'')+' – '+dstr(e.close)]];
+    if(e.status==='listed'){facts.push(['Listing price',rupee(e.listing_price)+'<small> '+pct(e.listing_gain_pct)+'</small>']);if(e.current_price!=null)facts.push(['Now',rupee(e.current_price)+'<small class="'+cls(e.current_gain_pct)+'"> '+pct(e.current_gain_pct)+'</small>'])}
+    else if(e.subscribed_x!=null)facts.push(['Subscribed',fmt(e.subscribed_x,2)+'x']);
+    $('#facts').innerHTML=facts.map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num">'+x[1]+'</div></div>'}).join('');
+    $('#timeline').innerHTML=e.timeline.map(function(t,i){return '<div class="'+t.state+'"><i>'+(t.state==='done'?'✓':i+1)+'</i><b>'+esc(t.label)+'</b><span>'+dstr(t.date)+'</span></div>'}).join('');
+    var a=e.agent;$('#verdict').innerHTML='<span class="big num">'+(a.score>0?'+':'')+a.score.toFixed(2)+'</span><span class="stance '+a.stance+'">'+esc(a.stance)+'</span><span>coverage <b>'+(a.coverage*100).toFixed(0)+' %</b></span><span>horizon <b>'+esc(a.horizon)+'</b></span>';
+    $('#agent').innerHTML=a.checks.map(function(c){var s=c.signal||0;return '<div><b>'+esc(c.name)+'</b><span>'+esc(c.reading)+'</span><span><span class="vbar"><i class="'+(s>=0?'up':'dn')+'" style="width:'+(Math.abs(s)*50).toFixed(1)+'%"></i></span><small>'+(c.confidence*100).toFixed(0)+' %</small></span></div>'}).join('');
+    $('#agentNote').textContent=a.note;
+    $('#about').innerHTML='<p>'+esc(e.about||'No description loaded.')+'</p>';$('#aboutMeta').textContent=(e.founded?'founded '+e.founded+' · ':'')+(e.md?esc(e.md):'');
+    var fin=e.financials||[];
+    if(fin.length){$('#finHead').innerHTML='<tr><th>Metric</th>'+fin.map(function(f){return '<th class="num">'+esc(f.fy)+'</th>'}).join('')+'</tr>';
+      $('#fin').innerHTML=[['Revenue','revenue'],['Profit after tax','pat'],['Total assets','assets'],['Net worth','net_worth']].map(function(m){return '<tr><td>'+m[0]+'</td>'+fin.map(function(f){return '<td class="num">'+(f[m[1]]!=null?fmt(f[m[1]],1):'—')+'</td>'}).join('')+'</tr>'}).join('');
+      var W=480,H=150,L=8,B=22,T=10,n=fin.length,mx=Math.max.apply(null,fin.map(function(f){return Math.max(f.revenue||0,f.pat||0)}))||1,gw=(W-2*L)/n,bw=gw*0.28;
+      var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="revenue and profit by year">';
+      fin.forEach(function(f,i){var x0=L+i*gw+gw/2;var rh=(f.revenue||0)/mx*(H-T-B),ph=(f.pat||0)/mx*(H-T-B);
+        s+='<rect class="rev" x="'+(x0-bw-2)+'" y="'+(H-B-rh)+'" width="'+bw+'" height="'+rh+'" rx="3"/><rect class="pat" x="'+(x0+2)+'" y="'+(H-B-ph)+'" width="'+bw+'" height="'+ph+'" rx="3"/><text x="'+x0+'" y="'+(H-6)+'" text-anchor="middle">'+esc(f.fy)+'</text><text x="'+(x0-bw/2-2)+'" y="'+(H-B-rh-4)+'" text-anchor="middle">'+fmt(f.revenue,0)+'</text>'});
+      $('#finChart').innerHTML=s+'</svg><div class="lg"><span><i style="background:var(--s1)"></i>revenue</span><span><i style="background:var(--ink)"></i>profit after tax</span></div>'}
+    else{$('#fin').innerHTML='<tr><td class="muted">financials not loaded</td></tr>'}
+    $('#strengths').innerHTML=(e.strengths||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')||'<li class="muted">not loaded</li>';
+    $('#risks').innerHTML=(e.risks||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')||'<li class="muted">not loaded</li>';
+    $('#objectives').innerHTML=(e.objectives||[]).map(function(x){return '<li>'+esc(x)+'</li>'}).join('')||'<li class="muted">not loaded</li>';
+    var sub=e.subscription||{},mxs=Math.max(1,sub.total||0,sub.qib||0,sub.nii||0,sub.rii||0,sub.employee||0);
+    var cats=[['QIB','qib'],['NII (HNI)','nii'],['Retail (RII)','rii'],['Employee','employee'],['Total','total']].filter(function(c){return sub[c[1]]!=null});
+    $('#subs').innerHTML=cats.length?cats.map(function(c){return '<div class="'+(c[1]==='total'?'total':'')+'"><span>'+c[0]+'</span><i><b style="width:'+(sub[c[1]]/mxs*100).toFixed(1)+'%"></b></i><span class="t num">'+fmt(sub[c[1]],2)+'x</span></div>'}).join(''):'<div class="note">'+(e.status==='upcoming'?'Bidding has not opened yet.':'No subscription data on file.')+'</div>';
+    $('#subMeta').textContent=e.status==='open'?'live during bidding · updated from the exchange feed when wired':'final';
+    var d=[['Price band',band],['Face value',rupee(e.face_value,0)],['Lot size',fmt(e.lot,0)+' shares'],['Issue size','₹'+fmt(e.issue_size_cr,0)+' cr'],['Fresh issue',e.fresh_cr!=null?'₹'+fmt(e.fresh_cr,0)+' cr':'—'],['Offer for sale',e.ofs_cr!=null?'₹'+fmt(e.ofs_cr,0)+' cr':'—'],['Listing at',esc(e.exchange||'—')],['Board',esc(e.segment)],['Open',dstr(e.open)],['Close',dstr(e.close)],['Allotment',dstr(e.allotment)],['Listing',dstr(e.listing)],
+      ['DRHP',e.docs&&e.docs.drhp?'<a href="'+esc(e.docs.drhp)+'" target="_blank" rel="noopener" style="text-decoration:underline">open</a>':'—'],['RHP',e.docs&&e.docs.rhp?'<a href="'+esc(e.docs.rhp)+'" target="_blank" rel="noopener" style="text-decoration:underline">open</a>':'—']];
+    $('#details').innerHTML=d.map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('');
+    var k=e.kpis||{};$('#kpis').innerHTML=[['P/E',k.pe],['P/B',k.pb],['EPS (₹)',k.eps],['ROE %',k.roe],['ROCE %',k.roce],['Debt / equity',k.debt_equity]].map(function(x){return '<div><span>'+x[0]+'</span><b class="num">'+(x[1]!=null?fmt(x[1],x[0]==='EPS (₹)'?2:1):'—')+'</b></div>'}).join('');
+    $('#people').innerHTML=[['Promoters',(e.promoters||[]).join(', ')],['Lead managers',(e.lead_managers||[]).join(', ')],['Registrar',e.registrar||''],['Managing director',e.md||'']].map(function(x){return '<div><span>'+x[0]+'</span><b>'+esc(x[1]||'—')+'</b></div>'}).join('');
+    $('#foot').textContent='Source: '+e.source+'. Facts come from the offer documents; the agent is a rules model v0. Nothing here is investment advice.';
+    var words=(e.name||'').split(/\s+/).filter(function(w){return w.length>3&&!/^(ltd|limited|india)$/i.test(w)}).slice(0,2);
+    get('/news/feed?limit=300').then(function(nd){var hits=(nd.entries||[]).filter(function(h){var t=(h.title+' '+(h.description||'')).toLowerCase();return words.length&&words.every(function(w){return t.indexOf(w.toLowerCase())>=0})}).slice(0,6);
+      $('#newsMeta').textContent=hits.length+' headlines';$('#news').innerHTML=hits.map(function(h){var k2=h.impact==='good'?'open':h.impact==='bad'?'warn':'closed';return '<div><span><a href="'+esc(h.link)+'" target="_blank" rel="noopener">'+esc(h.title)+'</a><div class="s">'+esc(h.source)+'</div></span><span class="pill '+k2+'">'+esc(h.impact)+'</span></div>'}).join('')||'<div class="note">No headline on the wire mentions this company yet.</div>'}).catch(function(){$('#news').innerHTML='<div class="note">news unavailable</div>'})}
+  get('/markets/ipo/'+encodeURIComponent(slug)).then(render).catch(function(e){$('#nm').textContent='Unknown IPO';$('#subl').innerHTML='<a href="/ipo" style="text-decoration:underline">Back to the IPO list</a> · '+esc(e)});
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},10000);
+})();
+</script>
+</body>
+</html>

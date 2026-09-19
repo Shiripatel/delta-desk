@@ -102,7 +102,7 @@ def test_search_ipo_calendars_news(tmp_path):
     assert any(h["kind"] == "index" for h in s.search("nifty"))
     assert any(h["kind"] == "etf" for h in s.search("bees"))
     ipo = s.ipos()
-    assert ipo["entries"] and {"open", "close", "status"} <= set(ipo["entries"][0])
+    assert ipo["entries"] and {"open", "close", "status", "slug", "subscription"} <= set(ipo["entries"][0])
     c = s.calendar()
     assert any(r.get("computed") and "NIFTY weekly" in r["title"] for r in c["entries"])
     assert s.earnings()["entries"] and s.flows()["totals"]["days"] >= 1
