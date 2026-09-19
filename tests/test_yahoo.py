@@ -53,6 +53,6 @@ def test_service_runs_on_yahoo(tmp_path):
     n50 = s.index("NIFTY50")
     assert any(r["symbol"] == "HDFCBANK" and r["quote"] for r in n50["constituents"])
     assert n50["breadth"]["advances"] + n50["breadth"]["declines"] + n50["breadth"]["unchanged"] == 1
-    w = s.watchlists()["lists"]["Core"]
+    w = s.watchlists()["lists"]["My watchlist"]
     assert any(r["key"] == "HDFCBANK" and r["quote"] for r in w)
     assert any(r["key"] == "TCS" and r["quote"] is None for r in w)   # unavailable rows still render

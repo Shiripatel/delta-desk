@@ -15,6 +15,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | route | file | nav label |
 |---|---|---|
 | `/` | `home.html` | Home (the AI radar and ranking; never call it "radar" in the nav) |
+| `/watchlist` | `watchlist.html` | Watchlist |
 | `/news` | `news.html` | News (live wire, impact calls, assistant) |
 | `/ipo`, `/ipo/<slug>` | `ipo.html` | IPO |
 | `/analysis` | `analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; the chart is one tab inside it: a single line of closes with range buttons, no third-party widget; `/chart` redirects) |

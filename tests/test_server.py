@@ -19,7 +19,8 @@ def _client():
     d = Path(tempfile.mkdtemp())
     s = Settings(feed="synthetic", cycle_seconds=30, _env_file=None)
     from deltadesk.markets.service import MarketsService
-    m = MarketsService()
+    from deltadesk.markets.watchlist import Watchlist as WL
+    m = MarketsService(watchlist=WL(d / "watch.json"))
     return TestClient(create_app(Pipeline(s, SyntheticFeed(s, speed=0.0)), cycles=1, markets=m, waitlist=Waitlist(d / "wl.jsonl"),
                                  alerts=Alerts(m, notifier=Notifier(), path=d / "a.json", log_path=d / "log.jsonl"), alert_interval=3600))
 
@@ -56,6 +57,12 @@ def test_pages_and_assets():
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
+        wl = c.get("/watchlist").text
+        assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
+        assert c.get("/markets/watchlist/presets").json()[0]["code"] == "NIFTY50"
+        pl = c.post("/markets/watchlist/preset/BANKNIFTY").json()
+        assert pl["loaded"] == "NIFTY BANK" and len(pl["lists"]["NIFTY BANK"]) > 5 and pl["max_symbols"] == 50
+        assert c.post("/markets/watchlist/preset/NOPE").status_code == 409
         ipo = c.get("/ipo").text
         assert 'id="body"' in ipo and 'class="pills"' in ipo and 'href="/ipo" aria-current="page"' in ipo and 'id="perfBody"' in ipo
         det = c.get("/ipo/meridian").text

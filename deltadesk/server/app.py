@@ -16,6 +16,7 @@ from deltadesk.beta import Alerts, Waitlist
 from deltadesk.markets import universe
 from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
+from deltadesk.markets.watchlist import WatchlistError
 from deltadesk.pipeline import Pipeline
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -156,6 +157,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def alerts_run():
         return JSONResponse(await asyncio.to_thread(alerts.evaluate))
 
+    @app.get("/watchlist")
+    async def watchlist_page():
+        return FileResponse(ROOT / "watchlist.html")
+
     @app.get("/ipo")
     async def ipo_page():
         return FileResponse(ROOT / "ipo.html")
@@ -284,6 +289,28 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def m_watchlist():
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
+    @app.get("/markets/watchlist/presets")
+    async def m_watchlist_presets():
+        return JSONResponse(markets.watchlist_presets())
+
+    @app.post("/markets/watchlist/preset/{code}")
+    async def m_watchlist_preset(code: str):
+        try:
+            loaded = markets.watchlist.load_preset(code)
+        except WatchlistError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        out = await asyncio.to_thread(markets.watchlists)
+        out["loaded"] = loaded
+        return JSONResponse(out)
+
+    @app.post("/markets/watchlist/{name}/rename/{new}")
+    async def m_watchlist_rename(name: str, new: str):
+        try:
+            markets.watchlist.rename(name, new)
+        except WatchlistError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return JSONResponse(await asyncio.to_thread(markets.watchlists))
+
     @app.get("/markets/ai")
     async def m_ai(index: str | None = None, limit: int = 50, mode: str = "short"):
         return JSONResponse(await asyncio.to_thread(markets.ai_rank, index, limit, mode))
@@ -318,8 +345,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.post("/markets/watchlist/{name}")
     async def m_watchlist_create(name: str):
-        markets.watchlist.create(name)
-        return JSONResponse(markets.watchlists())
+        try:
+            markets.watchlist.create(name)
+        except WatchlistError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
     @app.delete("/markets/watchlist/{name}")
     async def m_watchlist_delete(name: str):
@@ -331,8 +361,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         symbol = symbol.upper() if not symbol.startswith("FUT:") else symbol
         if not markets.known(symbol):
             raise HTTPException(404, f"unknown symbol {symbol}")
-        markets.watchlist.add(name, symbol)
-        return JSONResponse(markets.watchlists())
+        try:
+            markets.watchlist.add(name, symbol)
+        except WatchlistError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
     @app.delete("/markets/watchlist/{name}/{symbol}")
     async def m_watchlist_remove(name: str, symbol: str):

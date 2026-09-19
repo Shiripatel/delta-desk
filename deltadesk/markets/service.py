@@ -13,7 +13,7 @@ from deltadesk.markets.chat import DeskAssistant
 from deltadesk.markets.council import Council, SyntheticBars, chart_bars
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
-from deltadesk.markets.watchlist import Watchlist
+from deltadesk.markets.watchlist import Watchlist, presets
 
 
 class MarketsService:
@@ -204,7 +204,11 @@ class MarketsService:
         def row(k: str) -> dict:
             name, kind, sector = self._name(k)
             return {"key": k, "name": name, "kind": kind, "sector": sector, "quote": q[k].json() if k in q else None}
-        return {"lists": {name: [row(k) for k in keys_] for name, keys_ in self.watchlist.lists.items()}}
+        return {"lists": {name: [row(k) for k in keys_] for name, keys_ in self.watchlist.lists.items()}, "max_symbols": 50, "max_lists": 12}  # noqa: E501
+
+    @staticmethod
+    def watchlist_presets() -> list[dict]:
+        return presets()
 
     # ---- calendars, flows, ipo, news ---------------------------------------------------------
     def ipos(self) -> dict:
