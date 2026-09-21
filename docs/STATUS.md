@@ -72,6 +72,10 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 6. **Upstox live session:** create the Upstox app, `deltadesk login upstox`, run the sniper on the real chain during market hours; then the recorder and replay (roadmap days 6–7).
 7. Radar trails toggle, compare two stocks on the council, mobile pass, GitHub Pages demo.
 
+## Checks
+
+`uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running: it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). CI parse-checks every page with node.
+
 ## Known rough edges
 
 * NIFTY Midcap Select has no Yahoo symbol (no quote). India 10-year G-sec yield has no free source.
