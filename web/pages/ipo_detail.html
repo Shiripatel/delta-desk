@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 .page{padding:14px 20px 28px}
 .crumb{font-size:11.5px;color:var(--ink-3);margin-bottom:10px}
@@ -132,18 +132,19 @@ ul.plain li{margin:0 0 5px}
 </main>
 <footer><div class="wrap"></div></footer>
 
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)};
-  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
-  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
-  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var fmt=DD.fmt;
+  var esc=DD.esc;
+  var pct=DD.pct;
+  var cls=function(x){return DD.cls(x,0.05)};
+  var get=DD.get;
+  var p=DD.pad;
+  DD.boot();
   var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function dstr(iso){if(!iso)return 'to be announced';var d=new Date(iso+'T00:00:00');return isNaN(d)?esc(iso):d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear()}
   function rupee(v,d){return v==null?'—':'₹'+fmt(v,d==null?2:d)}
@@ -192,10 +193,7 @@ ul.plain li{margin:0 0 5px}
     get('/news/feed?limit=300').then(function(nd){var hits=(nd.entries||[]).filter(function(h){var t=(h.title+' '+(h.description||'')).toLowerCase();return words.length&&words.every(function(w){return t.indexOf(w.toLowerCase())>=0})}).slice(0,6);
       $('#newsMeta').textContent=hits.length+' headlines';$('#news').innerHTML=hits.map(function(h){var k2=h.impact==='good'?'open':h.impact==='bad'?'warn':'closed';return '<div><span><a href="'+esc(h.link)+'" target="_blank" rel="noopener">'+esc(h.title)+'</a><div class="s">'+esc(h.source)+'</div></span><span class="pill '+k2+'">'+esc(h.impact)+'</span></div>'}).join('')||'<div class="note">No headline on the wire mentions this company yet.</div>'}).catch(function(){$('#news').innerHTML='<div class="note">news unavailable</div>'})}
   get('/markets/ipo/'+encodeURIComponent(slug)).then(render).catch(function(e){$('#nm').textContent='Unknown IPO';$('#subl').innerHTML='<a href="/ipo" style="text-decoration:underline">Back to the IPO list</a> · '+esc(e)});
-  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
-    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
-  setInterval(function(){if(!document.hidden)ticker()},10000);
+  DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
 })();
 </script>
 </body>

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 .page{padding:18px 20px 28px}
 .page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
@@ -61,21 +61,20 @@
 </main>
 <footer><div class="wrap"></div></footer>
 
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
-  var cls=function(x){return x>0.005?'up':x<-0.005?'dn':''};
-  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
-  var safe=$('#safe');
-  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
-  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}render()});
+  var fmt=DD.fmt;
+  var esc=DD.esc;
+  var pct=DD.pct;
+  var cls=DD.cls;
+  var get=DD.get;
+  var p=DD.pad;
+  DD.boot();
+  document.addEventListener('dd:safe',render);
 
   var index='NIFTY50',mode='day',rows=[],ai={},loading=false;
   var h=location.hash.replace('#','');if(h)index=h;
@@ -123,10 +122,7 @@
   $('#tm').addEventListener('mouseleave',function(){tip.style.display='none'});
   $('#tm').addEventListener('click',function(e){var t=e.target.closest('.tile');if(t)location.href='/analysis#'+encodeURIComponent(t.dataset.sym)+'/3m'});
   window.addEventListener('resize',function(){clearTimeout(window.__rz);window.__rz=setTimeout(render,120)});
-  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
-    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
-  setInterval(function(){if(!document.hidden)ticker()},10000);
+  DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
   load();loadAi();setInterval(function(){if(!document.hidden)load()},10000);setInterval(function(){if(!document.hidden)loadAi()},300000);
 })();
 </script>

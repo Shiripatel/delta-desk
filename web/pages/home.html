@@ -8,8 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
-<link rel="stylesheet" href="/static/ai.css">
+<link rel="stylesheet" href="/static/css/design.css">
+<link rel="stylesheet" href="/static/css/ai.css">
 <style>
 
 .up{color:var(--good)}.dn{color:var(--bad)}.muted{color:var(--ink-3)}
@@ -135,15 +135,12 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 </main>
 <footer><div class="wrap"><div id="foot"><b>Delta Desk</b> · AI radar · quotes and history from the configured source. Nothing here is investment advice.</div><div>DD.HOME.0S2</div></div></footer>
 
-<script src="/static/ai.js"></script>
+<script src="/static/js/ai.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)},fmt=DDAI.fmt,pct=DDAI.pct,cls=DDAI.cls,esc=DDAI.esc,get=DDAI.get;
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
-  var safe=$('#safe');
-  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
-  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+  var p=DD.pad;
+  DD.boot();
 
   var index='NIFTY50',limit=10,mode='short',names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX'};
   function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
@@ -169,7 +166,8 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   loadAll();
 })();
 </script>
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 </body>
 </html>

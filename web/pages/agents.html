@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 /* controls */
 .ctl{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:16px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)}
@@ -142,16 +142,13 @@
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)};
-  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
-  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
-  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
-  var safe=$('#safe');
-  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
-  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+  var fmt=DD.fmt;
+  var esc=DD.esc;
+  var pct=DD.pct;
+  var cls=function(x){return DD.cls(x,0.05)};
+  var get=DD.get;
+  var p=DD.pad;
+  DD.boot();
 
   var HZ=[['15m','15m'],['1h','1h'],['1d','1d'],['1w','1w'],['1mo','1m'],['3mo','3m'],['1y','1y'],['3y','3y'],['10y','10y']];
   var state={symbol:'HDFCBANK',horizon:'1d'},data=null;
@@ -200,14 +197,12 @@
   sug.addEventListener('click',function(e){var b=e.target.closest('button[data-key]');if(!b)return;state.symbol=b.dataset.key;q.value='';sug.style.display='none';load()});
   q.addEventListener('keydown',function(e){if(e.key==='Enter'){var v=q.value.trim().toUpperCase();if(v){state.symbol=v;sug.style.display='none';load()}}if(e.key==='Escape')sug.style.display='none'});
   document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
-  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
-    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
-  setInterval(function(){if(!document.hidden)ticker()},5000);
+  DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:5000});
   load();
 })();
 </script>
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 </body>
 </html>

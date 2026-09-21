@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 .page{padding:26px 20px 30px}
 .hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:start}
@@ -116,19 +116,17 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 </main>
 
 <footer><div class="wrap"></div></footer>
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var esc=DD.esc;
   function get(u){return fetch(u).then(function(r){return r.json()})}
   function post(u,body){return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
-  var safe=$('#safe');
-  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
-  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+  var p=DD.pad;
+  DD.boot();
 
   function stats(){get('/waitlist/stats').then(function(s){$('#stats').innerHTML='<div><b>'+s.total+'</b>on the waitlist</div><div><b>'+s.last_24h+'</b>joined today</div><div><b>'+s.whatsapp+'</b>want WhatsApp alerts</div>'}).catch(function(){})}
   $('#wl').addEventListener('submit',function(e){e.preventDefault();var f=e.target,body={name:f.name.value,email:f.email.value,phone:f.phone.value,experience:f.experience.value,whatsapp_ok:f.whatsapp_ok.checked,

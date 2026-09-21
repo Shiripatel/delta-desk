@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 .filters{display:flex;gap:10px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
 .filters .seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
@@ -113,22 +113,20 @@
 
 <footer><div class="wrap"><div>Delta Desk · news wire. Nothing here is investment advice.</div><div>DD.NEWS.0S1</div></div></footer>
 
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
-  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
-  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  var fmt=DD.fmt;
+  var esc=DD.esc;
+  var pct=DD.pct;
+  var cls=function(x){return DD.cls(x,0.05)};
+  var get=DD.get;
   function post(u,body){return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
-  var safe=$('#safe');
-  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
-  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}});
+  var p=DD.pad;
+  DD.boot();
 
   var state={impact:'',scope:'all',picks:[],selected:null,seen:{},lastTs:0,watch:[]};
   try{state.picks=JSON.parse(localStorage.getItem('dd.news.picks')||'[]')}catch(e){}
@@ -172,9 +170,7 @@
   $('#chatForm').addEventListener('submit',function(e){e.preventDefault();var v=$('#chatIn').value.trim();$('#chatIn').value='';ask(v)});
   $('.chat .hint').addEventListener('click',function(e){var b=e.target.closest('button[data-q]');if(!b)return;ask(b.dataset.q)});
 
-  function ticker(){get('/markets/indicators').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX','USDINR','GOLD','BRENT','BTC','US10Y'],by={};list.forEach(function(i){by[i.key]=i;i.code=i.key});$('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp,ix.decimals==null?2:ix.decimals):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
-  setInterval(function(){if(!document.hidden)ticker()},10000);
+  DD.ticker({endpoint:'/markets/indicators',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX','USDINR','GOLD','BRENT','BTC','US10Y'],every:10000});
   renderChips();reload();setInterval(poll,20000);
 })();
 </script>

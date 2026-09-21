@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
-<link rel="stylesheet" href="/static/design.css">
+<link rel="stylesheet" href="/static/css/design.css">
 <style>
 .page{padding:18px 20px 28px}
 .page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
@@ -172,20 +172,21 @@
 </main>
 <footer><div class="wrap"></div></footer>
 
-<script src="/static/ui.js"></script>
-<script src="/static/nav.js"></script>
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
-  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
-  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
-  var cls=function(x){return x>0.05?'up':x<-0.05?'dn':''};
+  var fmt=DD.fmt;
+  var esc=DD.esc;
+  var pct=DD.pct;
+  var cls=function(x){return DD.cls(x,0.05)};
   function hhmmss(iso){var m=/T(\d\d:\d\d:\d\d)/.exec(iso||'');return m?m[1]:''}
-  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  var get=DD.get;
   function post(u){return fetch(u,{method:'POST'}).then(function(r){return r.json()})}
-  function p(x){return (x<10?'0':'')+x}
-  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var p=DD.pad;
+  DD.boot();
   var ICO={FADE:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 8h16"/><path d="M8 4l-4 4 4 4"/><path d="M20 16H4"/><path d="M16 12l4 4-4 4"/></svg>',BREAK:'<svg class="ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>',PREMIUM:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>'};
   var box=$('#logBox'),count=0;
   function log(agent,msg,t){var d=document.createElement('div');d.innerHTML='<span class="t num">'+esc(t||new Date().toTimeString().slice(0,8))+'</span><span class="a">'+esc(agent)+'</span><span>'+esc(msg)+'</span>';box.appendChild(d);while(box.children.length>400)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;$('#logCount').textContent=++count}
@@ -260,10 +261,7 @@
     decision:renderDecision,orders:renderOrders,cycle:function(c){renderPipe(c);if(plan)renderTargets();stage()}};
   function connect(){var ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/stream');ws.onmessage=function(ev){try{var m=JSON.parse(ev.data);var h=handlers[m.topic];if(h)h(m.data)}catch(e){}};ws.onclose=function(){setTimeout(connect,3000)}}
   get('/limits').then(function(l){limits=l}).catch(function(){});connect();stage();
-  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
-    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(q?fmt(q.ltp):'—')+'</span><span class="c num '+(q?cls(q.change_pct):'')+'">'+(q?pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
-  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
-  setInterval(function(){if(!document.hidden)ticker()},10000);
+  DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
 })();
 </script>
 </body>

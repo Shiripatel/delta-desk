@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -18,8 +20,14 @@ from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
 from deltadesk.markets.watchlist import WatchlistError
 from deltadesk.pipeline import Pipeline
+from deltadesk.server.analytics import Traffic
 
 ROOT = Path(__file__).resolve().parents[2]
+WEB = ROOT / "web"
+PAGES = WEB / "pages"
+PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html", "/ipo": "ipo.html",
+               "/ipo/{slug}": "ipo_detail.html", "/forex": "forex.html", "/global": "global.html", "/desk": "agents.html", "/sniper": "sniper.html",  # noqa: E501
+               "/analysis": "analysis.html", "/beta": "beta.html", "/legal": "legal.html"}
 
 
 class ChatIn(BaseModel):
@@ -56,9 +64,11 @@ def _dump(x):
 
 
 def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None,
-               waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0) -> FastAPI:
+               waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0,
+               traffic_log_store: Traffic | None = None) -> FastAPI:
     markets = markets or MarketsService()
     waitlist = waitlist or Waitlist()
+    traffic = traffic_log_store or Traffic()
     alerts = alerts or Alerts(markets)
 
     async def alert_loop():
@@ -78,7 +88,22 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         loop.cancel()
 
     app = FastAPI(title="Delta Desk", lifespan=lifespan)
-    app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
+    app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")
+
+    @app.middleware("http")
+    async def traffic_log(request, call_next):
+        resp = await call_next(request)
+        if request.method == "GET" and resp.status_code == 200 and traffic.is_page(request.url.path):
+            ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "").split(",")[0].strip()
+            await asyncio.to_thread(traffic.record, request.url.path, ip, request.headers.get("user-agent", ""), request.headers.get("referer", ""))  # noqa: E501
+        return resp
+
+    @app.get("/admin/traffic")
+    async def admin_traffic(token: str = "", days: int = 30):
+        expected = os.environ.get("DD_ADMIN_TOKEN", "")
+        if not expected or not secrets.compare_digest(token, expected):
+            raise HTTPException(401, "set DD_ADMIN_TOKEN in .env and pass ?token=")
+        return JSONResponse(await asyncio.to_thread(traffic.summary, days))
 
     @app.middleware("http")
     async def cache_policy(request, call_next):
@@ -92,41 +117,21 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         return resp
 
     # ---- pages ----------------------------------------------------------------------------
-    @app.get("/")
-    async def home():
-        return FileResponse(ROOT / "home.html")
+    def _page(name: str):
+        async def handler(slug: str = "") -> FileResponse:   # slug only matters for /ipo/{slug}; the page reads it from the URL
+            return FileResponse(PAGES / name)
+        return handler
 
-    @app.get("/desk")
-    async def desk():
-        return FileResponse(ROOT / "agents.html")
-
-    @app.get("/news")
-    async def news_page():
-        return FileResponse(ROOT / "news.html")
-
-    @app.get("/analysis")
-    async def analysis_page():
-        return FileResponse(ROOT / "analysis.html")
+    for _path, _file in PAGE_ROUTES.items():
+        app.add_api_route(_path, _page(_file), methods=["GET"], name=_file[:-5])
 
     @app.get("/chart")
     async def chart_page():
         return RedirectResponse("/analysis", status_code=307)
 
-    @app.get("/forex")
-    async def forex_page():
-        return FileResponse(ROOT / "forex.html")
-
     @app.get("/markets/forex-market")
     async def m_forex_market():
         return JSONResponse(await asyncio.to_thread(markets.forex_market))
-
-    @app.get("/beta")
-    async def beta_page():
-        return FileResponse(ROOT / "beta.html")
-
-    @app.get("/legal")
-    async def legal_page():
-        return FileResponse(ROOT / "legal.html")
 
     @app.post("/waitlist")
     async def waitlist_join(body: WaitlistIn):
@@ -167,38 +172,6 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.post("/alerts/run")
     async def alerts_run():
         return JSONResponse(await asyncio.to_thread(alerts.evaluate))
-
-    @app.get("/heatmap")
-    async def heatmap_page():
-        return FileResponse(ROOT / "heatmap.html")
-
-    @app.get("/global")
-    async def global_page():
-        return FileResponse(ROOT / "global.html")
-
-    @app.get("/watchlist")
-    async def watchlist_page():
-        return FileResponse(ROOT / "watchlist.html")
-
-    @app.get("/ipo")
-    async def ipo_page():
-        return FileResponse(ROOT / "ipo.html")
-
-    @app.get("/ipo/{slug}")
-    async def ipo_detail_page(slug: str):
-        return FileResponse(ROOT / "ipo_detail.html")
-
-    @app.get("/sniper")
-    async def sniper():
-        return FileResponse(ROOT / "sniper.html")
-
-    @app.get("/prototype")
-    async def prototype():
-        return FileResponse(ROOT / "prototype" / "index.html")
-
-    @app.get("/markets")
-    async def markets_page():
-        return FileResponse(ROOT / "markets.html")
 
     # ---- desk -----------------------------------------------------------------------------
     @app.get("/state")

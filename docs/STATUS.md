@@ -12,6 +12,10 @@ set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120     # then open http:/
 
 Tell Claude: "read docs/STATUS.md and continue with the next item" — this file is the memory.
 
+## Layout
+
+`deltadesk/` is the Python package (agents, feeds, markets read model, server, beta, cli). `web/pages/` holds one HTML file per page, `web/static/css|js|vendor` the shared design system and scripts. `data/` is runtime state (gitignored). `tests/` mirrors the package. `docs/` is this file, the roadmap and the plan.
+
 ## What exists (all on the shared design system, five themes, Home · News · IPO · Agents · Sniper)
 
 | page | route | what it does | data today |
@@ -28,7 +32,6 @@ Tell Claude: "read docs/STATUS.md and continue with the next item" — this file
 | Beta | `/beta` | waitlist sign-up (name, email, phone, interests, experience, WhatsApp consent) into `data/waitlist.jsonl`; free alerts: price move, price above/below, council verdict flip, bad news; WhatsApp Cloud API or Telegram when configured, dry-run log otherwise; evaluated every 60 s | files under `data/` |
 | Legal | `/legal` | disclaimer, risk disclosure, terms, privacy, data sources, contact; the same footer is injected on every page | static |
 | Analysis | `/analysis#SYMBOL/3m/fundamental` | every stock, index, FX or commodity click lands here. Two tabs. **Fundamental** (screener-style): top ratios box, pros and cons (rules v0), peer comparison, quarterly results, profit and loss with compounded growth, balance sheet, cash flows, ratios; real filings via Yahoo fundamentals, cached 12 h. **Technical** (investing-style): line chart, summary per timeframe (15 min, 1 hour, daily, weekly, monthly), indicators table with actions, moving averages simple and exponential, pivot points (classic, Fibonacci, Camarilla, Woodie, DeMark), AI score and council stance, latest headlines. `/chart` redirects here. | statements need `DD_QUOTES=yahoo`; shareholding pattern still needs NSE data |
-| Markets | `/markets` | the full market-analysis surface (overview, stocks, options, futures, ETF, forex, screener, heat map, earnings, flows, calendar, trending, watchlist). Not in the nav for now | Yahoo / files |
 
 Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/markets/`; the F&O pipeline in `deltadesk/agents/` + `pipeline.py`; feeds in `deltadesk/feeds/` (synthetic, kite, upstox); tests in `tests/`.
 
@@ -40,7 +43,7 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 ## Decisions taken with the user
 
-* Product focus: Home (radar + table), News, IPO, Agents, Sniper. Markets stays alive but unlinked.
+* Product focus: Home (radar + table), News, IPO, Agents, Sniper. The old Markets page and the prototype were deleted in the restructure.
 * Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
 * Look: light grey Mist theme default, filled dark header band with "Join beta" as the only call to action (no beta strip on pages), compact hero written in LLM / AI-agent terms, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
 * Sniper page is a five-step flow (Plan → Watch → Arm → Shoot → Manage) with a live stepper; keep any new agent output inside one of those steps.

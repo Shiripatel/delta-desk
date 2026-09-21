@@ -21,20 +21,22 @@ def _client():
     from deltadesk.markets.service import MarketsService
     from deltadesk.markets.watchlist import Watchlist as WL
     m = MarketsService(watchlist=WL(d / "watch.json"))
+    from deltadesk.server.analytics import Traffic
     return TestClient(create_app(Pipeline(s, SyntheticFeed(s, speed=0.0)), cycles=1, markets=m, waitlist=Waitlist(d / "wl.jsonl"),
-                                 alerts=Alerts(m, notifier=Notifier(), path=d / "a.json", log_path=d / "log.jsonl"), alert_interval=3600))
+                                 alerts=Alerts(m, notifier=Notifier(), path=d / "a.json", log_path=d / "log.jsonl"), alert_interval=3600,
+                                 traffic_log_store=Traffic(d / "traffic.jsonl", salt="test")))
 
 
 def test_pages_and_assets():
     with _client() as c:
         home = c.get("/").text
-        assert "LLM agents" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/ai.js" in home
+        assert "LLM agents" in home and 'id="rdSvg"' in home and 'id="aiBody"' in home and "/static/js/ai.js" in home
         for path, marker in (("/news", 'id="flow"'), ("/analysis", "lightweight-charts"), ("/static/vendor/lightweight-charts.standalone.production.js", "createChart")):  # noqa: E501
             assert marker in c.get(path).text, path
         assert 'href="/news">News</a>' in home and 'href="/sniper">Sniper</a>' in home
         dom = c.get("/markets/domains").json()
         assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
-        assert c.get("/static/ui.js").status_code == 200 and "/static/ui.js" in home
+        assert c.get("/static/js/ui.js").status_code == 200 and "/static/js/ui.js" in home
         assert 'id="fxmap"' in c.get("/forex").text and len(c.get("/markets/forex-market").json()["world"]) == 10
         assert "waitlist" in c.get("/beta").text and "Risk disclosure" in c.get("/legal").text
         w = c.post("/waitlist", json={"name": "Test User", "email": "t@example.com", "phone": "+919999999999", "interests": ["ipo"], "whatsapp_ok": True}).json()  # noqa: E501
@@ -48,7 +50,7 @@ def test_pages_and_assets():
         lim = c.get("/limits").json()
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
         an = c.get("/analysis").text
-        assert "TradingView" not in an and "addAreaSeries" in an and 'id="pane-fundamental"' in an and 'id="pivBody"' in an
+        assert "TradingView" not in an and "addAreaSeries" in an and "/static/js/common.js" in an and 'id="pane-fundamental"' in an and 'id="pivBody"' in an  # noqa: E501
         assert c.get("/chart", follow_redirects=False).status_code == 307 and "/analysis" in c.get("/chart", follow_redirects=False).headers["location"]  # noqa: E501
         bars = c.get("/markets/bars?symbol=NIFTY50&range=1d").json()
         assert bars["intraday"] and bars["interval"] == "5m" and len(bars["bars"]) > 20 and {"open", "high", "low", "close", "volume"} <= set(bars["bars"][0])  # noqa: E501
@@ -57,7 +59,12 @@ def test_pages_and_assets():
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
-        assert c.get("/ipo").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/nav.js").headers["cache-control"]
+        assert c.get("/ipo").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/js/nav.js").headers["cache-control"]
+        import os as _os
+        _os.environ["DD_ADMIN_TOKEN"] = "t0k"
+        assert c.get("/admin/traffic").status_code == 401
+        tr = c.get("/admin/traffic?token=t0k").json()
+        assert tr["views"] >= 3 and tr["visitors"] >= 1 and any(p["path"] == "/" for p in tr["pages"]) and tr["today"]["views"] == tr["views"]  # noqa: E501
         hm = c.get("/heatmap").text
         assert 'id="tm"' in hm and 'href="/heatmap" aria-current="page"' in hm
         fu = c.get("/markets/fundamentals/RELIANCE").json()
@@ -97,17 +104,14 @@ def test_pages_and_assets():
         assert perf["summary"]["count"] == len(perf["rows"]) and "avg_listing_gain" in perf["summary"]
         assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home
         desk = c.get("/desk").text
-        assert 'id="flow"' in desk and "/static/design.css" in desk and "wlPane" not in desk
+        assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text
         assert 'id="stepper"' in sn and 'id="targets"' in sn and 'id="pipe"' in sn and 'id="oc"' in sn
         cn = c.get("/markets/council?symbol=HDFCBANK&horizon=1h").json()
         assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
-        mk = c.get("/markets").text
-        assert "DDAI.radar(" in mk and "DDAI.ranking(" in mk and "/static/ai.css" in mk and "wlPane" not in mk
         assert 'data-ix="SENSEX"' in home and "limit=10" in home and 'data-ix=""' not in home
-        assert 'data-view="overview"' in mk and "/static/nav.js" in mk and "maBtn" not in mk and 'id="ovInd"' in mk
         assert len(c.get("/markets/indicators").json()) == 18
-        for path in ("/static/ai.js", "/static/ai.css", "/static/design.css", "/static/nav.js", "/static/watchlist.js", "/static/watchlist.css"):  # noqa: E501
+        for path in ("/static/js/ai.js", "/static/css/ai.css", "/static/css/design.css", "/static/js/nav.js", "/static/js/common.js", "/static/js/ui.js"):  # noqa: E501
             assert c.get(path).status_code == 200, path
         src = c.get("/markets/source").json()
         assert src["name"] == "synthetic" and src["history"] == "synthetic"
