@@ -47,6 +47,8 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 ## Decisions taken with the user
 
+* Product shape: a small free tier that lands customers with unique data (radar and AI score, heatmap, watchlist, news wire with impact calls, IPO tracker with the IPO agent, fundamental and technical analysis, Telegram alerts), and a premium tier for the agentic side (council at every horizon with explanations, sniper desk, real-time WhatsApp alerts, desk assistant on an LLM, custom rules, real-time data). Do not add features beyond that basic set until launch.
+* WhatsApp: Meta Cloud API is wired (`WhatsAppNotifier`); replies inside a 24-hour window are free, business-initiated alerts are paid utility templates (about ₹0.12 each in India), so free-tier alerts go over Telegram and WhatsApp is a premium or daily-digest channel.
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. The old Markets page and the prototype were deleted in the restructure.
 * Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
 * Look: light grey Mist theme default, filled dark header band with "Join beta" as the only call to action (no beta strip on pages), compact hero written in LLM / AI-agent terms, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
