@@ -24,9 +24,9 @@ PATH = Path("data") / "investors.json"
 SEED = [
     {"slug": "rakesh-jhunjhunwala", "name": "Rakesh Jhunjhunwala (RARE Enterprises)", "known_for": "The Big Bull: concentrated, decade-long bets on Indian consumption and finance; the portfolio is now run by his family through RARE Enterprises.",  # noqa: E501
      "style": ["long term", "concentrated", "consumer", "financials"], "vehicle": "RARE Enterprises", "since": "1985", "asof": "2025-06-30",
-     "holdings": [{"symbol": "TITAN", "stake_pct": 5.2, "approx": True}, {"symbol": "TATAMOTORS", "stake_pct": 1.4, "approx": True}, {"symbol": "STARHEALTH", "stake_pct": 17.5, "approx": True},  # noqa: E501
+     "holdings": [{"symbol": "TITAN", "stake_pct": 5.2, "approx": True}, {"symbol": "STARHEALTH", "stake_pct": 17.5, "approx": True},  # noqa: E501
                   {"symbol": "METROBRAND", "stake_pct": 14.4, "approx": True}, {"symbol": "CRISIL", "stake_pct": 5.5, "approx": True}, {"symbol": "FEDERALBNK", "stake_pct": 1.4, "approx": True},  # noqa: E501
-                  {"symbol": "APTECH", "stake_pct": 23.4, "approx": True}, {"symbol": "NAZARA", "stake_pct": 7.1, "approx": True}]},
+                  {"symbol": "NAZARA", "stake_pct": 7.1, "approx": True}]},
     {"slug": "radhakishan-damani", "name": "Radhakishan Damani", "known_for": "Founder of DMart; buys quality businesses at fair prices and holds for decades with very few names.",  # noqa: E501
      "style": ["value", "very long term", "retail", "consumer"], "vehicle": "Bright Star Investments", "since": "1980s", "asof": "2025-06-30",  # noqa: E501
      "holdings": [{"symbol": "DMART", "stake_pct": 74.6, "approx": True}, {"symbol": "VSTIND", "stake_pct": 32.7, "approx": True},
@@ -34,7 +34,7 @@ SEED = [
     {"slug": "ashish-kacholia", "name": "Ashish Kacholia", "known_for": "Small and mid caps with rising earnings; dozens of positions, active churn, early into niche manufacturers.",  # noqa: E501
      "style": ["small cap", "growth", "diversified"], "vehicle": "Lucky Investment Managers", "since": "1990s", "asof": "2025-06-30",
      "holdings": [{"symbol": "SAFARI", "stake_pct": 2.3, "approx": True}, {"symbol": "GRAVITA", "stake_pct": 2.1, "approx": True}, {"symbol": "XPROINDIA", "stake_pct": 3.3, "approx": True},  # noqa: E501
-                  {"symbol": "GARWAREHIT", "stake_pct": 3.4, "approx": True}, {"symbol": "BEML", "stake_pct": 1.1, "approx": True}, {"symbol": "ADFFOODS", "stake_pct": 2.6, "approx": True}]},  # noqa: E501
+                  {"symbol": "BEML", "stake_pct": 1.1, "approx": True}, {"symbol": "ADFFOODS", "stake_pct": 2.6, "approx": True}]},  # noqa: E501
     {"slug": "vijay-kedia", "name": "Vijay Kedia", "known_for": "SMILE investing: small in size, medium in experience, large in aspiration, extra-large in market potential.",  # noqa: E501
      "style": ["small cap", "long term", "management quality"], "vehicle": "Kedia Securities", "since": "1990s", "asof": "2025-06-30",
      "holdings": [{"symbol": "ATULAUTO", "stake_pct": 20.6, "approx": True}, {"symbol": "TEJASNET", "stake_pct": 1.8, "approx": True}, {"symbol": "ELECON", "stake_pct": 1.6, "approx": True},  # noqa: E501
@@ -46,14 +46,14 @@ SEED = [
     {"slug": "dolly-khanna", "name": "Dolly Khanna", "known_for": "Chennai-based investor known for early positions in unglamorous cyclicals: chemicals, textiles, sugar, small manufacturers.",  # noqa: E501
      "style": ["small cap", "cyclicals", "contrarian"], "vehicle": "", "since": "2010s", "asof": "2025-06-30",
      "holdings": [{"symbol": "CHENNPETRO", "stake_pct": 1.7, "approx": True}, {"symbol": "POLYPLEX", "stake_pct": 1.4, "approx": True}, {"symbol": "PRAKASH", "stake_pct": 1.6, "approx": True},  # noqa: E501
-                  {"symbol": "MANGCHEFER", "stake_pct": 1.3, "approx": True}, {"symbol": "NITINSPIN", "stake_pct": 1.4, "approx": True}]},
+                  {"symbol": "NITINSPIN", "stake_pct": 1.4, "approx": True}]},
     {"slug": "sunil-singhania", "name": "Sunil Singhania (Abakkus)", "known_for": "Former Reliance MF CIO; Abakkus funds buy mid and small caps with a five-year lens and public disclosure above 1 %.",  # noqa: E501
      "style": ["mid cap", "growth at reasonable price", "institutional"], "vehicle": "Abakkus Asset Manager", "since": "2018", "asof": "2025-06-30",  # noqa: E501
      "holdings": [{"symbol": "IONEXCHANG", "stake_pct": 3.1, "approx": True}, {"symbol": "JTLIND", "stake_pct": 2.7, "approx": True}, {"symbol": "ROUTE", "stake_pct": 2.6, "approx": True},  # noqa: E501
                   {"symbol": "HILTON", "stake_pct": 4.9, "approx": True}, {"symbol": "SARDAEN", "stake_pct": 1.3, "approx": True}, {"symbol": "DYNAMATECH", "stake_pct": 2.1, "approx": True}]},  # noqa: E501
     {"slug": "porinju-veliyath", "name": "Porinju Veliyath (Equity Intelligence)", "known_for": "Deep-value and turnaround picks in micro and small caps, publicly argued, high conviction.",  # noqa: E501
      "style": ["micro cap", "deep value", "turnarounds"], "vehicle": "Equity Intelligence India", "since": "2002", "asof": "2025-06-30",
-     "holdings": [{"symbol": "KERALAAYUR", "stake_pct": 4.0, "approx": True}, {"symbol": "RAJSREESUG", "stake_pct": 2.4, "approx": True}, {"symbol": "SHALPAINTS", "stake_pct": 1.6, "approx": True},  # noqa: E501
+     "holdings": [{"symbol": "RAJSREESUG", "stake_pct": 2.4, "approx": True}, {"symbol": "SHALPAINTS", "stake_pct": 1.6, "approx": True},  # noqa: E501
                   {"symbol": "ANSALAPI", "stake_pct": 2.0, "approx": True}]},
 ]
 
