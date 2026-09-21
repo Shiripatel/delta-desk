@@ -31,24 +31,24 @@
 .lhead svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .lhead select{width:auto;height:24px;padding:0 6px;border:1px solid var(--line-2);background:var(--card);font-size:11px;color:var(--ink-2)}
 .rows{flex:1;overflow:auto}
-.row{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 14px;border-bottom:1px solid var(--line);cursor:pointer;position:relative}
+.cols,.row{display:grid;grid-template-columns:minmax(0,1fr) 84px 68px 64px;gap:8px;align-items:center;padding:0 12px 0 10px}
+.cols{height:26px;font-size:10.5px;color:var(--ink-3);letter-spacing:.03em;text-transform:uppercase;border-bottom:1px solid var(--line);background:var(--card)}
+.cols span:not(:first-child),.row .num{text-align:right}
+.row{height:36px;border-bottom:1px solid var(--line);cursor:pointer;position:relative;font-size:12.5px}
 .row:hover{background:var(--fill)}
 .row.sel{background:color-mix(in srgb,var(--accent) 12%,transparent)}
-.row .sym{font:600 13px/1.2 var(--sans);letter-spacing:-.01em}
-.row .sym.up{color:var(--good)}.row .sym.dn{color:var(--bad)}
-.row .ltp{font:600 13px/1.2 var(--sans);text-align:right}
-.row .ltp.up{color:var(--good)}.row .ltp.dn{color:var(--bad)}
-.row .chg{grid-column:1/3;display:flex;gap:10px;font-size:11px;color:var(--ink-3);align-items:center}
-.row .chg span b{font-weight:500;color:var(--ink-2)}
-.row .chg .up{color:var(--good)}.row .chg .dn{color:var(--bad)}
-.row .r52{grid-column:1/3;display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:center;font-size:10px;color:var(--ink-3);margin-top:2px}
-.row .r52 i{display:block;height:3px;background:var(--fill-2);border-radius:999px;position:relative}
-.row .r52 i b{position:absolute;top:-2.5px;width:8px;height:8px;border-radius:50%;background:var(--ink-3);transform:translateX(-50%)}
-.row .act{position:absolute;right:10px;top:8px;display:none;gap:4px}
+.row .co{display:flex;align-items:center;gap:8px;min-width:0}
+.row .co .logo{width:20px;height:20px;font-size:8px;border-radius:50%;flex:0 0 20px}
+.row .co .logo img{width:20px;height:20px;border-radius:50%}
+.row .co .mono{width:20px;height:20px;font-size:8px;border-radius:50%}
+.row .sym{font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .last{font-weight:500}
+.row .up{color:var(--good)}.row .dn{color:var(--bad)}
+.row .act{position:absolute;right:8px;top:6px;display:none;gap:4px}
 .row:hover .act{display:flex}
-.row .act a,.row .act button{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line-2);color:var(--ink-2);font-size:12px}
+.row:hover .pc{visibility:hidden}
+.row .act a,.row .act button{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;background:var(--card);border:1px solid var(--line-2);color:var(--ink-2);font-size:12px}
 .row .act a:hover,.row .act button:hover{color:var(--ink);border-color:var(--ink-3)}
-.row:hover .ltp{visibility:hidden}
 .pager{display:flex;align-items:center;border-top:1px solid var(--line);background:var(--card)}
 .pager button{flex:1;padding:10px 0;font-size:12.5px;color:var(--ink-3);border-top:2px solid transparent}
 .pager button[aria-pressed="true"]{color:var(--accent-deep);border-top-color:var(--accent-deep)}
@@ -66,6 +66,9 @@
 .chead .px small{font:500 11.5px var(--sans);margin-left:6px}
 .chead .px small.up{color:var(--good)}.chead .px small.dn{color:var(--bad)}
 .chead .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.chead .stats{display:flex;gap:14px;font-size:11px;color:var(--ink-3)}
+.chead .stats b{font-weight:600;color:var(--ink-2)}
+.chead .stats .up{color:var(--good)}.chead .stats .dn{color:var(--bad)}
 .modes{display:flex;gap:10px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--card);flex-wrap:wrap}
 .modes .model{margin-left:auto;font-size:11px;color:var(--ink-3)}
 .modes .model b{font-weight:500;color:var(--ink-2)}
@@ -103,6 +106,7 @@
     <div class="meta"><span>Watchlist <b id="listNo">1</b> (<b id="cnt">0</b> / 50)</span><button id="newList">+ New list</button></div>
     <div class="lhead"><b id="listName">—</b><select id="preset" title="Load a preset into a new list"><option value="">preset…</option></select><button id="rename" title="Rename list"><svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13 7l4 4"/></svg></button><button id="del" title="Delete list"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
     <div class="msg" id="msg"></div>
+    <div class="cols"><span>Symbol</span><span>Last</span><span>Chg</span><span>Chg %</span></div>
     <div class="rows" id="rows"><div class="empty">loading…</div></div>
     <div class="pager" id="pager"></div>
   </aside>
@@ -111,6 +115,7 @@
     <div class="chead" id="chead" hidden>
       <div class="who"><span id="clogo"></span><div><h2 id="cname">—</h2><div class="sub" id="csub"></div></div></div>
       <div class="px num" id="cpx">—</div>
+      <div class="stats" id="cstats"></div>
       <div class="right"><a class="btn" id="openAn" href="/analysis">Open analysis →</a><button class="btn" id="cremove">Remove</button></div>
     </div>
     <div class="modes" id="modes" hidden><div class="pills"><button data-mode="fundamental" aria-pressed="true">Fundamental agent</button><button data-mode="technical">Technical agent</button></div><span class="model" id="model">model: —</span></div>
@@ -139,14 +144,13 @@
   function rows(){return data?(data.lists[name()]||[]):[]}
   function msg(t){$('#msg').textContent=t||'';if(t)setTimeout(function(){if($('#msg').textContent===t)$('#msg').textContent=''},4000)}
   function dec(r){return r.kind==='forex'?4:2}
+  function logo(r){return window.DDUI?window.DDUI.logo(r.key,r.name):'<span class="mono">'+esc(r.key.slice(0,2))+'</span>'}
 
   /* ---- left list ---- */
   function renderList(){if(!data)return;var n=name(),rs=rows(),ns=names();
     $('#listNo').textContent=ns.indexOf(n)+1;$('#cnt').textContent=rs.length;$('#listName').textContent=n+' ('+rs.length+')';
-    $('#rows').innerHTML=rs.length?rs.map(function(r){var q=r.quote||{},d=dec(r),st=stats[r.key]||{},c=q.change_pct;
-      var r52=st.lo_52w!=null&&st.hi_52w>st.lo_52w&&q.ltp!=null?'<div class="r52"><span class="num">'+fmt(st.lo_52w,d)+'</span><i><b style="left:'+Math.max(0,Math.min(100,(q.ltp-st.lo_52w)/(st.hi_52w-st.lo_52w)*100)).toFixed(1)+'%"></b></i><span class="num">'+fmt(st.hi_52w,d)+'</span></div>':'';
-      return '<div class="row'+(r.key===sel?' sel':'')+'" data-key="'+esc(r.key)+'"><span class="sym '+cls(c||0)+'">'+esc(r.key.replace(/^FUT:[A-Z0-9]+:/,''))+'</span><span class="ltp num '+cls(c||0)+'">'+(q.ltp!=null?fmt(q.ltp,d):'—')+'</span>'+
-        '<div class="chg"><span>D <b class="'+cls(c||0)+'">'+pct(c)+'</b></span><span>W <b class="'+cls(st.ret_1w||0)+'">'+pct(st.ret_1w)+'</b></span><span>M <b class="'+cls(st.ret_1m||0)+'">'+pct(st.ret_1m)+'</b></span></div>'+r52+
+    $('#rows').innerHTML=rs.length?rs.map(function(r){var q=r.quote||{},d=dec(r),c=q.change_pct,k=cls(c||0);
+      return '<div class="row'+(r.key===sel?' sel':'')+'" data-key="'+esc(r.key)+'" title="'+esc(r.name)+'"><span class="co">'+logo(r)+'<span class="sym">'+esc(r.key.replace(/^FUT:[A-Z0-9]+:/,''))+'</span></span><span class="num last">'+(q.ltp!=null?fmt(q.ltp,d):'—')+'</span><span class="num '+k+'">'+(q.change!=null?(q.change>0?'+':'')+fmt(q.change,d):'—')+'</span><span class="num pc '+k+'">'+pct(c)+'</span>'+
         '<span class="act"><a href="/analysis#'+esc(r.key)+'/3m/fundamental" title="Open analysis">↗</a><button data-rm="'+esc(r.key)+'" title="Remove">✕</button></span></div>'}).join(''):
       '<div class="empty"><b>'+esc(n)+' is empty.</b><br>Search above to add symbols, or load a preset.</div>';
     $('#pager').innerHTML=ns.map(function(x,i){return '<button data-list="'+esc(x)+'" aria-pressed="'+(x===n)+'" title="'+esc(x)+'">'+(i+1)+'</button>'}).join('')+'<button class="add" id="pagerAdd" title="New list">+</button>';
@@ -154,7 +158,7 @@
   function load(){return get('/markets/watchlist').then(function(d){data=d;renderList();loadStats()}).catch(function(e){$('#rows').innerHTML='<div class="empty">watchlist unavailable · '+esc(e)+'</div>'})}
   var statsFor='';
   function loadStats(){var keys=rows().map(function(r){return r.key});var k=keys.join(',');if(!keys.length||k===statsFor)return;statsFor=k;
-    get('/markets/watchlist/stats?symbols='+encodeURIComponent(k)).then(function(s){Object.keys(s).forEach(function(x){stats[x]=s[x]});renderList()}).catch(function(){})}
+    get('/markets/watchlist/stats?symbols='+encodeURIComponent(k)).then(function(s){Object.keys(s).forEach(function(x){stats[x]=s[x]});if(sel)renderStats()}).catch(function(){})}
   get('/markets/watchlist/presets').then(function(ps){$('#preset').innerHTML='<option value="">preset…</option>'+ps.map(function(x){return '<option value="'+esc(x.code)+'">'+esc(x.name)+' · '+x.count+'</option>'}).join('')}).catch(function(){});
   $('#preset').addEventListener('change',function(){var code=this.value;if(!code)return;this.value='';send('POST','/markets/watchlist/preset/'+encodeURIComponent(code)).then(function(d){data=d;active=d.loaded||active;try{localStorage.setItem('dd.wl.active',active)}catch(x){}statsFor='';renderList();loadStats();DD.toast('Loaded '+active)}).catch(function(e){msg(String(e.message||e))})});
   function newList(){var n=prompt('Name for the new list');if(!n)return;send('POST','/markets/watchlist/'+encodeURIComponent(n.trim())).then(function(d){data=d;active=n.trim();try{localStorage.setItem('dd.wl.active',active)}catch(x){}statsFor='';renderList()}).catch(function(e){msg(String(e.message||e))})}
@@ -181,7 +185,9 @@
     var q=r.quote||{},d=dec(r);$('#clogo').innerHTML=window.DDUI?window.DDUI.logo(r.key,r.name):'';$('#cname').textContent=r.name;$('#csub').textContent=r.key+(r.sector?' · '+r.sector:'')+' · '+r.kind;
     $('#cpx').innerHTML=(q.ltp!=null?fmt(q.ltp,d):'—')+'<small class="'+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</small>';$('#openAn').href='/analysis#'+encodeURIComponent(r.key)+'/3m/'+mode;
     $$('#modes button[data-mode]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===mode))});
-    renderChat()}
+    renderStats();renderChat()}
+  function renderStats(){var r=rows().filter(function(x){return x.key===sel})[0];if(!r){$('#cstats').innerHTML='';return}var st=stats[r.key]||{},d=dec(r);
+    $('#cstats').innerHTML='<span>1W <b class="'+cls(st.ret_1w||0)+'">'+pct(st.ret_1w)+'</b></span><span>1M <b class="'+cls(st.ret_1m||0)+'">'+pct(st.ret_1m)+'</b></span><span>52w <b class="num">'+(st.lo_52w!=null?fmt(st.lo_52w,d)+' – '+fmt(st.hi_52w,d):'—')+'</b></span>'}
   function key(){return sel+'|'+mode}
   function renderChat(){var c=convo[key()]||[];var box=$('#chat');
     box.innerHTML=c.length?c.map(function(m){return '<div class="m '+(m.role==='user'?'user':'bot')+(m.thinking?' think':'')+'">'+esc(m.content)+(m.model?'<span class="tag">'+esc(mode==='fundamental'?'Fundamental agent':'Technical agent')+' · '+esc(m.model)+'</span>':'')+'</div>'}).join(''):
