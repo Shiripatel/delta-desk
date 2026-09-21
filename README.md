@@ -20,7 +20,7 @@ deltadesk/            Python package
   cli.py              `deltadesk run` (one synthetic day) and `deltadesk serve`
 web/
   pages/              one self-contained HTML file per page
-  static/css/         design.css (tokens, five themes, header, tables, cards), ai.css
+  static/css/         design.css (tokens, three themes, header, tables, cards), ai.css
   static/js/          common.js (shared helpers), nav.js (theme, beta pill, legal footer), ui.js (logos), ai.js (radar, ranking)
   static/vendor/      Lightweight Charts
 data/                 runtime state, gitignored: watchlists, waitlist, alerts, caches, traffic log

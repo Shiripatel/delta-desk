@@ -43,7 +43,7 @@ The header is a filled band (`--head`, dark ink on the light themes, near-black 
 `<header class="top"><div class="wrap">` with three zones in one 56px row:
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
 2. `.nav` text links (Home · News · IPO · Agents · Sniper),
-3. `.status` borderless items: theme select (injected by nav.js), colour-safe toggle, clock; the Sniper page adds the paper/live `.seg` switch and the `.kill` button. The data source is shown in the ticker strip, not the header.
+3. `.status` borderless items: theme select (injected by nav.js), clock; the Sniper page adds the paper/live `.seg` switch and the `.kill` button. The data source is shown in the ticker strip, not the header.
 
 The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
 
@@ -100,6 +100,6 @@ validated. Shared marks live in `web/static/css/ai.css` / `web/static/js/ai.js`:
 ## Checklist before committing a page change
 
 1. `node --check` every inline `<script>` and `static/*.js`.
-2. Light and dark render, colour-safe toggle still works.
+2. Mist, White and Ink all render.
 3. Width 400px: no horizontal scroll except inside `.tbl-wrap`.
 4. `uv run pytest tests/test_server.py` passes (routes and assets).

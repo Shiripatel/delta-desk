@@ -16,7 +16,7 @@ Tell Claude: "read docs/STATUS.md and continue with the next item" — this file
 
 `deltadesk/` is the Python package (agents, feeds, markets read model, server, beta, cli). `web/pages/` holds one HTML file per page, `web/static/css|js|vendor` the shared design system and scripts. `data/` is runtime state (gitignored). `tests/` mirrors the package. `docs/` is this file, the roadmap and the plan.
 
-## What exists (all on the shared design system, five themes, Home · News · IPO · Agents · Sniper)
+## What exists (all on the shared design system, three themes, Home · News · IPO · Agents · Sniper)
 
 | page | route | what it does | data today |
 |---|---|---|---|

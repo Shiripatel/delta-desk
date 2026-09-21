@@ -24,25 +24,12 @@
   --head:#171A1F; --head-ink:#F5F6F8; --head-ink-2:#B4BAC6; --head-line:#2A2F3A; --card:#FFFFFF; --bg:#FEFEFE; --ink:#171A1F; --ink-2:#4A5059; --ink-3:#737A86;
   --line:#DEDEDE; --line-2:#C4C4C4; --fill:#F4F4F4; --fill-2:#EAEAEA; --flat:#EAEAEA; --thead:#E9E9E9;
 }
-/* Paper: warm off-white */
-:root[data-theme="paper"]{
-  --head:#221F1B; --head-ink:#F7F3EC; --head-ink-2:#BDB5A9; --head-line:#37322B; --card:#FFFDF9; --bg:#FAF7F1; --ink:#221F1B; --ink-2:#544E47; --ink-3:#7E776E;
-  --line:#E5DFD4; --line-2:#CFC7B9; --fill:#F1ECE3; --fill-2:#E7E1D6; --flat:#E7E1D6; --thead:#EBE5DA;
-}
 /* Ink: neutral dark */
 :root[data-theme="dark"], :root[data-theme="ink"]{
   --head:#0A0A0A; --head-ink:#ECECEC; --head-ink-2:#A8A8A8; --head-line:#262626; --card:#1B1B1B; --bg:#141414; --ink:#ECECEC; --ink-2:#A8A8A8; --ink-3:#6E6E6E;
   --line:#2C2C2C; --line-2:#3A3A3A; --fill:#1B1B1B; --fill-2:#242424; --thead:#262626;
   --good:#2f9e44; --bad:#e66767; --warn:#e0a100; --s1:#3987e5; --s2:#d95926;
   --dn3:#e66767; --dn2:#8a3a3a; --dn1:#3d2323; --flat:#242424; --up1:#1e3322; --up2:#276b33; --up3:#2f9e44;
-  color-scheme:dark;
-}
-/* Midnight: blue-black */
-:root[data-theme="midnight"]{
-  --head:#070A12; --head-ink:#E6EAF2; --head-ink-2:#A3ABBA; --head-line:#1B2230; --card:#151C2B; --bg:#0F1420; --ink:#E6EAF2; --ink-2:#A3ABBA; --ink-3:#6B7484;
-  --line:#222B3B; --line-2:#2F3A4E; --fill:#151C2B; --fill-2:#1B2434; --thead:#1E2737;
-  --good:#3fae57; --bad:#ef6b6b; --warn:#e3a800; --s1:#4c9be8; --s2:#e8683a;
-  --dn3:#ef6b6b; --dn2:#8b3a44; --dn1:#3a2431; --flat:#1B2434; --up1:#1b3327; --up2:#256b3b; --up3:#3fae57;
   color-scheme:dark;
 }
 /* no stored choice + system prefers dark → Ink */
@@ -55,10 +42,6 @@
     color-scheme:dark;
   }
 }
-/* colour-safe: swap the "up" pole to blue for red/green colour-vision deficiency */
-:root[data-safe="1"]{ --up1:#dbe8f9; --up2:#9cc0ee; --up3:#2a78d6; --good:#2a78d6 }
-:root[data-safe="1"][data-theme="dark"], :root[data-safe="1"][data-theme="ink"], :root[data-safe="1"][data-theme="midnight"]{ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 }
-@media (prefers-color-scheme: dark){ :root[data-safe="1"]:not([data-theme]){ --up1:#1c2a3d; --up2:#245a99; --up3:#3987e5; --good:#3987e5 } }
 
 /* ---- reset + text ------------------------------------------------------------------------- */
 *{box-sizing:border-box}
@@ -154,7 +137,7 @@ table.tbl-clean tbody tr:hover td{background:var(--fill)}
 .logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:5px;background:var(--card);border:1px solid var(--line);border-radius:8px;z-index:1}
 .logo:not(.has) img{display:none}
 .mono{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:8px;font:600 12px var(--sans);letter-spacing:.02em;color:hsl(var(--h,200) 45% 30%);background:hsl(var(--h,200) 60% 92%);border:1px solid hsl(var(--h,200) 40% 80%);flex:0 0 auto}
-:root[data-theme="dark"] .mono,:root[data-theme="ink"] .mono,:root[data-theme="midnight"] .mono{color:hsl(var(--h,200) 60% 78%);background:hsl(var(--h,200) 30% 20%);border-color:hsl(var(--h,200) 30% 30%)}
+:root[data-theme="dark"] .mono,:root[data-theme="ink"] .mono{color:hsl(var(--h,200) 60% 78%);background:hsl(var(--h,200) 30% 20%);border-color:hsl(var(--h,200) 30% 30%)}
 .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;border:1px solid var(--line-2);color:var(--ink-2);background:var(--card);white-space:nowrap}
 .pill.open{background:color-mix(in srgb,var(--good) 14%,transparent);border-color:transparent;color:var(--good)}
 .pill.upcoming{background:color-mix(in srgb,var(--warn) 16%,transparent);border-color:transparent;color:var(--warn)}
