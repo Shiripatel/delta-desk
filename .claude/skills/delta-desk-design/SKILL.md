@@ -21,7 +21,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/investors` | `web/pages/investors.html` | Investors |
 | `/news` | `web/pages/news.html` | News (live wire, impact calls, assistant) |
 | `/ipo`, `/ipo/<slug>` | `web/pages/ipo.html` | IPO |
-| `/analysis` | `web/pages/analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (screener-style tables: years as columns, ratios box, pros / cons, peers) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
+| `/analysis` | `web/pages/analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (stock-analysis layout: Overview / Financials / Statistics / Dividends / History / Profile sub-tabs; statement tables with fiscal years as columns newest first, Annual / Quarterly / TTM, bold totals, muted italic growth rows, a chart icon per row) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
 | `/desk` | `web/pages/agents.html` | Agents (the agent council: stock + horizon → verdict) |
 | `/sniper` | `web/pages/sniper.html` | Sniper (F&O desk: scope, range with zones, chain, targets, the shot, risk) |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |

@@ -12,5 +12,6 @@ window.DDUI=(function(){
     if(!d)return '<span class="logo">'+mono+'</span>';
     return '<span class="logo has"><img src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(d)+'&sz=64" alt="" loading="lazy" onerror="this.parentNode.classList.remove(\'has\');this.remove()">'+mono+'</span>'}
   function ready(fn){if(domains)fn();else pending.push(fn)}
-  return {logo:logo,ready:ready,initials:initials,hue:hue};
+  function domain(sym){return domains&&domains[sym]||null}
+  return {logo:logo,ready:ready,initials:initials,hue:hue,domain:domain};
 })();

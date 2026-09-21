@@ -12,6 +12,7 @@ SERIES = {
     "quarterly": {"TotalRevenue": {"2025-09-30": 40e7, "2025-12-31": 45e7, "2026-03-31": 50e7, "2026-06-30": 55e7},
                   "NetIncome": {"2025-09-30": 5e7, "2025-12-31": 6e7, "2026-03-31": 8e7, "2026-06-30": 9e7}},
     "trailing": {"PeRatio": {"2026-09-01": 30.0, "2026-09-18": 25.0}, "PbRatio": {"2026-09-18": 4.0}, "MarketCap": {"2026-09-18": 5000e7}},
+    "monthly": [{"date": "2026-03-31", "close": 500.0}], "dividends": [{"date": "2025-08-01", "amount": 5.0}, {"date": "2026-08-01", "amount": 6.0}], "splits": [], "meta": {"regularMarketPrice": 520.0},  # noqa: E501
 }
 
 
@@ -24,7 +25,9 @@ def test_compose_statements_ratios_snapshot():
     assert a["ttm"]["TotalRevenue"] == 190.0 and a["ttm"]["NetIncome"] == 28.0
     s = a["snapshot"]
     assert s["pe"] == 25.0 and s["pb"] == 4.0 and s["market_cap_cr"] == 5000 and s["revenue_cagr_3y"] == 21.6 and s["eps_cagr_3y"] == 39.2
-    assert s["net_margin"] == 14.7 and a["council"]["roe"] == 28.0 and a["council"]["dividend_yield"] is None
+    assert s["net_margin"] == 14.7 and a["council"]["roe"] == 28.0
+    assert a["dividends"]["years_paying"] == 2 and a["dividends"]["by_fy"][-1]["dps"] == 6.0 and a["tables"]["ratios"]["annual"][0]["label"] == "Period-end price"  # noqa: E501
+    assert a["statistics"]["Scores"][1]["label"] == "Piotroski F-score" and a["fiscal_note"].startswith("Financials in")
 
 
 def test_symbols_and_cache(tmp_path, monkeypatch):
