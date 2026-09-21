@@ -26,7 +26,7 @@ def test_compose_statements_ratios_snapshot():
     s = a["snapshot"]
     assert s["pe"] == 25.0 and s["pb"] == 4.0 and s["market_cap_cr"] == 5000 and s["revenue_cagr_3y"] == 21.6 and s["eps_cagr_3y"] == 39.2
     assert s["net_margin"] == 14.7 and a["council"]["roe"] == 28.0
-    assert a["dividends"]["years_paying"] == 2 and a["dividends"]["by_fy"][-1]["dps"] == 6.0 and a["tables"]["ratios"]["annual"][0]["label"] == "Period-end price"  # noqa: E501
+    assert a["dividends"]["years_paying"] == 1 and a["dividends"]["by_fy"][-1]["dps"] == 6.0 and a["dividends"]["by_fy"][-1]["partial"] and a["tables"]["ratios"]["annual"][0]["label"] == "Period-end price"  # noqa: E501
     assert a["statistics"]["Scores"][1]["label"] == "Piotroski F-score" and a["fiscal_note"].startswith("Financials in")
 
 
