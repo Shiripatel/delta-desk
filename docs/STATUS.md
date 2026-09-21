@@ -41,6 +41,10 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 * Placeholder, clearly tagged in the UI: IPO rows, earnings dates, FII/DII flows, holidays, fundamentals (3 example files). Each reads a `data/*.json` file the moment one exists; schemas are in the module docstrings.
 * Rules v0 everywhere an "AI" label appears (radar score, council votes, news impact, assistant). Designed so a trained model or an LLM slots in behind the same endpoints.
 
+## UX
+
+`docs/UX_REVIEW.md` lists what Groww, Kite, moomoo, Robinhood, Screener, Investing, TradingView and Yahoo do well and which of it we adopt. Round 1 is in: global search palette (Ctrl K, `/`) with add-to-watchlist, sticky ticker, mobile bottom bar, toasts, no section numbers. Round 2 and 3 are listed there.
+
 ## Decisions taken with the user
 
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. The old Markets page and the prototype were deleted in the restructure.

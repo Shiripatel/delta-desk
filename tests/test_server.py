@@ -65,6 +65,9 @@ def test_pages_and_assets():
         assert c.get("/admin/traffic").status_code == 401
         tr = c.get("/admin/traffic?token=t0k").json()
         assert tr["views"] >= 3 and tr["visitors"] >= 1 and any(p["path"] == "/" for p in tr["pages"]) and tr["today"]["views"] == tr["views"]  # noqa: E501
+        navjs = c.get("/static/js/nav.js").text
+        assert "ddPalette" in navjs and "ddBottom" in navjs and "D.toast" in c.get("/static/js/common.js").text
+        assert 'id="wlAdd"' in c.get("/analysis").text and "[01]" not in c.get("/").text
         hm = c.get("/heatmap").text
         assert 'id="tm"' in hm and 'href="/heatmap" aria-current="page"' in hm
         fu = c.get("/markets/fundamentals/RELIANCE").json()

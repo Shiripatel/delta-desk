@@ -26,7 +26,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
-The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same nine links on every page, in this order: Home, Watchlist, Heatmap, News, IPO, Forex, Global, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: clock, theme, and on the Sniper page the kill switch. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same nine links on every page, in this order: Home, Watchlist, Heatmap, News, IPO, Forex, Global, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: the search button (opens the palette, Ctrl K or `/`), clock, theme, and on the Sniper page the kill switch. Under 760 px the text nav hides and nav.js injects a five-item bottom bar (Home, Watchlist, Search, News, More). The index ticker is sticky under the header. Section headings carry no numbers. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 
@@ -61,6 +61,10 @@ Below the header, `.ticker` is the index strip (NIFTY 50, BANK, FIN SERVICE, NEX
 ## Page skeleton
 
 Every page is a standalone file in `web/pages/` that links `/static/css/design.css`, then loads `/static/js/common.js` (the `DD` helpers: formatting, fetch, clock, colour-safe toggle, ticker), `/static/js/ui.js` (logos) and `/static/js/nav.js` (theme, beta pill, legal footer). Page scripts start with `DD.boot()` and `DD.ticker({...})`, then their own code. No page re-implements these.
+
+## Actions and feedback
+
+Every symbol leads to its analysis page; the analysis head and the search palette add to the active watchlist; `DD.toast()` confirms any write. See `docs/UX_REVIEW.md` for the platform takeaways behind these rules.
 
 ## Tables
 

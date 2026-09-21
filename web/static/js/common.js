@@ -16,6 +16,12 @@ window.DD=(function(){
       box.innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote,d=ix.decimals!=null?ix.decimals:2;return '<a href="/analysis#'+D.esc(c)+'/3m" data-sym="'+D.esc(c)+'"><span class="n">'+D.esc(ix.name)+'</span><span class="v num">'+(q?D.fmt(q.ltp,d):'—')+'</span><span class="c num '+(q?D.cls(q.change_pct):'')+'">'+(q?D.pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+D.esc(window.__src||'')+'</span>'}).catch(function(){})}
     D.get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');paint()}).catch(paint);
     setInterval(function(){if(!document.hidden)paint()},every)};
+  /* toast: one short confirmation at the bottom of the screen */
+  D.toast=function(msg){var t=document.getElementById('ddToast');if(!t){t=document.createElement('div');t.id='ddToast';t.className='toast';t.setAttribute('role','status');document.body.appendChild(t)}t.textContent=msg;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2200)};
+  /* watchlist: the active list is the one last opened on the Watchlist page, else the first */
+  D.wlActive=function(lists){var a=null;try{a=localStorage.getItem('dd.wl.active')}catch(e){}var names=Object.keys(lists||{});return (a&&names.indexOf(a)>=0)?a:names[0]};
+  D.watchState=function(sym){return D.get('/markets/watchlist').then(function(d){var n=D.wlActive(d.lists);return {list:n,has:(d.lists[n]||[]).some(function(r){return r.key===sym})}})};
+  D.watch=function(sym){return D.watchState(sym).then(function(st){return fetch('/markets/watchlist/'+encodeURIComponent(st.list)+'/'+encodeURIComponent(sym),{method:st.has?'DELETE':'POST'}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.detail||r.status);D.toast((st.has?'Removed '+sym+' from ':'Added '+sym+' to ')+st.list);document.dispatchEvent(new CustomEvent('dd:watchlist'));return {added:!st.has,list:st.list}})})}).catch(function(e){D.toast(String(e.message||e));throw e})};
   D.boot=function(){D.clock()};
   return D;
 })();

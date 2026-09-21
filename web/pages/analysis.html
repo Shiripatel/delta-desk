@@ -131,7 +131,7 @@ tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight
   <div class="card">
     <div class="head">
       <div class="who"><span id="logo"></span><div style="min-width:0"><h1 id="nm">—</h1><div class="sub" id="subl">—</div></div></div>
-      <div class="px"><div class="v num" id="px">—</div><div class="c num" id="chg">—</div><div class="src" id="src"></div></div>
+      <div class="px"><div class="v num" id="px">—</div><div class="c num" id="chg">—</div><div class="src" id="src"></div><button class="btn small" id="wlAdd" type="button" style="margin-top:8px">+ Watchlist</button></div>
     </div>
     <div class="rng" id="rng"></div>
     <div class="verdicts" id="verdicts"></div>
@@ -335,7 +335,12 @@ tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight
   document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
   function go(sym){state.symbol=sym.toUpperCase();council=null;aiRow=null;daily=null;fin=null;peers=null;ta=null;last=null;setHash();document.title='Delta Desk · '+state.symbol;boot()}
   window.addEventListener('hashchange',function(){var s=location.hash.replace(/^#/,'').split('/');if(s[0]&&s[0].toUpperCase()!==state.symbol)go(s[0])});
-  function boot(){$('#verdicts').innerHTML='';$('#ratios').innerHTML='<div class="note" style="grid-column:1/-1">loading…</div>';loadDaily();loadAi();loadCouncil();showTab(state.tab)}
+  function boot(){wlPaint();$('#verdicts').innerHTML='';$('#ratios').innerHTML='<div class="note" style="grid-column:1/-1">loading…</div>';loadDaily();loadAi();loadCouncil();showTab(state.tab)}
+
+  /* ---- watchlist button ---- */
+  function wlPaint(){DD.watchState(state.symbol).then(function(st){var b=$('#wlAdd');b.textContent=st.has?'✓ In '+st.list:'+ Watchlist';b.className='btn small'+(st.has?' on':'')}).catch(function(){})}
+  $('#wlAdd').addEventListener('click',function(){DD.watch(state.symbol).then(wlPaint).catch(function(){})});
+  document.addEventListener('dd:watchlist',wlPaint);
 
   /* ---- ticker ---- */
   DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});

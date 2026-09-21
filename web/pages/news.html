@@ -97,9 +97,9 @@
   <div class="wire">
     <div class="left"><div class="flowhead"><span>time</span><span>source</span><span>headline</span><span>impact</span></div><div id="flow"></div></div>
     <div>
-      <div class="detail" id="detail"><div class="eyebrow">[01] &nbsp;story</div><h3>Pick a headline</h3><p>Click any story on the wire for its AI generated summary, the stocks it touches, and to ask the desk about it.</p></div>
+      <div class="detail" id="detail"><div class="eyebrow">story</div><h3>Pick a headline</h3><p>Click any story on the wire for its AI generated summary, the stocks it touches, and to ask the desk about it.</p></div>
       <div class="chat">
-        <div class="eyebrow" style="padding:10px 20px 0">[02] &nbsp;ask the desk</div>
+        <div class="eyebrow" style="padding:10px 20px 0">ask the desk</div>
         <div class="log" id="log"><div class="msg a">Ask about a stock or the selected story. I answer from the desk's own data: quote, the agent council at the horizon you name, and the tagged headlines. Rules model v0, no external model yet.</div></div>
         <div class="hint"><button data-q="What does the council say about this stock for the short term?">council · short term</button><button data-q="Is this stock worth holding long term?">long term</button><button data-q="Why is this news good or bad?">why this news?</button><button data-q="What is the latest news on this stock?">latest news</button></div>
         <form id="chatForm"><input id="chatIn" placeholder="e.g. how does this news affect HDFC Bank this week?" autocomplete="off"><button type="submit">ask</button></form>
@@ -158,7 +158,7 @@
   function select(id){state.selected=id;$$('.item').forEach(function(x){x.setAttribute('aria-selected',String(x.dataset.id===id))});
     get('/news/item?id='+encodeURIComponent(id)).then(function(h){if(!h){return}
       var summary=(h.description||'').split(/(?<=[.!?])\s/).slice(0,2).join(' ');
-      $('#detail').innerHTML='<div class="eyebrow">[01] &nbsp;story</div><h3>'+esc(h.title)+'</h3><div class="meta">'+esc(h.source)+(h.published?' · '+esc(h.published.replace('T',' ').slice(0,16)):'')+'</div>'+
+      $('#detail').innerHTML='<div class="eyebrow">story</div><h3>'+esc(h.title)+'</h3><div class="meta">'+esc(h.source)+(h.published?' · '+esc(h.published.replace('T',' ').slice(0,16)):'')+'</div>'+
         '<div class="ai">AI generated summary · rules v0</div><div class="why">'+impBadge(h)+' &nbsp;'+(summary?esc(summary)+' ':'')+'Impact: '+esc(h.reason)+'.</div>'+(h.symbols.length?'<div class="rel">'+h.symbols.map(function(s){return '<a href="/analysis#'+esc(s)+'/3m"><b>'+esc(s)+'</b> · chart →</a><a href="/desk#'+esc(s)+'/1d">council →</a>'}).join('')+'</div>':'')+(h.link?'<a class="open" href="'+esc(h.link)+'" target="_blank" rel="noopener">open the full article ↗</a>':'');
       if(h.symbols.length)$('#chatIn').placeholder='ask about '+h.symbols[0]+' or this story…'})}
 
