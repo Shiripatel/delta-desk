@@ -58,6 +58,10 @@ Checks: `uv run ruff check .` and `uv run pytest -q`; CI also parse-checks every
   until a feed is wired. Grey market premium is deliberately not modelled.
 * Everything labelled "AI" is a transparent rules model (v0) until it is calibrated.
 
+## Agent chat
+
+The Watchlist page hosts a Fundamental agent and a Technical agent. Set one free key in `.env` (`GROQ_API_KEY`, `GEMINI_API_KEY` or `OPENROUTER_API_KEY`, or run Ollama locally with `DD_LLM=ollama`) and answers come from that model, grounded in the desk's data for the stock. With no key the agents answer by rules from the same data.
+
 ## Traffic
 
 Page views are logged locally to `data/traffic.jsonl` (salted daily hash of IP and user agent, no

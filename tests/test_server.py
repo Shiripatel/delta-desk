@@ -86,11 +86,23 @@ def test_pages_and_assets():
         assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
         for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap"):  # noqa: E501
             body = c.get(page).text
-            for h in ("/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper"):
+            for h in ("/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/investors", "/desk", "/sniper"):
                 assert 'href="' + h + '"' in body, (page, h)
         wl = c.get("/watchlist").text
         assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
         assert c.get("/markets/watchlist/presets").json()[0]["code"] == "NIFTY50"
+        iv = c.get("/markets/investors").json()
+        assert iv["count"] >= 6 and iv["investors"][0]["holdings"] and "summary" in iv["investors"][0] and iv["investors"][0]["seed"]
+        assert 'id="grid"' in c.get("/investors").text and 'href="/investors">Investors</a>' in home
+        st = c.get("/markets/watchlist/stats?symbols=HDFCBANK,RELIANCE").json()
+        assert {"ret_1w", "ret_1m", "hi_52w", "lo_52w"} <= set(st["HDFCBANK"]) and st["HDFCBANK"]["hi_52w"] >= st["HDFCBANK"]["lo_52w"]
+        assert c.get("/agent/model").json()["available"] is False
+        ag = c.post("/agent/chat", json={"symbol": "HDFCBANK", "mode": "technical", "messages": [{"role": "user", "content": "What is the trend right now?"}]}).json()  # noqa: E501
+        assert ag["model"] == "rules v0" and "Daily read" in ag["reply"] and ag["reply"].strip().endswith("Not investment advice.") and len(ag["suggestions"]) == 4  # noqa: E501
+        af = c.post("/agent/chat", json={"symbol": "HDFCBANK", "mode": "fundamental", "messages": [{"role": "user", "content": "Is it expensive?"}]}).json()  # noqa: E501
+        assert af["mode"] == "fundamental" and "HDFC Bank" in af["reply"]
+        wl2 = c.get("/watchlist").text
+        assert 'id="chat"' in wl2 and 'data-mode="technical"' in wl2 and 'id="pager"' in wl2
         pl = c.post("/markets/watchlist/preset/BANKNIFTY").json()
         assert pl["loaded"] == "NIFTY BANK" and len(pl["lists"]["NIFTY BANK"]) > 5 and pl["max_symbols"] == 50
         assert c.post("/markets/watchlist/preset/NOPE").status_code == 409

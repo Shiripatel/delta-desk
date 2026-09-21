@@ -18,6 +18,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/watchlist` | `web/pages/watchlist.html` | Watchlist |
 | `/global` | `web/pages/global.html` | Global |
 | `/heatmap` | `web/pages/heatmap.html` | Heatmap |
+| `/investors` | `web/pages/investors.html` | Investors |
 | `/news` | `web/pages/news.html` | News (live wire, impact calls, assistant) |
 | `/ipo`, `/ipo/<slug>` | `web/pages/ipo.html` | IPO |
 | `/analysis` | `web/pages/analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (screener-style tables: years as columns, ratios box, pros / cons, peers) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
@@ -26,7 +27,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
-The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same nine links on every page, in this order: Home, Watchlist, Heatmap, News, IPO, Forex, Global, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: the search button (opens the palette, Ctrl K or `/`), clock, theme, and on the Sniper page the kill switch. Under 760 px the text nav hides and nav.js injects a five-item bottom bar (Home, Watchlist, Search, News, More). The index ticker is sticky under the header. Section headings carry no numbers. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same ten links on every page, in this order: Home, Watchlist, Heatmap, News, IPO, Forex, Global, Investors, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: the search button (opens the palette, Ctrl K or `/`), clock, theme, and on the Sniper page the kill switch. Under 760 px the text nav hides and nav.js injects a five-item bottom bar (Home, Watchlist, Search, News, More). The index ticker is sticky under the header. Section headings carry no numbers. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 

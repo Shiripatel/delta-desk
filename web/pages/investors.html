@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Investors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/css/design.css">
+<style>
+.page{padding:18px 20px 28px}
+.page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
+.page .lead{font-size:12.5px;color:var(--ink-2);margin:0 0 14px;max-width:96ch}
+.toolrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolrow .meta{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.inv{display:flex;flex-direction:column;cursor:pointer;transition:border-color .12s}
+.inv:hover{border-color:var(--ink-3)}
+.inv .hd{display:flex;gap:12px;align-items:center;padding:14px 16px 10px}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:600 15px var(--sans);letter-spacing:.02em;color:hsl(var(--h) 45% 30%);background:hsl(var(--h) 60% 90%);flex:0 0 44px}
+:root[data-theme="ink"] .avatar{color:hsl(var(--h) 60% 80%);background:hsl(var(--h) 30% 22%)}
+.inv h2{margin:0;font:600 14.5px/1.2 var(--sans);letter-spacing:-.01em}
+.inv .veh{font-size:11px;color:var(--ink-3);margin-top:2px}
+.inv .known{padding:0 16px 10px;font-size:12px;color:var(--ink-2);line-height:1.5}
+.tags{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 12px}
+.tags span{padding:2px 8px;border-radius:999px;background:var(--fill-2);font-size:10.5px;color:var(--ink-2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats div{padding:9px 14px;border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats .v{font:600 15px/1.1 var(--sans);letter-spacing:-.02em;margin-top:3px}
+.stats .v.up{color:var(--good)}.stats .v.dn{color:var(--bad)}
+.top{display:flex;flex-direction:column}
+.top .h{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:7px 16px;border-bottom:1px solid var(--line);font-size:12px}
+.top .h .logo{width:26px;height:26px;font-size:10px}
+.top .h .logo img{width:26px;height:26px}
+.top .h b{font-weight:600}.top .h small{display:block;color:var(--ink-3);font-size:10.5px}
+.top .h .st{color:var(--ink-3);font-size:11px;white-space:nowrap}
+.top .h .c{font-weight:600;min-width:58px;text-align:right}
+.more{padding:8px 16px;font-size:11.5px;color:var(--ink-3);margin-top:auto;display:flex;justify-content:space-between}
+/* detail */
+.detail{margin-top:12px}
+.detail .hd{display:flex;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.detail .hd .avatar{width:52px;height:52px;font-size:17px;flex-basis:52px}
+.detail h2{margin:0;font:600 17px/1.2 var(--sans)}
+.detail .hd .right{margin-left:auto;display:flex;gap:8px}
+.detail .known{padding:12px 16px;font-size:12.5px;color:var(--ink-2);border-bottom:1px solid var(--line)}
+.company{display:flex;align-items:center;gap:10px}
+.company b{font-weight:600}.company small{display:block;color:var(--ink-3);font-size:11px}
+.note{font-size:11.5px;color:var(--ink-3);margin-top:12px}
+.up{color:var(--good)}.dn{color:var(--bad)}
+.skel{color:transparent;background:linear-gradient(90deg,var(--fill) 25%,var(--fill-2) 37%,var(--fill) 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;border-radius:4px}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+@media (max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">INVESTORS</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/investors" aria-current="page">Investors</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status"><span class="clock num" id="clock">—</span></div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+<div class="page">
+  <h1>Investors</h1>
+  <p class="lead">The portfolios of India's best-known individual investors, from the quarterly shareholding disclosures, valued with live prices. Open a card for every holding. Not advice, and not a reason to copy anyone.</p>
+  <div class="toolrow">
+    <div class="pills" id="sort"><button data-s="value" aria-pressed="true">By portfolio value</button><button data-s="day">By today's move</button><button data-s="count">By holdings</button></div>
+    <span class="meta" id="meta">—</span>
+  </div>
+  <div class="grid" id="grid"><div class="card inv"><div class="hd"><span class="avatar" style="--h:200">··</span><div><h2 class="skel">loading investors</h2><div class="veh skel">…</div></div></div><div class="known skel">Fetching holdings, quotes and market caps. The first load values every holding and can take a few seconds.</div></div></div>
+  <div class="card detail" id="detail" hidden></div>
+  <div class="note" id="note"></div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var fmt=DD.fmt,esc=DD.esc,pct=DD.pct,cls=function(x){return DD.cls(x,0.05)},get=DD.get;
+  DD.boot();
+  var data=null,sortK='value',open=(location.hash||'').replace('#','');
+  function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
+  function initials(n){return n.split(/[\s(]+/).filter(Boolean).slice(0,2).map(function(w){return w[0]}).join('').toUpperCase()}
+  function cr(v){if(v==null)return '—';return v>=1e5?'₹'+fmt(v/1e5,2)+' L cr':'₹'+fmt(v,0)+' cr'}
+  function logo(h){return window.DDUI?window.DDUI.logo(h.symbol,h.name):'<span class="mono">'+esc(h.symbol.slice(0,2))+'</span>'}
+  function card(inv){var s=inv.summary,top=inv.holdings.slice(0,4);
+    return '<div class="card inv" data-slug="'+esc(inv.slug)+'"><div class="hd"><span class="avatar" style="--h:'+hue(inv.slug)+'">'+esc(initials(inv.name))+'</span><div><h2>'+esc(inv.name)+'</h2><div class="veh">'+esc(inv.vehicle||'')+(inv.vehicle?' · ':'')+'investing since '+esc(inv.since||'—')+'</div></div></div>'+
+      '<div class="known">'+esc(inv.known_for)+'</div><div class="tags">'+(inv.style||[]).map(function(t){return '<span>'+esc(t)+'</span>'}).join('')+'</div>'+
+      '<div class="stats"><div><span class="eyebrow">Holdings</span><div class="v num">'+s.count+'</div></div><div><span class="eyebrow">Valued</span><div class="v num">'+(s.value_cr!=null?cr(s.value_cr):'—')+'</div></div><div><span class="eyebrow">Today</span><div class="v num '+cls(s.day_avg_pct||0)+'">'+pct(s.day_avg_pct)+'</div></div></div>'+
+      '<div class="top">'+top.map(function(h){var q=h.quote||{};return '<div class="h">'+logo(h)+'<span><b>'+esc(h.symbol)+'</b><small>'+esc(h.name)+'</small></span><span class="st">'+(h.stake_pct!=null?(h.approx?'~':'')+fmt(h.stake_pct,1)+' %':'')+'</span><span class="c num '+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</span></div>'}).join('')+'</div>'+
+      '<div class="more"><span>'+(inv.holdings.length>4?'+ '+(inv.holdings.length-4)+' more':'')+'</span><span>as of '+esc(inv.asof||'—')+(inv.seed?' · seed, approximate':'')+' · open →</span></div></div>'}
+  function render(){if(!data)return;var list=data.investors.slice();
+    list.sort(function(a,b){var x=a.summary,y=b.summary;return sortK==='day'?((y.day_avg_pct||-1e9)-(x.day_avg_pct||-1e9)):sortK==='count'?y.count-x.count:((y.value_cr||0)-(x.value_cr||0))});
+    $('#grid').innerHTML=list.map(card).join('');$('#meta').textContent=data.count+' investors · '+data.source;$('#note').textContent=data.note;
+    $$('#sort button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.s===sortK))});renderDetail()}
+  function renderDetail(){var box=$('#detail');var inv=data&&data.investors.filter(function(i){return i.slug===open})[0];if(!inv){box.hidden=true;return}box.hidden=false;var s=inv.summary;
+    box.innerHTML='<div class="hd"><span class="avatar" style="--h:'+hue(inv.slug)+'">'+esc(initials(inv.name))+'</span><div><h2>'+esc(inv.name)+'</h2><div class="veh">'+esc(inv.vehicle||'')+' · '+s.count+' holdings · '+(s.value_cr!=null?cr(s.value_cr)+' valued':'')+' · as of '+esc(inv.asof||'—')+'</div></div><div class="right"><button class="btn" id="closeD">Close</button></div></div>'+
+      '<div class="known">'+esc(inv.known_for)+' <span class="muted">Style: '+esc((inv.style||[]).join(', '))+'.</span></div>'+
+      '<div class="tbl-wrap flush"><table><thead><tr><th>Company</th><th>Sector</th><th class="num">Stake</th><th class="num">Market cap</th><th class="num">Value</th><th class="num">LTP</th><th class="num">Today</th></tr></thead><tbody>'+
+      inv.holdings.map(function(h){var q=h.quote||{};return '<tr data-sym="'+esc(h.symbol)+'" style="cursor:pointer"><td><div class="company">'+logo(h)+'<span><b>'+esc(h.symbol)+'</b><small>'+esc(h.name)+'</small></span></div></td><td class="muted">'+esc(h.sector||'—')+'</td><td class="num">'+(h.stake_pct!=null?(h.approx?'~':'')+fmt(h.stake_pct,1)+' %':'—')+'</td><td class="num">'+cr(h.market_cap_cr)+'</td><td class="num">'+cr(h.value_cr)+'</td><td class="num">'+(q.ltp!=null?fmt(q.ltp):'—')+'</td><td class="num '+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</td></tr>'}).join('')+
+      '</tbody></table></div><div class="note" style="padding:10px 16px;margin:0">'+(inv.seed?'Seed entry: stakes are approximate and from public filings of an earlier quarter; the shareholding feed will refresh them. ':'')+'Values are stake × market cap. Click a company for its analysis.</div>';
+    box.scrollIntoView({behavior:'smooth',block:'start'})}
+  $('#grid').addEventListener('click',function(e){var c=e.target.closest('.inv[data-slug]');if(!c)return;open=c.dataset.slug;location.hash=open;renderDetail()});
+  $('#detail').addEventListener('click',function(e){if(e.target.closest('#closeD')){open='';location.hash='';renderDetail();return}var tr=e.target.closest('tr[data-sym]');if(tr)location.href='/analysis#'+encodeURIComponent(tr.dataset.sym)+'/3m/fundamental'});
+  $('#sort').addEventListener('click',function(e){var b=e.target.closest('button[data-s]');if(!b)return;sortK=b.dataset.s;render()});
+  function load(){get('/markets/investors').then(function(d){data=d;render()}).catch(function(e){$('#grid').innerHTML='<div class="card inv"><div class="known">failed: '+esc(e)+'</div></div>'})}
+  DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
+  load();setInterval(function(){if(!document.hidden)load()},60000);
+})();
+</script>
+</body>
+</html>

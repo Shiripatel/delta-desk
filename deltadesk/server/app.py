@@ -26,8 +26,14 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 PAGES = WEB / "pages"
 PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html", "/ipo": "ipo.html",
-               "/ipo/{slug}": "ipo_detail.html", "/forex": "forex.html", "/global": "global.html", "/desk": "agents.html", "/sniper": "sniper.html",  # noqa: E501
+               "/ipo/{slug}": "ipo_detail.html", "/forex": "forex.html", "/global": "global.html", "/investors": "investors.html", "/desk": "agents.html", "/sniper": "sniper.html",  # noqa: E501
                "/analysis": "analysis.html", "/beta": "beta.html", "/legal": "legal.html"}
+
+
+class AgentChatIn(BaseModel):
+    symbol: str
+    mode: str = "fundamental"
+    messages: list[dict] = []
 
 
 class ChatIn(BaseModel):
@@ -299,6 +305,23 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/global")
     async def m_global():
         return JSONResponse(await asyncio.to_thread(markets.global_market))
+
+    @app.get("/markets/investors")
+    async def m_investors():
+        return JSONResponse(await asyncio.to_thread(markets.investors))
+
+    @app.get("/markets/watchlist/stats")
+    async def m_watchlist_stats(symbols: str = ""):
+        keys = [k.strip().upper() for k in symbols.split(",") if k.strip()]
+        return JSONResponse(await asyncio.to_thread(markets.wl_stats, keys))
+
+    @app.get("/agent/model")
+    async def agent_model():
+        return JSONResponse({"provider": markets.agent.llm.provider, "model": markets.agent.llm.model, "label": markets.agent.llm.label(), "available": markets.agent.llm.available})  # noqa: E501
+
+    @app.post("/agent/chat")
+    async def agent_chat(body: AgentChatIn):
+        return JSONResponse(await asyncio.to_thread(markets.agent.reply, body.symbol, body.mode, body.messages))
 
     @app.get("/markets/watchlist/presets")
     async def m_watchlist_presets():

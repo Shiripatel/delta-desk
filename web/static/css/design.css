@@ -72,7 +72,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .brand b{color:var(--head-ink)}
 .brand .tag{display:none}
 .brand .tag::before{content:"·";margin-right:8px;color:var(--head-line)}
-.nav{display:flex;align-items:center;gap:28px;justify-self:center}
+.nav{display:flex;align-items:center;gap:22px;justify-self:center}
 .nav a,.nav button{position:relative;font:500 13px/1 var(--sans);letter-spacing:-.005em;color:var(--head-ink-2);padding:8px 2px;white-space:nowrap}
 .nav a:hover,.nav button:hover{color:var(--head-ink)}
 .nav a[aria-current]{color:var(--head-ink)}

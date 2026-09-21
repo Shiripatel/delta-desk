@@ -7,8 +7,10 @@ from dataclasses import asdict
 from datetime import date
 
 from deltadesk.markets import calendar as cal
+from deltadesk.markets import investors as inv
 from deltadesk.markets import ipo, universe
 from deltadesk.markets import technicals as ta
+from deltadesk.markets.agent_chat import AgentChat
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
 from deltadesk.markets.chat import DeskAssistant
 from deltadesk.markets.council import Council, SyntheticBars, chart_bars
@@ -29,6 +31,8 @@ class MarketsService:
         if self.funda is not None and self.council.fundamentals is None:
             self.council.fundamentals = self.funda.council_summary
         self.assistant = DeskAssistant(self)
+        self.agent = AgentChat(self)
+        self._wl_stats: dict[str, tuple[float, dict]] = {}
         self.watchlist = watchlist or Watchlist()
         self.news = news or NewsService()
         universe.load_cached()
@@ -211,6 +215,46 @@ class MarketsService:
             name, kind, sector = self._name(k)
             return {"key": k, "name": name, "kind": kind, "sector": sector, "quote": q[k].json() if k in q else None}
         return {"lists": {name: [row(k) for k in keys_] for name, keys_ in self.watchlist.lists.items()}, "max_symbols": 50, "max_lists": 12}  # noqa: E501
+
+    def investors(self) -> dict:
+        """Famous investors' portfolios valued with live quotes; market caps from the fundamentals provider when configured."""
+        def caps(keys: list[str]) -> dict:
+            if self.funda is None:
+                return {}
+            from concurrent.futures import ThreadPoolExecutor
+
+            def one(k: str) -> tuple[str, float | None]:
+                a = self.funda.analysis(k)
+                return k, ((a.get("snapshot") or {}).get("market_cap_cr") if a and not a.get("error") else None)
+            with ThreadPoolExecutor(max_workers=8) as ex:
+                return {k: v for k, v in ex.map(one, keys) if v}
+        return inv.load(quotes=self.quotes.quotes, market_caps=caps, names=self._name)
+
+    def wl_stats(self, symbols: list[str]) -> dict:
+        """Week and month change plus the 52-week range from daily bars; cached half an hour per symbol."""
+        import time as _t
+        from concurrent.futures import ThreadPoolExecutor
+        now = _t.time()
+        want = [k for k in symbols if k not in self._wl_stats or now - self._wl_stats[k][0] > 1800][:60]
+
+        def one(k: str) -> tuple[str, dict]:
+            try:
+                bars = self.council.bars.bars_for(k, "1y", "1d")
+            except Exception:  # noqa: BLE001
+                bars = []
+            c = [b.close for b in bars]
+            if len(c) < 6:
+                return k, {}
+            hi = max(b.high for b in bars[-250:])
+            lo = min(b.low for b in bars[-250:])
+            out = {"ret_1w": round((c[-1] / c[-6] - 1) * 100, 2), "ret_1m": round((c[-1] / c[-22] - 1) * 100, 2) if len(c) >= 22 else None,
+                   "hi_52w": round(hi, 2), "lo_52w": round(lo, 2)}
+            return k, out
+        if want:
+            with ThreadPoolExecutor(max_workers=8) as ex:
+                for k, v in ex.map(one, want):
+                    self._wl_stats[k] = (now, v)
+        return {k: self._wl_stats[k][1] for k in symbols if k in self._wl_stats}
 
     @staticmethod
     def watchlist_presets() -> list[dict]:
