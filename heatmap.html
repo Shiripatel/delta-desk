@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Delta Desk · Heatmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="/static/design.css">
+<style>
+.page{padding:18px 20px 28px}
+.page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
+.page .lead{font-size:12.5px;color:var(--ink-2);margin:0 0 14px}
+.toolrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolrow .lbl{font-size:11.5px;color:var(--ink-3)}
+.toolrow .meta{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.legend{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2)}
+.legend i{display:inline-block;width:22px;height:12px;border-radius:2px}
+.tm{position:relative;width:100%;height:calc(100vh - 300px);min-height:520px;background:var(--fill-2);border-radius:10px;overflow:hidden;user-select:none}
+.sec{position:absolute;overflow:hidden;border:1px solid var(--bg)}
+.sec .h{position:absolute;left:0;right:0;top:0;height:15px;padding:0 5px;font:600 9.5px/15px var(--sans);letter-spacing:.05em;text-transform:uppercase;color:#E8EAEE;background:rgba(20,22,26,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
+.tile{position:absolute;overflow:hidden;border:1px solid rgba(0,0,0,.35);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;transition:filter .12s}
+.tile:hover{filter:brightness(1.18);z-index:3;outline:2px solid #fff}
+.tile b{font:600 var(--fs,12px)/1.1 var(--sans);letter-spacing:-.01em;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.tile small{font:500 calc(var(--fs,12px)*.78)/1.2 var(--sans);opacity:.92;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.tile.tiny b,.tile.tiny small{display:none}
+.tip{position:fixed;z-index:20;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-size:11.5px;box-shadow:0 8px 24px rgba(0,0,0,.14);display:none;min-width:190px}
+.tip b{font-weight:600;display:block}
+.tip .r{display:flex;justify-content:space-between;gap:12px;color:var(--ink-2)}
+.tip .r span:last-child{color:var(--ink);font-weight:500}
+.empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);font-size:12.5px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">HEATMAP</span></div>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap" aria-current="page">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <div class="status">
+    <span class="clock num" id="clock">—</span>
+    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+<div class="page">
+  <h1>Heatmap</h1>
+  <p class="lead">Every stock in the index as a tile: size is its weight, colour is the move. Grouped by sector, refreshed every ten seconds. Click a tile for the analysis page. Not advice.</p>
+  <div class="toolrow">
+    <div class="pills" id="idx"><button data-i="NIFTY50" aria-pressed="true">NIFTY 50</button><button data-i="NIFTY100">NIFTY 100</button><button data-i="NIFTYNEXT50">NEXT 50</button><button data-i="BANKNIFTY">BANK NIFTY</button><button data-i="FINNIFTY">FIN NIFTY</button><button data-i="MIDCPNIFTY">MIDCAP SELECT</button><button data-i="SENSEX">SENSEX</button></div>
+    <span class="lbl">colour</span>
+    <div class="pills" id="mode"><button data-m="day" aria-pressed="true">Day %</button><button data-m="ret_1m">1 month</button><button data-m="ret_3m">3 months</button><button data-m="score">AI score</button></div>
+    <span class="legend" id="legend"></span>
+    <span class="meta" id="meta">—</span>
+  </div>
+  <div class="tm" id="tm"><div class="empty">loading…</div></div>
+  <div class="tip" id="tip"></div>
+</div>
+</main>
+<footer><div class="wrap"></div></footer>
+
+<script src="/static/ui.js"></script>
+<script src="/static/nav.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+  var fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var pct=function(x){return x==null?'—':(x>0?'+':'')+fmt(x)+' %'};
+  var cls=function(x){return x>0.005?'up':x<-0.005?'dn':''};
+  function get(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})}
+  function p(x){return (x<10?'0':'')+x}
+  (function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);$('#clock').textContent=p(t.getHours())+':'+p(t.getMinutes())+' IST';setTimeout(tick,1000)})();
+  var safe=$('#safe');
+  try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';safe.setAttribute('aria-pressed','true')}}catch(e){}
+  safe.addEventListener('click',function(){var on=safe.getAttribute('aria-pressed')!=='true';safe.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}render()});
+
+  var index='NIFTY50',mode='day',rows=[],ai={},loading=false;
+  var h=location.hash.replace('#','');if(h)index=h;
+  /* colour: diverging red - grey - green (blue for up when colour-safe), clamped to a range per mode */
+  var RANGE={day:3,ret_1m:12,ret_3m:25,score:1};
+  function colour(v){if(v==null)return 'hsl(220,6%,42%)';var r=RANGE[mode],x=Math.max(-1,Math.min(1,v/r));var safeOn=document.documentElement.dataset.safe==='1';
+    if(x>=0){var hue=safeOn?212:142,sat=safeOn?70:52,l=44-8*x;return 'hsl('+hue+','+(30+sat*x)+'%,'+Math.round(36+(l-36)*(1-x)+8*(1-x))+'%)'}
+    x=-x;return 'hsl(2,'+(30+50*x)+'%,'+Math.round(44-6*x)+'%)'}
+  function value(r){if(mode==='day')return r.quote?r.quote.change_pct:null;var a=ai[r.symbol];if(!a)return null;if(mode==='score')return a.score!=null?(a.score-5.5)/4.5:null;return a[mode]}
+  function label(v){if(v==null)return '—';if(mode==='score'){return String(Math.round(v*4.5+5.5))}return pct(v)}
+  /* squarified treemap */
+  function squarify(items,x,y,w,h){var total=items.reduce(function(s,i){return s+i.v},0)||1,out=[],row=[],rest=items.slice();
+    function worst(row,len){var s=row.reduce(function(a,b){return a+b.a},0),mx=0,mn=1e18;row.forEach(function(r){mx=Math.max(mx,r.a);mn=Math.min(mn,r.a)});return Math.max(len*len*mx/(s*s),s*s/(len*len*mn))}
+    function layout(row,x,y,w,h){var s=row.reduce(function(a,b){return a+b.a},0);if(w>=h){var rw=s/h,cy=y;row.forEach(function(r){var rh=r.a/rw;out.push({it:r.it,x:x,y:cy,w:rw,h:rh});cy+=rh});return [x+rw,y,w-rw,h]}var rh=s/w,cx=x;row.forEach(function(r){var rw2=r.a/rh;out.push({it:r.it,x:cx,y:y,w:rw2,h:rh});cx+=rw2});return [x,y+rh,w,h-rh]}
+    var area=w*h;rest.forEach(function(i){i.a=Math.max(1e-6,i.v/total*area)});
+    var cur=[x,y,w,h];
+    while(rest.length){var len=Math.min(cur[2],cur[3]);var it=rest[0];
+      if(!row.length||worst(row.concat([it]),len)<=worst(row,len)){row.push(it);rest.shift()}else{cur=layout(row,cur[0],cur[1],cur[2],cur[3]);row=[]}}
+    if(row.length)layout(row,cur[0],cur[1],cur[2],cur[3]);return out}
+  function render(){var box=$('#tm');if(!rows.length){box.innerHTML='<div class="empty">no constituents</div>';return}
+    var W=box.clientWidth,H=box.clientHeight,bySec={};rows.forEach(function(r){var s=r.sector||'Other';(bySec[s]=bySec[s]||[]).push(r)});
+    var secs=Object.keys(bySec).map(function(s){return {v:bySec[s].reduce(function(a,r){return a+(r.weight||0.1)},0),it:s}}).sort(function(a,b){return b.v-a.v});
+    var html='';squarify(secs,0,0,W,H).forEach(function(S){var name=S.it,list=bySec[name].map(function(r){return {v:r.weight||0.1,it:r}}).sort(function(a,b){return b.v-a.v});
+      html+='<div class="sec" style="left:'+S.x+'px;top:'+S.y+'px;width:'+S.w+'px;height:'+S.h+'px"><div class="h">'+esc(name)+'</div>';
+      var inner=squarify(list,0,15,S.w,Math.max(1,S.h-15));
+      inner.forEach(function(T){var r=T.it,v=value(r),fs=Math.max(8,Math.min(30,Math.sqrt(T.w*T.h)/5.2)),tiny=T.w<34||T.h<24;
+        html+='<div class="tile'+(tiny?' tiny':'')+'" data-sym="'+esc(r.symbol)+'" style="left:'+T.x+'px;top:'+T.y+'px;width:'+T.w+'px;height:'+T.h+'px;background:'+colour(v)+';--fs:'+fs.toFixed(1)+'px"><b>'+esc(r.symbol)+'</b><small>'+label(v)+'</small></div>'});
+      html+='</div>'});
+    box.innerHTML=html;
+    var r=RANGE[mode],steps=[-1,-.5,0,.5,1];$('#legend').innerHTML=(mode==='score'?['1','3','5','8','10']:steps.map(function(s){return (s*r>0?'+':'')+(s*r)+'%'})).map(function(t,i){return '<i style="background:'+colour(steps[i]*r)+'" title="'+t+'"></i>'}).join('')+'<span style="margin-left:6px">'+(mode==='score'?'1 sell … 10 buy':'−'+r+' % … +'+r+' %')+'</span>';
+    var up=rows.filter(function(x){return (value(x)||0)>0}).length,dn=rows.filter(function(x){return (value(x)||0)<0}).length;
+    $('#meta').textContent=rows.length+' stocks · '+up+' up · '+dn+' down · '+(window.__src||'')}
+  function load(){if(loading)return;loading=true;var codes=index==='NIFTY100'?['NIFTY50','NIFTYNEXT50']:[index];
+    Promise.all(codes.map(function(c){return get('/markets/index/'+c)})).then(function(ds){var seen={};rows=[];ds.forEach(function(d){(d.constituents||[]).forEach(function(c){if(seen[c.symbol])return;seen[c.symbol]=1;rows.push(c)})});
+      if(index==='NIFTY100'){var tot=rows.reduce(function(a,r){return a+(r.weight||0)},0)||1;rows.forEach(function(r){r.weight=(r.weight||0)/tot*100})}
+      loading=false;render()}).catch(function(e){loading=false;$('#tm').innerHTML='<div class="empty">failed: '+esc(e)+'</div>'})}
+  function loadAi(){var codes=index==='NIFTY100'?['NIFTY50','NIFTYNEXT50']:[index];Promise.all(codes.map(function(c){return get('/markets/ai?index='+c+'&limit=500')})).then(function(ds){ai={};ds.forEach(function(d){(d.entries||[]).forEach(function(e){ai[e.symbol]=e})});if(mode!=='day')render()}).catch(function(){})}
+  $('#idx').addEventListener('click',function(e){var b=e.target.closest('button[data-i]');if(!b)return;index=b.dataset.i;location.hash=index;$$('#idx button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});rows=[];ai={};$('#tm').innerHTML='<div class="empty">loading…</div>';load();loadAi()});
+  $('#mode').addEventListener('click',function(e){var b=e.target.closest('button[data-m]');if(!b)return;mode=b.dataset.m;$$('#mode button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render()});
+  $$('#idx button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.i===index))});
+  var tip=$('#tip');
+  $('#tm').addEventListener('mousemove',function(e){var t=e.target.closest('.tile');if(!t){tip.style.display='none';return}var r=rows.filter(function(x){return x.symbol===t.dataset.sym})[0];if(!r)return;var q=r.quote||{},a=ai[r.symbol]||{};
+    tip.innerHTML='<b>'+esc(r.name)+' · '+esc(r.symbol)+'</b><div class="r"><span>sector</span><span>'+esc(r.sector||'—')+'</span></div><div class="r"><span>weight</span><span>'+fmt(r.weight||0,2)+' %</span></div><div class="r"><span>LTP</span><span>'+(q.ltp!=null?fmt(q.ltp):'—')+'</span></div><div class="r"><span>day</span><span class="'+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</span></div><div class="r"><span>1 month</span><span class="'+cls(a.ret_1m||0)+'">'+pct(a.ret_1m)+'</span></div><div class="r"><span>3 months</span><span class="'+cls(a.ret_3m||0)+'">'+pct(a.ret_3m)+'</span></div><div class="r"><span>AI score</span><span>'+(a.score!=null?a.score+' / 10':'—')+'</span></div>';
+    tip.style.display='block';var x=e.clientX+14,y=e.clientY+14;if(x+220>window.innerWidth)x=e.clientX-230;if(y+170>window.innerHeight)y=e.clientY-180;tip.style.left=x+'px';tip.style.top=y+'px'});
+  $('#tm').addEventListener('mouseleave',function(){tip.style.display='none'});
+  $('#tm').addEventListener('click',function(e){var t=e.target.closest('.tile');if(t)location.href='/analysis#'+encodeURIComponent(t.dataset.sym)+'/3m'});
+  window.addEventListener('resize',function(){clearTimeout(window.__rz);window.__rz=setTimeout(render,120)});
+  function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});
+    $('#ticker').innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var qq=ix.quote;return '<a href="/analysis#'+esc(c)+'/3m"><span class="n">'+esc(ix.name)+'</span><span class="v num">'+(qq?fmt(qq.ltp):'—')+'</span><span class="c num '+(qq?cls(qq.change_pct):'')+'">'+(qq?pct(qq.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+esc(window.__src||'')+'</span>'}).catch(function(){})}
+  get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');ticker()}).catch(ticker);
+  setInterval(function(){if(!document.hidden)ticker()},10000);
+  load();loadAi();setInterval(function(){if(!document.hidden)load()},10000);setInterval(function(){if(!document.hidden)loadAi()},300000);
+})();
+</script>
+</body>
+</html>

@@ -168,6 +168,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def alerts_run():
         return JSONResponse(await asyncio.to_thread(alerts.evaluate))
 
+    @app.get("/heatmap")
+    async def heatmap_page():
+        return FileResponse(ROOT / "heatmap.html")
+
     @app.get("/global")
     async def global_page():
         return FileResponse(ROOT / "global.html")
@@ -303,6 +307,13 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/watchlist")
     async def m_watchlist():
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
+
+    @app.get("/markets/fundamentals/{symbol}")
+    async def m_fundamentals(symbol: str, refresh: bool = False):
+        out = await asyncio.to_thread(markets.fundamentals, symbol, refresh)
+        if out is None:
+            raise HTTPException(404, f"no financial statements for {symbol}")
+        return JSONResponse(out)
 
     @app.get("/markets/global")
     async def m_global():

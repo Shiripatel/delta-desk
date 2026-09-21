@@ -109,15 +109,17 @@ def main() -> None:
 
         from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory, YahooHistory
         from deltadesk.markets.council import Council, SyntheticBars, YahooBars
+        from deltadesk.markets.fundamentals import YahooFundamentals
         from deltadesk.markets.quotes import make_quotes
         from deltadesk.markets.service import MarketsService
         from deltadesk.server.app import create_app
         quotes = make_quotes(pipe.s.quotes or pipe.s.feed)
         history = YahooHistory() if quotes.name == "yahoo" else SyntheticHistory()
         history_long = YahooHistory(range_="2y", interval="1wk") if quotes.name == "yahoo" else SyntheticHistory(days=104, weekly=True)
-        council = Council(YahooBars() if quotes.name == "yahoo" else SyntheticBars())
+        funda = YahooFundamentals() if quotes.name == "yahoo" else None
+        council = Council(YahooBars() if quotes.name == "yahoo" else SyntheticBars(), fundamentals=funda.council_summary if funda else None)
         print(f"desk feed: {pipe.feed.name} · markets quotes: {quotes.name} · history: {history.name} · http://{args.host}:{args.port}/")
-        uvicorn.run(create_app(pipe, args.cycles, MarketsService(quotes=quotes, ai=AiRanker(history, history_long=history_long), council=council)), host=args.host,  # noqa: E501
+        uvicorn.run(create_app(pipe, args.cycles, MarketsService(quotes=quotes, ai=AiRanker(history, history_long=history_long), council=council, fundamentals=funda)), host=args.host,  # noqa: E501
                     port=args.port, log_level="warning")
 
 

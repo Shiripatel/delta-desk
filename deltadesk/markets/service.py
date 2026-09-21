@@ -11,6 +11,7 @@ from deltadesk.markets import ipo, universe
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
 from deltadesk.markets.chat import DeskAssistant
 from deltadesk.markets.council import Council, SyntheticBars, chart_bars
+from deltadesk.markets.fundamentals import YahooFundamentals
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
 from deltadesk.markets.watchlist import Watchlist, presets
@@ -18,10 +19,14 @@ from deltadesk.markets.watchlist import Watchlist, presets
 
 class MarketsService:
     def __init__(self, quotes: QuoteProvider | None = None, watchlist: Watchlist | None = None,
-                 news: NewsService | None = None, ai: AiRanker | None = None, council: Council | None = None) -> None:
+                 news: NewsService | None = None, ai: AiRanker | None = None, council: Council | None = None,
+                 fundamentals: YahooFundamentals | None = None) -> None:
         self.quotes = quotes or SyntheticQuotes()
         self.ai = ai or AiRanker(SyntheticHistory())
         self.council = council or Council(SyntheticBars())
+        self.funda = fundamentals
+        if self.funda is not None and self.council.fundamentals is None:
+            self.council.fundamentals = self.funda.council_summary
         self.assistant = DeskAssistant(self)
         self.watchlist = watchlist or Watchlist()
         self.news = news or NewsService()
@@ -209,6 +214,12 @@ class MarketsService:
     @staticmethod
     def watchlist_presets() -> list[dict]:
         return presets()
+
+    def fundamentals(self, symbol: str, refresh: bool = False) -> dict | None:
+        """Koyfin-style statements, ratios and snapshot; None for instruments without statements."""
+        if self.funda is None:
+            return {"symbol": symbol.upper(), "error": "fundamentals provider not configured (run with DD_QUOTES=yahoo)", "source": "none"}
+        return self.funda.analysis(symbol, refresh)
 
     def global_market(self) -> dict:
         """World map read model: key indices placed by city, grouped by region, plus futures, commodities, FX, bonds, crypto."""

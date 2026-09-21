@@ -58,14 +58,20 @@ def test_pages_and_assets():
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
         assert c.get("/ipo").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/nav.js").headers["cache-control"]
+        hm = c.get("/heatmap").text
+        assert 'id="tm"' in hm and 'href="/heatmap" aria-current="page"' in hm
+        fu = c.get("/markets/fundamentals/RELIANCE").json()
+        assert fu["symbol"] == "RELIANCE" and "error" in fu          # no provider in tests: explains itself instead of failing
+        an = c.get("/analysis").text
+        assert 'id="pane-financials"' in an and 'data-t="financials"' in an
         gl = c.get("/global").text
         assert 'id="map"' in gl and 'id="regions"' in gl and 'href="/global" aria-current="page"' in gl
         g = c.get("/markets/global").json()
         assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
         assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
-        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global"):
+        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap"):  # noqa: E501
             body = c.get(page).text
-            for h in ("/watchlist", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper"):
+            for h in ("/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper"):
                 assert 'href="' + h + '"' in body, (page, h)
         wl = c.get("/watchlist").text
         assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home

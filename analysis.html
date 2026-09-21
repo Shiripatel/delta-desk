@@ -87,6 +87,33 @@
 .nl div{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:10px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
 .nl .t{font-size:11px;color:var(--ink-3);padding-top:2px}
 .nl a{font-weight:500}.nl .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+/* financials */
+.fingrid{display:grid;grid-template-columns:250px 1fr;gap:12px;margin-top:12px}
+.fingrid > *{min-width:0}
+.mlist{max-height:640px;overflow:auto}
+.mlist .g{padding:8px 16px 4px;font:600 10.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
+.mlist button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:7px 16px;font-size:12.5px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.mlist button:hover{background:var(--fill);color:var(--ink)}
+.mlist button[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--ink);font-weight:600}
+.mlist button span{color:var(--ink-3);font-size:11px;white-space:nowrap}
+.finchart{padding:12px 16px 8px}
+.finchart svg{width:100%;height:auto;display:block;font:500 10.5px var(--sans)}
+.finchart text{fill:var(--ink-3)}
+.finchart .bar{fill:var(--s1)}.finchart .bar.neg{fill:var(--bad)}
+.finchart .ln{fill:none;stroke:var(--ink);stroke-width:2;stroke-linejoin:round}
+.finchart .dot{fill:var(--ink)}
+.finchart .base{stroke:var(--line-2)}
+.finchart .val{fill:var(--ink);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.seg button{padding:4px 10px;border-right:1px solid var(--line-2);font-size:11px;color:var(--ink-2)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+#finTbl td.neg{color:var(--bad)}
+#finTbl tr.grp td{background:var(--fill);font:600 11px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);padding:8px 14px}
+#finTbl tr.sub td{font-size:11px;color:var(--ink-3);padding-top:2px;padding-bottom:6px;font-style:italic}
+#finTbl tr.pick td{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+#finTbl td:first-child{white-space:nowrap}
+.snapv small{font:400 11px var(--sans);color:var(--ink-3)}
 /* levels */
 tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weight:600}
 @media (max-width:900px){.grid2{grid-template-columns:1fr}.head{grid-template-columns:1fr}.head .px{text-align:left}#price{height:320px}#tv{height:480px}}
@@ -95,7 +122,7 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">ANALYSIS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
@@ -114,7 +141,7 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   </div>
 
   <div class="toolrow">
-    <div class="pills" id="tabs"><button data-t="overview" aria-pressed="true">Overview</button><button data-t="chart">Chart</button><button data-t="agents">Agents</button><button data-t="news">News</button><button data-t="levels">Levels</button></div>
+    <div class="pills" id="tabs"><button data-t="overview" aria-pressed="true">Overview</button><button data-t="financials">Financials</button><button data-t="chart">Chart</button><button data-t="agents">Agents</button><button data-t="news">News</button><button data-t="levels">Levels</button></div>
     <div class="search"><input id="q" placeholder="analyse another symbol · RELIANCE, NIFTY50, GOLD" autocomplete="off"><div class="sug" id="sug"></div></div>
   </div>
 
@@ -129,6 +156,19 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
       </div>
     </div>
     <div class="note">AI score, win rate, forecast and risk come from the rules model v0 on the ranking; the stance is the council's horizon-weighted vote. Nothing here is investment advice.</div>
+  </section>
+
+  <!-- financials -->
+  <section class="pane" id="pane-financials" style="border:0">
+    <div class="card"><div class="tiles" id="finSnap"><div class="note">loading statements…</div></div></div>
+    <div class="fingrid" id="finGrid" hidden>
+      <div class="card"><h3>Line items <span id="finListMeta"></span></h3><div class="mlist" id="finList"></div></div>
+      <div>
+        <div class="card"><h3><span id="finTitle">Revenue</span><span class="seg" id="finFreq"><button data-f="annual" aria-pressed="true">Annual</button><button data-f="quarterly">Quarterly</button></span></h3><div class="finchart" id="finChart"></div></div>
+        <div class="card" style="margin-top:12px"><h3>Statements <span id="finUnit">₹ crore · as filed</span></h3><div class="tbl-wrap flush"><table id="finTbl"><thead id="finHead"></thead><tbody id="finBody"></tbody></table></div></div>
+      </div>
+    </div>
+    <div class="note" id="finNote"></div>
   </section>
 
   <!-- chart -->
@@ -191,7 +231,7 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
 
   /* ---- tabs ---- */
   function showTab(t){state.tab=t;$$('#tabs button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.t===t))});$$('.pane').forEach(function(pn){pn.classList.toggle('on',pn.id==='pane-'+t)});setHash();
-    if(t==='chart')loadChart();if(t==='agents'&&!council)loadCouncil();if(t==='news')loadNews();if(t==='levels'&&daily)renderLevels()}
+    if(t==='financials')loadFin();if(t==='chart')loadChart();if(t==='agents'&&!council)loadCouncil();if(t==='news')loadNews();if(t==='levels'&&daily)renderLevels()}
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-t]');if(b)showTab(b.dataset.t)});
   $('#moreNews').addEventListener('click',function(e){e.preventDefault();showTab('news')});
 
@@ -277,6 +317,50 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   $$('#rangeSeg button').forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.r===state.range))});
   var themeSel=document.getElementById('theme');if(themeSel)themeSel.addEventListener('change',function(){if(built){chart.applyOptions(theme());if(state.tab==='chart')loadChart()}});
 
+  /* ---- financials (Koyfin-style statements, ratios, snapshot) ---- */
+  var fin=null,finFreq='annual',finLine='TotalRevenue',finKind='money';
+  var GROUPS=[['income','Income statement'],['balance','Balance sheet'],['cash','Cash flow'],['ratio','Ratios and growth']];
+  function cr(v,d){if(v==null)return '—';var a=Math.abs(v);return (v<0?'−':'')+fmt(a,d!=null?d:(a>=1000?0:1))}
+  function big(v){if(v==null)return '—';return v>=1e5?'₹'+fmt(v/1e5,2)+' L cr':'₹'+fmt(v,0)+' cr'}
+  function fyLabel(dt,freq){if(!dt)return '—';var y=+dt.slice(0,4),m=+dt.slice(5,7);if(freq==='annual')return 'FY'+(m<=6?y:y+1);var q=m<=3?'Q4':m<=6?'Q1':m<=9?'Q2':'Q3';return q+' FY'+(m<=3?y:y+1)}
+  function loadFin(){if(fin){renderFin();return}$('#finSnap').innerHTML='<div class="note">loading statements…</div>';$('#finGrid').hidden=true;
+    get('/markets/fundamentals/'+encodeURIComponent(state.symbol)).then(function(d){fin=d;renderFin()}).catch(function(e){fin={error:String(e.message||e),notfound:/404/.test(String(e))};renderFin()})}
+  function finVal(line,dt){var f=fin,fr=finFreq;if(fin.lines[line])return f.statements[fr][line]?f.statements[fr][line][dt]:null;return f.ratios[fr][line]?f.ratios[fr][line][dt]:null}
+  function renderFin(){if(!fin)return;
+    if(fin.error){$('#finSnap').innerHTML='<div class="note">'+(fin.notfound?'No financial statements for this instrument. Indices, FX pairs and commodities do not file accounts; pick a listed company.':'Statements unavailable: '+esc(fin.error))+'</div>';$('#finGrid').hidden=true;$('#finNote').textContent='';return}
+    var s=fin.snapshot||{};
+    var tiles=[['Market cap',big(s.market_cap_cr),''],['Enterprise value',big(s.ev_cr),''],['P/E (TTM)',s.pe!=null?fmt(s.pe,1)+'x':'—',''],['Forward P/E',s.forward_pe!=null?fmt(s.forward_pe,1)+'x':'—',''],['P/B',s.pb!=null?fmt(s.pb,2)+'x':'—',''],['P/S',s.ps!=null?fmt(s.ps,2)+'x':'—',''],['EV / EBITDA',s.ev_ebitda!=null?fmt(s.ev_ebitda,1)+'x':'—',''],
+      ['Revenue (TTM)',big(s.revenue_ttm_cr),''],['Net income (TTM)',big(s.net_income_ttm_cr),cls(s.net_income_ttm_cr||0)],['EPS (TTM)',s.eps_ttm!=null?'₹'+fmt(s.eps_ttm,2):'—',''],['Net margin',s.net_margin!=null?fmt(s.net_margin,1)+' %':'—',''],['Return on equity',s.roe!=null?fmt(s.roe,1)+' %':'—',''],['Debt / equity',s.debt_equity!=null?fmt(s.debt_equity,2):'—',''],['Free cash flow (TTM)',big(s.fcf_ttm_cr),cls(s.fcf_ttm_cr||0)],['Revenue CAGR 3y',pct(s.revenue_cagr_3y),cls(s.revenue_cagr_3y||0)],['EPS CAGR 3y',pct(s.eps_cagr_3y),cls(s.eps_cagr_3y||0)]];
+    $('#finSnap').innerHTML=tiles.map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num snapv '+x[2]+'">'+x[1]+'</div></div>'}).join('');
+    $('#finGrid').hidden=false;
+    var per=fin.periods[finFreq]||[];$('#finListMeta').textContent=per.length+' '+(finFreq==='annual'?'years':'quarters');
+    var last=per[per.length-1];
+    var list='';GROUPS.forEach(function(g){var items=g[0]==='ratio'?Object.keys(fin.ratio_labels).map(function(k){return [k,fin.ratio_labels[k],'ratio']}):Object.keys(fin.lines).filter(function(k){return fin.lines[k].statement===g[0]}).map(function(k){return [k,fin.lines[k].label,fin.lines[k].kind]});
+      list+='<div class="g">'+g[1]+'</div>'+items.map(function(it){var v=finVal(it[0],last);return '<button data-line="'+it[0]+'" data-kind="'+it[2]+'" aria-pressed="'+(it[0]===finLine)+'"><span style="color:inherit">'+esc(it[1])+'</span><span class="num">'+(it[2]==='money'?cr(v):it[2]==='pershare'?cr(v,2):(v==null?'—':fmt(v,1)))+'</span></button>'}).join('')});
+    $('#finList').innerHTML=list;
+    /* chart of the picked line */
+    var label=fin.lines[finLine]?fin.lines[finLine].label:fin.ratio_labels[finLine];finKind=fin.lines[finLine]?fin.lines[finLine].kind:'ratio';
+    $('#finTitle').textContent=label+(finKind==='money'?' · ₹ crore':'');$$('#finFreq button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.f===finFreq))});
+    var vals=per.map(function(dt){return finVal(finLine,dt)}),W=640,H=220,L=14,R=14,T=26,B=28,n=per.length||1,gw=(W-L-R)/n;
+    var nums=vals.filter(function(v){return v!=null}),mx=Math.max.apply(null,nums.concat([0])),mn=Math.min.apply(null,nums.concat([0]));if(mx===mn){mx=mn+1}
+    var y=function(v){return T+(mx-v)/(mx-mn)*(H-T-B)};var svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(label)+' by period"><line class="base" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(0)+'" y2="'+y(0)+'"/>';
+    if(finKind==='ratio'){var d='';per.forEach(function(dt,i){var v=vals[i];if(v==null)return;var x=L+i*gw+gw/2;d+=(d?'L':'M')+x.toFixed(1)+' '+y(v).toFixed(1)+' ';svg+='<circle class="dot" cx="'+x.toFixed(1)+'" cy="'+y(v).toFixed(1)+'" r="3.5"/><text class="val" x="'+x.toFixed(1)+'" y="'+(y(v)-9).toFixed(1)+'" text-anchor="middle">'+fmt(v,1)+'</text>'});svg+='<path class="ln" d="'+d+'"/>'}
+    else{per.forEach(function(dt,i){var v=vals[i];if(v==null)return;var x=L+i*gw+gw*0.18,w=gw*0.64,y0=y(0),y1=y(v);svg+='<rect class="bar'+(v<0?' neg':'')+'" x="'+x.toFixed(1)+'" y="'+Math.min(y0,y1).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+Math.max(1,Math.abs(y0-y1)).toFixed(1)+'" rx="3"/><text class="val" x="'+(x+w/2).toFixed(1)+'" y="'+(Math.min(y0,y1)-6).toFixed(1)+'" text-anchor="middle">'+(finKind==='money'?cr(v):cr(v,2))+'</text>'})}
+    per.forEach(function(dt,i){svg+='<text x="'+(L+i*gw+gw/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+fyLabel(dt,finFreq)+'</text>'});
+    $('#finChart').innerHTML=svg+'</svg>';
+    /* statements table */
+    $('#finHead').innerHTML='<tr><th>'+esc(fin.unit)+'</th>'+per.map(function(dt){return '<th class="num">'+fyLabel(dt,finFreq)+'<br><small class="muted">'+esc(dt)+'</small></th>'}).join('')+(finFreq==='quarterly'?'<th class="num">TTM</th>':'')+'</tr>';
+    var rows='';GROUPS.forEach(function(g){rows+='<tr class="grp"><td colspan="'+(per.length+2)+'">'+g[1]+'</td></tr>';
+      var items=g[0]==='ratio'?Object.keys(fin.ratio_labels).map(function(k){return [k,fin.ratio_labels[k],'ratio']}):Object.keys(fin.lines).filter(function(k){return fin.lines[k].statement===g[0]}).map(function(k){return [k,fin.lines[k].label,fin.lines[k].kind]});
+      items.forEach(function(it){var k=it[0],kind=it[2];if(!per.some(function(dt){return finVal(k,dt)!=null}))return;
+        rows+='<tr data-line="'+k+'" data-kind="'+kind+'" class="'+(k===finLine?'pick':'')+'"><td>'+esc(it[1])+'</td>'+per.map(function(dt){var v=finVal(k,dt);return '<td class="num'+(v!=null&&v<0?' neg':'')+'">'+(kind==='money'?cr(v):kind==='pershare'?cr(v,2):(v==null?'—':fmt(v,kind==='ratio'&&/margin|growth|roe|roa/.test(k)?1:2)))+'</td>'}).join('')+(finFreq==='quarterly'?'<td class="num">'+(fin.ttm[k]!=null?(kind==='pershare'?cr(fin.ttm[k],2):cr(fin.ttm[k])):'—')+'</td>':'')+'</tr>';
+        var gk={TotalRevenue:'revenue_growth',NetIncome:'net_income_growth',DilutedEPS:'eps_growth'}[k];if(gk&&g[0]==='income'){rows+='<tr class="sub"><td>&nbsp;&nbsp;growth '+(finFreq==='annual'?'YoY':'vs same quarter')+'</td>'+per.map(function(dt){var v=fin.ratios[finFreq][gk][dt];return '<td class="num'+(v!=null&&v<0?' neg':'')+'">'+pct(v)+'</td>'}).join('')+(finFreq==='quarterly'?'<td></td>':'')+'</tr>'}})});
+    $('#finBody').innerHTML=rows;
+    $('#finNote').textContent='Source: '+fin.source+' (as filed with the exchanges, consolidated where available) · fetched '+new Date(fin.fetched_at*1000).toLocaleString('en-IN')+' · money in ₹ crore, EPS in ₹ · ratios computed by Delta Desk · quarterly ROE and ROA are annualised · Nothing here is investment advice.'}
+  $('#finList').addEventListener('click',function(e){var b=e.target.closest('button[data-line]');if(!b)return;finLine=b.dataset.line;renderFin()});
+  $('#finBody').addEventListener('click',function(e){var tr=e.target.closest('tr[data-line]');if(!tr)return;finLine=tr.dataset.line;renderFin();$('#finChart').scrollIntoView({behavior:'smooth',block:'nearest'})});
+  $('#finFreq').addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;finFreq=b.dataset.f;renderFin()});
+
   /* ---- search + symbol switch ---- */
   var q=$('#q'),sug=$('#sug'),timer=null;
   q.addEventListener('input',function(){clearTimeout(timer);var v=q.value.trim();if(!v){sug.style.display='none';return}
@@ -284,9 +368,9 @@ tr.now td{background:color-mix(in srgb,var(--accent) 12%,transparent);font-weigh
   sug.addEventListener('click',function(e){var b=e.target.closest('button[data-key]');if(!b)return;q.value='';sug.style.display='none';go(b.dataset.key)});
   q.addEventListener('keydown',function(e){if(e.key==='Enter'){var v=q.value.trim().toUpperCase();if(v){sug.style.display='none';go(v)}}});
   document.addEventListener('click',function(e){if(!e.target.closest('.search'))sug.style.display='none'});
-  function go(sym){state.symbol=sym.toUpperCase();council=null;aiRow=null;daily=null;setHash();document.title='Delta Desk · '+state.symbol;boot()}
+  function go(sym){state.symbol=sym.toUpperCase();council=null;aiRow=null;daily=null;fin=null;setHash();document.title='Delta Desk · '+state.symbol;boot()}
   window.addEventListener('hashchange',function(){var s=location.hash.replace(/^#/,'').split('/');if(s[0]&&s[0].toUpperCase()!==state.symbol)go(s[0])});
-  function boot(){$('#tiles').innerHTML='';loadDaily();loadAi();loadCouncil();loadNews();if(state.tab==='chart')loadChart();showTab(state.tab)}
+  function boot(){$('#tiles').innerHTML='';loadDaily();loadAi();loadCouncil();loadNews();if(state.tab==='chart')loadChart();if(state.tab==='financials')loadFin();showTab(state.tab)}
 
   /* ---- ticker ---- */
   function ticker(){get('/markets/indices').then(function(list){var order=['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],by={};list.forEach(function(i){by[i.code]=i});

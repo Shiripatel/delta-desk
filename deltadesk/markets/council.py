@@ -320,8 +320,9 @@ FUND = [agent_valuation, agent_growth, agent_quality, agent_ownership]
 
 
 class Council:
-    def __init__(self, bars: BarsProvider) -> None:
+    def __init__(self, bars: BarsProvider, fundamentals=None) -> None:
         self.bars = bars
+        self.fundamentals = fundamentals      # callable(symbol) -> (dict | None, source); None = files / examples
 
     def run(self, symbol: str, horizon: str = "1d") -> dict:
         symbol = symbol.upper()
@@ -329,7 +330,15 @@ class Council:
             horizon = "1d"
         rng_, itv, w_tech, label = HORIZONS[horizon]
         bars = self.bars.bars(symbol, horizon)
-        f, f_src = load_fundamentals(symbol)
+        f, f_src = (None, "")
+        if self.fundamentals is not None:
+            try:
+                f, f_src = self.fundamentals(symbol)
+            except Exception as exc:  # noqa: BLE001 - a failing provider must not break the council
+                f, f_src = None, f"fundamentals unavailable ({exc})"
+        if f is None:
+            f, f_src2 = load_fundamentals(symbol)
+            f_src = f_src2 if f is not None or not f_src else f_src
         agents = [a(bars) for a in TECH] + [a(f) for a in FUND]
         w_fund = 1 - w_tech
         for a in agents:
