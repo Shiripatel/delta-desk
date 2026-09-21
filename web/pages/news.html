@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
-<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <style>
 .filters{display:flex;gap:10px;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
@@ -80,7 +80,6 @@
   <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news" aria-current="page">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
-    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
 </div></header>
 

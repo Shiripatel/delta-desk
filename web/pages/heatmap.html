@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
-<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <style>
 .page{padding:18px 20px 28px}
@@ -39,7 +39,6 @@
   <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap" aria-current="page">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
-    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
 </div></header>
 
@@ -74,15 +73,13 @@
   var get=DD.get;
   var p=DD.pad;
   DD.boot();
-  document.addEventListener('dd:safe',render);
 
   var index='NIFTY50',mode='day',rows=[],ai={},loading=false;
   var h=location.hash.replace('#','');if(h)index=h;
-  /* colour: diverging red - grey - green (blue for up when colour-safe), clamped to a range per mode */
+  /* colour: diverging red - grey - green, clamped to a range per mode */
   var RANGE={day:3,ret_1m:12,ret_3m:25,score:1};
-  function colour(v){if(v==null)return 'hsl(220,6%,42%)';var r=RANGE[mode],x=Math.max(-1,Math.min(1,v/r));var safeOn=document.documentElement.dataset.safe==='1';
-    if(x>=0){var hue=safeOn?212:142,sat=safeOn?70:52,l=44-8*x;return 'hsl('+hue+','+(30+sat*x)+'%,'+Math.round(36+(l-36)*(1-x)+8*(1-x))+'%)'}
-    x=-x;return 'hsl(2,'+(30+50*x)+'%,'+Math.round(44-6*x)+'%)'}
+  function colour(v){if(v==null)return 'hsl(220,6%,42%)';var r=RANGE[mode],x=Math.max(-1,Math.min(1,v/r));
+    if(x>=0)return 'hsl(142,'+(30+52*x)+'%,'+Math.round(44-8*x)+'%)';x=-x;return 'hsl(2,'+(30+50*x)+'%,'+Math.round(44-6*x)+'%)'}
   function value(r){if(mode==='day')return r.quote?r.quote.change_pct:null;var a=ai[r.symbol];if(!a)return null;if(mode==='score')return a.score!=null?(a.score-5.5)/4.5:null;return a[mode]}
   function label(v){if(v==null)return '—';if(mode==='score'){return String(Math.round(v*4.5+5.5))}return pct(v)}
   /* squarified treemap */

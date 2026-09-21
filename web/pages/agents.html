@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
-<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <style>
 /* controls */
@@ -82,7 +82,6 @@
   <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk" aria-current="page">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
-    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
 </div></header>
 
@@ -139,6 +138,9 @@
 
 <footer><div class="wrap"><div id="foot">Delta Desk · agents · rules model v0. Nothing here is investment advice.</div><div>DD.AGENTS.0S2</div></div></footer>
 
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)};
@@ -201,8 +203,5 @@
   load();
 })();
 </script>
-<script src="/static/js/common.js"></script>
-<script src="/static/js/ui.js"></script>
-<script src="/static/js/nav.js"></script>
 </body>
 </html>

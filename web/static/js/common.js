@@ -1,5 +1,5 @@
 /* Shared page helpers. Every page loads this before its own script and uses window.DD:
-   formatting (fmt, pct, esc, pad), fetch (get), the IST clock, the colour-safe toggle and the index ticker. */
+   formatting (fmt, pct, esc, pad), fetch (get), the IST clock and the index ticker. */
 window.DD=(function(){
   var D={};
   D.fmt=function(n,d){return Number(n).toLocaleString('en-IN',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d})};
@@ -10,16 +10,12 @@ window.DD=(function(){
   D.get=function(u){return fetch(u).then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})};
   /* IST clock in #clock */
   D.clock=function(){var el=document.getElementById('clock');if(!el)return;(function tick(){var n=new Date(),t=new Date(n.getTime()+(330+n.getTimezoneOffset())*60000);el.textContent=D.pad(t.getHours())+':'+D.pad(t.getMinutes())+' IST';setTimeout(tick,1000)})()};
-  /* colour-safe toggle (#safe): blue for up instead of green, remembered per browser */
-  D.safe=function(){var b=document.getElementById('safe');if(!b)return;
-    try{if(localStorage.getItem('dd.safe')==='1'){document.documentElement.dataset.safe='1';b.setAttribute('aria-pressed','true')}}catch(e){}
-    b.addEventListener('click',function(){var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',String(on));if(on)document.documentElement.dataset.safe='1';else delete document.documentElement.dataset.safe;try{localStorage.setItem('dd.safe',on?'1':'0')}catch(e){}document.dispatchEvent(new CustomEvent('dd:safe',{detail:{on:on}}))})};
   /* index ticker in #ticker: o.endpoint (/markets/indices or /markets/indicators), o.order (keys), o.every (ms) */
   D.ticker=function(o){var box=document.getElementById('ticker');if(!box)return;o=o||{};var endpoint=o.endpoint||'/markets/indices',order=o.order||['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every=o.every||10000;
     function paint(){D.get(endpoint).then(function(list){var by={};list.forEach(function(i){by[i.code||i.key]=i});
       box.innerHTML=order.map(function(c){var ix=by[c];if(!ix)return '';var q=ix.quote,d=ix.decimals!=null?ix.decimals:2;return '<a href="/analysis#'+D.esc(c)+'/3m" data-sym="'+D.esc(c)+'"><span class="n">'+D.esc(ix.name)+'</span><span class="v num">'+(q?D.fmt(q.ltp,d):'—')+'</span><span class="c num '+(q?D.cls(q.change_pct):'')+'">'+(q?D.pct(q.change_pct):'no data')+'</span></a>'}).join('')+'<span class="src">'+D.esc(window.__src||'')+'</span>'}).catch(function(){})}
     D.get('/markets/source').then(function(s){window.__src=s.name+(s.delay_min?' · '+s.delay_min+' min delayed':' · live');paint()}).catch(paint);
     setInterval(function(){if(!document.hidden)paint()},every)};
-  D.boot=function(){D.clock();D.safe()};
+  D.boot=function(){D.clock()};
   return D;
 })();

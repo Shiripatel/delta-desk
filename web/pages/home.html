@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
-<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <link rel="stylesheet" href="/static/css/ai.css">
 <style>
@@ -67,7 +67,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
-    <button id="safe" aria-pressed="false" title="Swap the up colour to blue for red/green colour-vision deficiency">colour-safe</button>
   </div>
 </div></header>
 
@@ -135,6 +134,9 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 </main>
 <footer><div class="wrap"><div id="foot"><b>Delta Desk</b> · AI radar · quotes and history from the configured source. Nothing here is investment advice.</div><div>DD.HOME.0S2</div></div></footer>
 
+<script src="/static/js/common.js"></script>
+<script src="/static/js/ui.js"></script>
+<script src="/static/js/nav.js"></script>
 <script src="/static/js/ai.js"></script>
 <script>
 (function(){
@@ -166,8 +168,5 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   loadAll();
 })();
 </script>
-<script src="/static/js/common.js"></script>
-<script src="/static/js/ui.js"></script>
-<script src="/static/js/nav.js"></script>
 </body>
 </html>

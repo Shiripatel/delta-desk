@@ -1,16 +1,16 @@
 /* Shared header: theme choice, the Join-beta pill and the legal footer, injected so every page carries the same. */
 (function(){
   /* theme: stored choice wins; otherwise Mist (light grey), or Ink when the system prefers dark */
-  var THEMES=[['mist','Mist · light grey'],['white','White'],['paper','Paper · warm'],['ink','Ink · dark'],['midnight','Midnight · blue']];
+  var THEMES=[['mist','Mist · light grey'],['white','White'],['ink','Ink · dark']];
   var theme=null;try{theme=localStorage.getItem('dd.theme')}catch(e){}
-  if(theme==='dark')theme='ink';
+  if(theme==='dark')theme='ink';if(theme==='paper'||theme==='midnight'){theme='mist';try{localStorage.setItem('dd.theme',theme)}catch(e){}}
   if(theme)document.documentElement.dataset.theme=theme;
   var status=document.querySelector('.status');
   if(status){var sel=document.createElement('select');sel.id='theme';sel.title='colour theme';
     sel.innerHTML=THEMES.map(function(t){return '<option value="'+t[0]+'">'+t[1]+'</option>'}).join('');
     var cur=theme||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'ink':'mist');sel.value=cur;
     sel.addEventListener('change',function(){document.documentElement.dataset.theme=sel.value;try{localStorage.setItem('dd.theme',sel.value)}catch(e){}});
-    var safe=document.getElementById('safe');status.insertBefore(sel,safe||null)}
+    status.appendChild(sel)}
   /* beta pill in the header, standard footer on every page */
   if(status&&!document.getElementById('betaLink')&&location.pathname!=='/beta'){var b=document.createElement('a');b.id='betaLink';b.href='/beta';b.className='beta';b.textContent='Join beta';status.insertBefore(b,status.firstChild)}
   var foot=document.querySelector('footer .wrap');
