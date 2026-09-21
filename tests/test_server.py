@@ -48,7 +48,7 @@ def test_pages_and_assets():
         lim = c.get("/limits").json()
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
         an = c.get("/analysis").text
-        assert "TradingView" not in an and "addAreaSeries" in an and 'id="pane-overview"' in an and 'id="lvBody"' in an
+        assert "TradingView" not in an and "addAreaSeries" in an and 'id="pane-fundamental"' in an and 'id="pivBody"' in an
         assert c.get("/chart", follow_redirects=False).status_code == 307 and "/analysis" in c.get("/chart", follow_redirects=False).headers["location"]  # noqa: E501
         bars = c.get("/markets/bars?symbol=NIFTY50&range=1d").json()
         assert bars["intraday"] and bars["interval"] == "5m" and len(bars["bars"]) > 20 and {"open", "high", "low", "close", "volume"} <= set(bars["bars"][0])  # noqa: E501
@@ -63,7 +63,12 @@ def test_pages_and_assets():
         fu = c.get("/markets/fundamentals/RELIANCE").json()
         assert fu["symbol"] == "RELIANCE" and "error" in fu          # no provider in tests: explains itself instead of failing
         an = c.get("/analysis").text
-        assert 'id="pane-financials"' in an and 'data-t="financials"' in an
+        assert 'id="pane-fundamental"' in an and 'id="pane-technical"' in an and 'data-t="fundamental"' in an
+        ta = c.get("/markets/technicals/HDFCBANK?tf=daily").json()
+        assert ta["summary"]["overall"] in ("Strong buy", "Buy", "Neutral", "Sell", "Strong sell") and len(ta["indicators"]) == 12 and len(ta["strip"]) == 5  # noqa: E501
+        assert ta["pivots"]["methods"][0]["name"] == "Classic" and ta["moving_averages"][-1]["period"] == 200
+        pe = c.get("/markets/peers/HDFCBANK").json()
+        assert pe["sector"] == "Financials" and pe["rows"][0]["self"] and len(pe["rows"]) > 3
         gl = c.get("/global").text
         assert 'id="map"' in gl and 'id="regions"' in gl and 'href="/global" aria-current="page"' in gl
         g = c.get("/markets/global").json()

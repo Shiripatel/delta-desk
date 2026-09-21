@@ -41,6 +41,7 @@ LINES: dict[str, tuple[str, str, str]] = {
 TRAILING = ["PeRatio", "ForwardPeRatio", "PbRatio", "PsRatio", "PegRatio", "MarketCap", "EnterpriseValue", "EnterprisesValueEBITDARatio", "EnterprisesValueRevenueRatio"]  # noqa: E501
 RATIOS: list[tuple[str, str]] = [("gross_margin", "Gross margin %"), ("operating_margin", "Operating margin %"), ("ebitda_margin", "EBITDA margin %"),  # noqa: E501
                                  ("net_margin", "Net margin %"), ("roe", "Return on equity %"), ("roa", "Return on assets %"),
+                                 ("roce", "ROCE %"), ("interest_coverage", "Interest coverage"),
                                  ("debt_equity", "Debt to equity"), ("current_ratio", "Current ratio"), ("fcf_margin", "FCF margin %"),
                                  ("revenue_growth", "Revenue growth %"), ("net_income_growth", "Net income growth %"), ("eps_growth", "EPS growth %")]  # noqa: E501
 FLOW = {"TotalRevenue", "CostOfRevenue", "GrossProfit", "OperatingIncome", "EBITDA", "InterestExpense", "PretaxIncome", "TaxProvision", "NetIncome",  # noqa: E501
@@ -178,6 +179,9 @@ def compose(d: dict) -> dict:
             r["net_margin"][dt] = _pct(g("NetIncome"), g("TotalRevenue"))
             r["roe"][dt] = _pct(g("NetIncome") * (4 if freq == "quarterly" else 1) if g("NetIncome") is not None else None, g("StockholdersEquity"))  # noqa: E501
             r["roa"][dt] = _pct(g("NetIncome") * (4 if freq == "quarterly" else 1) if g("NetIncome") is not None else None, g("TotalAssets"))  # noqa: E501
+            cap = (g("TotalAssets") - g("CurrentLiabilities")) if g("TotalAssets") is not None and g("CurrentLiabilities") is not None else None  # noqa: E501
+            r["roce"][dt] = _pct(g("OperatingIncome") * (4 if freq == "quarterly" else 1) if g("OperatingIncome") is not None else None, cap)  # noqa: E501
+            r["interest_coverage"][dt] = _div(g("OperatingIncome"), g("InterestExpense"))
             r["debt_equity"][dt] = _div(g("TotalDebt"), g("StockholdersEquity"))
             r["current_ratio"][dt] = _div(g("CurrentAssets"), g("CurrentLiabilities"))
             r["fcf_margin"][dt] = _pct(g("FreeCashFlow"), g("TotalRevenue"))
@@ -193,6 +197,11 @@ def compose(d: dict) -> dict:
         for line in FLOW:
             vals = [q[line].get(dt) for dt in qd[-4:]]
             out["ttm"][line] = round(sum(vals), 1) if all(v is not None for v in vals) else None
+    out["ttm_prev"] = {}
+    if len(qd) >= 8:
+        for line in ("TotalRevenue", "NetIncome", "DilutedEPS"):
+            vals = [q[line].get(dt) for dt in qd[-8:-4]]
+            out["ttm_prev"][line] = round(sum(vals), 1) if all(v is not None for v in vals) else None
     tr = {k: (sorted(v.items())[-1][1] if v else None) for k, v in series.get("trailing", {}).items()}
     a, ad = out["statements"].get("annual", {}), out["periods"].get("annual", [])
     last = ad[-1] if ad else None
@@ -211,8 +220,16 @@ def compose(d: dict) -> dict:
         "revenue_cagr_3y": _cagr(a["TotalRevenue"].get(first), a["TotalRevenue"].get(last), years) if first and last else None,
         "eps_cagr_3y": _cagr(a["DilutedEPS"].get(first), a["DilutedEPS"].get(last), years) if first and last else None,
         "fy": last,
+        "roce": out["ratios"]["annual"]["roce"].get(last) if last else None,
+        "interest_coverage": out["ratios"]["annual"]["interest_coverage"].get(last) if last else None,
+        "revenue_ttm_growth": _growth(out["ttm"].get("TotalRevenue"), out["ttm_prev"].get("TotalRevenue")),
+        "net_income_ttm_growth": _growth(out["ttm"].get("NetIncome"), out["ttm_prev"].get("NetIncome")),
+        "roe_3y_avg": _avg([out["ratios"]["annual"]["roe"].get(dt) for dt in ad[-3:]]),
+        "revenue_cagr_1y": out["ratios"]["annual"]["revenue_growth"].get(last) if last else None,
+        "profit_cagr_1y": out["ratios"]["annual"]["net_income_growth"].get(last) if last else None,
     }
     s = out["snapshot"]
+    out["pros"], out["cons"] = pros_cons(s)
     out["council"] = {"pe": s["pe"], "pb": s["pb"], "roe": s["roe"], "debt_equity": s["debt_equity"], "revenue_growth": s["revenue_cagr_3y"],  # noqa: E501
                       "eps_growth": s["eps_cagr_3y"], "dividend_yield": None, "promoter_holding": None, "fii_holding": None, "source": "yahoo fundamentals"}  # noqa: E501
     return out
@@ -220,3 +237,44 @@ def compose(d: dict) -> dict:
 
 def _r(v: float | None) -> float | None:
     return round(v, 2) if v is not None else None
+
+
+def _avg(vals: list[float | None]) -> float | None:
+    xs = [v for v in vals if v is not None]
+    return round(sum(xs) / len(xs), 1) if xs else None
+
+
+def pros_cons(s: dict) -> tuple[list[str], list[str]]:
+    """Plain-language observations from the ratios (rules v0). Thresholds are conventional retail screens."""
+    pros: list[str] = []
+    cons: list[str] = []
+    g = s.get("net_income_ttm_growth") if s.get("net_income_ttm_growth") is not None else s.get("profit_cagr_1y")
+    if s.get("eps_cagr_3y") is not None:
+        (pros if s["eps_cagr_3y"] >= 15 else cons).append(f"EPS {'grew' if s['eps_cagr_3y'] >= 0 else 'fell'} at {abs(s['eps_cagr_3y']):.0f} % a year over three years"  # noqa: E501
+                                                          + (" · strong compounding" if s["eps_cagr_3y"] >= 15 else " · slow"))
+    if s.get("revenue_cagr_3y") is not None and s["revenue_cagr_3y"] < 8:
+        cons.append(f"Revenue growth is slow: {s['revenue_cagr_3y']:.0f} % a year over three years")
+    elif s.get("revenue_cagr_3y") is not None and s["revenue_cagr_3y"] >= 15:
+        pros.append(f"Revenue grew {s['revenue_cagr_3y']:.0f} % a year over three years")
+    if s.get("roe") is not None:
+        (pros if s["roe"] >= 18 else cons).append(f"Return on equity of {s['roe']:.0f} %" + (" · high" if s["roe"] >= 18 else " · below the 18 % bar" if s["roe"] >= 10 else " · low"))  # noqa: E501
+    if s.get("roce") is not None and s["roce"] >= 20:
+        pros.append(f"ROCE of {s['roce']:.0f} % · capital is used well")
+    if s.get("debt_equity") is not None:
+        if s["debt_equity"] <= 0.3:
+            pros.append(f"Almost debt free · debt to equity {s['debt_equity']:.2f}")
+        elif s["debt_equity"] >= 1.5:
+            cons.append(f"High leverage · debt to equity {s['debt_equity']:.2f}")
+    if s.get("interest_coverage") is not None and s["interest_coverage"] < 2:
+        cons.append(f"Interest coverage is thin at {s['interest_coverage']:.1f}×")
+    if s.get("pb") is not None and s["pb"] >= 6:
+        cons.append(f"Stock trades at {s['pb']:.1f} times book value")
+    if s.get("pe") is not None and s.get("eps_cagr_3y") is not None and s["eps_cagr_3y"] > 0 and s["pe"] / s["eps_cagr_3y"] <= 1.2:
+        pros.append(f"P/E of {s['pe']:.0f} against {s['eps_cagr_3y']:.0f} % EPS growth · PEG near or below 1")
+    if s.get("fcf_ttm_cr") is not None and s["fcf_ttm_cr"] < 0:
+        cons.append("Free cash flow is negative over the last year")
+    elif s.get("fcf_ttm_cr") is not None and s.get("net_income_ttm_cr") and s["fcf_ttm_cr"] >= 0.8 * s["net_income_ttm_cr"]:
+        pros.append("Profits convert into free cash flow")
+    if g is not None and g < 0:
+        cons.append(f"Profit fell {abs(g):.0f} % in the latest year")
+    return pros[:6], cons[:6]

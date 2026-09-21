@@ -8,6 +8,7 @@ from datetime import date
 
 from deltadesk.markets import calendar as cal
 from deltadesk.markets import ipo, universe
+from deltadesk.markets import technicals as ta
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
 from deltadesk.markets.chat import DeskAssistant
 from deltadesk.markets.council import Council, SyntheticBars, chart_bars
@@ -220,6 +221,53 @@ class MarketsService:
         if self.funda is None:
             return {"symbol": symbol.upper(), "error": "fundamentals provider not configured (run with DD_QUOTES=yahoo)", "source": "none"}
         return self.funda.analysis(symbol, refresh)
+
+    def technicals(self, symbol: str, timeframe: str = "daily") -> dict:
+        """Indicators, moving averages and pivots on one timeframe, plus the summary verdict for every timeframe."""
+        symbol = symbol.upper()
+        if timeframe not in ta.TIMEFRAMES:
+            timeframe = "daily"
+        out = ta.analyse(self.bars(symbol, ta.TIMEFRAMES[timeframe][0])["bars"], timeframe)
+        strip = []
+        for tf, (rng, label) in ta.TIMEFRAMES.items():
+            try:
+                r = out if tf == timeframe else ta.analyse(self.bars(symbol, rng)["bars"], tf)
+                strip.append({"timeframe": tf, "label": label, "verdict": r.get("summary", {}).get("overall", "—"),
+                              "ma": r.get("summary", {}).get("moving_averages", {}).get("verdict", "—"),
+                              "ind": r.get("summary", {}).get("indicators", {}).get("verdict", "—")})
+            except Exception:  # noqa: BLE001 - one timeframe failing must not sink the page
+                strip.append({"timeframe": tf, "label": label, "verdict": "—", "ma": "—", "ind": "—"})
+        out["strip"] = strip
+        out["symbol"] = symbol
+        out["source"] = self.council.bars.name
+        return out
+
+    def peers(self, symbol: str, limit: int = 8) -> dict:
+        """Same-sector companies from the index universe with quote and, when the provider is configured, valuation."""
+        symbol = symbol.upper()
+        me = universe.all_symbols().get(symbol)
+        if me is None:
+            return {"symbol": symbol, "sector": "", "rows": []}
+        cands = sorted([c for c in universe.all_symbols().values() if c.sector == me.sector and c.symbol != symbol], key=lambda c: -c.weight)[:limit]  # noqa: E501
+        rows = [me] + cands
+        q = self.quotes.quotes([c.symbol for c in rows])
+        snaps: dict[str, dict] = {}
+        if self.funda is not None:
+            from concurrent.futures import ThreadPoolExecutor
+
+            def one(sym: str) -> tuple[str, dict]:
+                a = self.funda.analysis(sym)
+                return sym, (a.get("snapshot") or {}) if a and not a.get("error") else {}
+            with ThreadPoolExecutor(max_workers=6) as ex:
+                snaps = dict(ex.map(one, [c.symbol for c in rows]))
+        out = []
+        for c in rows:
+            qq = q.get(c.symbol)
+            sn = snaps.get(c.symbol, {})
+            out.append({"symbol": c.symbol, "name": c.name, "self": c.symbol == symbol, "cmp": qq.ltp if qq else None, "change_pct": qq.change_pct if qq else None,  # noqa: E501
+                        "pe": sn.get("pe"), "market_cap_cr": sn.get("market_cap_cr"), "roe": sn.get("roe"), "roce": sn.get("roce"), "net_margin": sn.get("net_margin"),  # noqa: E501
+                        "revenue_cagr_3y": sn.get("revenue_cagr_3y"), "eps_cagr_3y": sn.get("eps_cagr_3y"), "debt_equity": sn.get("debt_equity")})  # noqa: E501
+        return {"symbol": symbol, "sector": me.sector, "rows": out, "valuation": self.funda is not None}
 
     def global_market(self) -> dict:
         """World map read model: key indices placed by city, grouped by region, plus futures, commodities, FX, bonds, crypto."""

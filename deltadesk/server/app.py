@@ -315,6 +315,14 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(404, f"no financial statements for {symbol}")
         return JSONResponse(out)
 
+    @app.get("/markets/technicals/{symbol}")
+    async def m_technicals(symbol: str, tf: str = "daily"):
+        return JSONResponse(await asyncio.to_thread(markets.technicals, symbol, tf))
+
+    @app.get("/markets/peers/{symbol}")
+    async def m_peers(symbol: str):
+        return JSONResponse(await asyncio.to_thread(markets.peers, symbol))
+
     @app.get("/markets/global")
     async def m_global():
         return JSONResponse(await asyncio.to_thread(markets.global_market))

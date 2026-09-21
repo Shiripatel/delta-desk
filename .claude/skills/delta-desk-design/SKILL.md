@@ -20,7 +20,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/heatmap` | `heatmap.html` | Heatmap |
 | `/news` | `news.html` | News (live wire, impact calls, assistant) |
 | `/ipo`, `/ipo/<slug>` | `ipo.html` | IPO |
-| `/analysis` | `analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; the chart is one tab inside it: a single line of closes with range buttons, no third-party widget; `/chart` redirects) |
+| `/analysis` | `analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (screener-style tables: years as columns, ratios box, pros / cons, peers) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
 | `/markets` | `markets.html` | (full market-analysis surface, not in the nav for now) |
 | `/desk` | `agents.html` | Agents (the agent council: stock + horizon → verdict) |
 | `/sniper` | `sniper.html` | Sniper (F&O desk: scope, range with zones, chain, targets, the shot, risk) |
