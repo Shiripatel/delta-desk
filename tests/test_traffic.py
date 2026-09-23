@@ -1,4 +1,4 @@
-from deltadesk.server.analytics import Traffic
+from deltadesk.server.traffic import Traffic
 
 
 def test_traffic_log_and_summary(tmp_path):

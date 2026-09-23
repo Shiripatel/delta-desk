@@ -21,7 +21,7 @@ def _client():
     from deltadesk.markets.service import MarketsService
     from deltadesk.markets.watchlist import Watchlist as WL
     m = MarketsService(watchlist=WL(d / "watch.json"))
-    from deltadesk.server.analytics import Traffic
+    from deltadesk.server.traffic import Traffic
     return TestClient(create_app(Pipeline(s, SyntheticFeed(s, speed=0.0)), cycles=1, markets=m, waitlist=Waitlist(d / "wl.jsonl"),
                                  alerts=Alerts(m, notifier=Notifier(), path=d / "a.json", log_path=d / "log.jsonl"), alert_interval=3600,
                                  traffic_log_store=Traffic(d / "traffic.jsonl", salt="test")))

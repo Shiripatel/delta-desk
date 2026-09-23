@@ -12,10 +12,14 @@ F&O desk that runs a typed, risk-checked pipeline in paper mode. Nothing here is
 ```
 deltadesk/            Python package
   agents/             the sniper pipeline: feed → planner → regime → chain → sniper → strategy → risk → exec
+  analytics/          options maths: Black-76 Greeks and implied vol, chain stats, indicators
+  broker/             broker interface and the paper broker
   feeds/              synthetic market, Kite and Upstox adapters
-  markets/            read model behind the pages: universe, quotes, ranking, radar, council, news,
-                      chat, IPO, fundamentals, technicals, watchlist, logos
-  server/             FastAPI app (pages, JSON API, WebSocket stream), traffic log
+  auth/               Upstox login and token cache
+  markets/            read model behind the pages: universe, quotes and bars, AI ranking and radar, council,
+                      news wire and desk assistant, IPO, fundamentals, technicals, investors, watchlist,
+                      agent chat and language-model providers, logos
+  server/             FastAPI app (page table, JSON API, WebSocket stream), traffic log (traffic.py)
   beta.py             waitlist, alert rules, WhatsApp / Telegram notifiers
   cli.py              `deltadesk run` (one synthetic day) and `deltadesk serve`
 web/
@@ -26,6 +30,7 @@ web/
 data/                 runtime state, gitignored: watchlists, waitlist, alerts, caches, traffic log
 docs/                 STATUS (hand-off), ROADMAP, PLAN
 tests/                pytest suite, mirrors the package
+tools/                page_harness.js: runtime smoke test for page scripts against a running server
 .claude/skills/       the design system skill every page follows
 ```
 

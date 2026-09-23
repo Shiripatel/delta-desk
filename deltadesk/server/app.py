@@ -20,7 +20,7 @@ from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
 from deltadesk.markets.watchlist import WatchlistError
 from deltadesk.pipeline import Pipeline
-from deltadesk.server.analytics import Traffic
+from deltadesk.server.traffic import Traffic
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
