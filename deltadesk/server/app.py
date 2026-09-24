@@ -98,7 +98,8 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def lifespan(app: FastAPI):
         task = asyncio.create_task(pipeline.run(cycles))
         loop = asyncio.create_task(alert_loop())
-        warmer = asyncio.create_task(Warmer(markets).run()) if warm else None
+        app.state.warmer = Warmer(markets) if warm else None
+        warmer = asyncio.create_task(app.state.warmer.run()) if warm else None
         yield
         task.cancel()
         loop.cancel()
@@ -146,7 +147,9 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.get("/healthz")
     async def healthz():
-        return JSONResponse({"ok": True, "quotes": markets.quotes.name, "mode": pipeline.s.mode})
+        w = getattr(app.state, "warmer", None)
+        return JSONResponse({"ok": True, "quotes": markets.quotes.name, "mode": pipeline.s.mode,
+                             "warm": {"runs": w.runs, "steps": len(w.last)} if w else None})
 
     @app.get("/chart")
     async def chart_page():
