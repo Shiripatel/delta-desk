@@ -31,7 +31,7 @@ class YahooQuotes:
     delay_min = 15
     note = "Yahoo Finance · about 15 min delayed · no account"
 
-    def __init__(self, ttl: float = 60.0, workers: int = 8, timeout: float = 10.0) -> None:
+    def __init__(self, ttl: float = 180.0, workers: int = 8, timeout: float = 10.0) -> None:   # quotes are ~15 min delayed anyway
         self.ttl = ttl
         self.workers = workers
         self.timeout = timeout

@@ -12,7 +12,7 @@ import asyncio
 import time
 from collections.abc import Callable
 
-FAST_EVERY = 240        # seconds: quotes, indices, news
+FAST_EVERY = 150        # seconds: quotes, indices, news (inside the 180 s quote cache)
 RANK_EVERY = 600        # seconds: rankings (cache TTL is 900)
 
 
