@@ -48,3 +48,12 @@ def test_alert_rules_fire_and_cool_down(tmp_path: Path):
     assert len(a.log()) == 2 and a.log()[0]["sent"] is True
     assert a.remove(r1["rule"]["id"]) and not a.remove("nope")
     assert Notifier().send("x", "y")["sent"] is False
+
+
+def test_waitlist_store_falls_back_without_database(monkeypatch):
+    from deltadesk.beta import Waitlist, WaitlistDB, waitlist_from_env
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    assert type(waitlist_from_env()) is Waitlist
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pw@127.0.0.1:1/none")   # unreachable: must fall back, not crash
+    assert type(waitlist_from_env()) is Waitlist
+    assert issubclass(WaitlistDB, Waitlist)

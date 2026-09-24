@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from deltadesk.beta import Alerts, Waitlist
+from deltadesk.beta import Alerts, Waitlist, waitlist_from_env
 from deltadesk.markets import universe
 from deltadesk.markets.logos import DOMAINS
 from deltadesk.markets.service import MarketsService
@@ -80,7 +80,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
                waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0,
                traffic_log_store: Traffic | None = None) -> FastAPI:
     markets = markets or MarketsService()
-    waitlist = waitlist or Waitlist()
+    waitlist = waitlist or waitlist_from_env()
     traffic = traffic_log_store or Traffic()
     alerts = alerts or Alerts(markets)
 

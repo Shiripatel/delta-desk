@@ -66,10 +66,13 @@ class Waitlist:
                         "total": len(rows)}
             row = {"ts": time.time(), "name": name, "email": email, "phone": phone, "interests": ints, "experience": experience[:40],
                    "whatsapp_ok": bool(whatsapp_ok and phone), "source": source}
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            with self.path.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(row) + "\n")
+            self._append(row)
             return {"ok": True, "duplicate": False, "position": len(rows) + 1, "total": len(rows) + 1}
+
+    def _append(self, row: dict) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row) + "\n")
 
     def stats(self) -> dict:
         rows = self._rows()
@@ -79,6 +82,45 @@ class Waitlist:
                 by_int[i] = by_int.get(i, 0) + 1
         return {"total": len(rows), "whatsapp": sum(1 for r in rows if r.get("whatsapp_ok")), "interests": by_int,
                 "last_24h": sum(1 for r in rows if time.time() - r.get("ts", 0) < 86400)}
+
+
+class WaitlistDB(Waitlist):
+    """The same waitlist on Postgres (DATABASE_URL), so sign-ups survive redeploys on hosts with no disk.
+    Works with any Postgres: Neon and Supabase have free tiers. The table is created on first use."""
+
+    def __init__(self, url: str) -> None:
+        self.url = url
+        self._lock = threading.Lock()
+        with self._conn() as c:
+            c.execute("CREATE TABLE IF NOT EXISTS waitlist (id serial PRIMARY KEY, ts double precision, name text, email text UNIQUE, phone text, "  # noqa: E501
+                      "interests text, experience text, whatsapp_ok boolean, source text)")
+
+    def _conn(self):
+        import psycopg
+        return psycopg.connect(self.url, connect_timeout=10, autocommit=True)
+
+    def _rows(self) -> list[dict]:
+        with self._conn() as c:
+            cur = c.execute("SELECT ts, name, email, phone, interests, experience, whatsapp_ok, source FROM waitlist ORDER BY id")
+            return [{"ts": r[0], "name": r[1], "email": r[2], "phone": r[3], "interests": json.loads(r[4] or "[]"), "experience": r[5],
+                     "whatsapp_ok": bool(r[6]), "source": r[7]} for r in cur.fetchall()]
+
+    def _append(self, row: dict) -> None:
+        with self._conn() as c:
+            c.execute("INSERT INTO waitlist (ts, name, email, phone, interests, experience, whatsapp_ok, source) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) "  # noqa: E501
+                      "ON CONFLICT (email) DO NOTHING",
+                      (row["ts"], row["name"], row["email"], row["phone"], json.dumps(row["interests"]), row["experience"], row["whatsapp_ok"], row["source"]))  # noqa: E501
+
+
+def waitlist_from_env() -> Waitlist:
+    """Postgres when DATABASE_URL is set (Neon, Supabase, Render Postgres), else the local JSONL file."""
+    url = os.environ.get("DATABASE_URL", "")
+    if url.startswith(("postgres://", "postgresql://")):
+        try:
+            return WaitlistDB(url)
+        except Exception as exc:  # noqa: BLE001 - a bad URL must not stop the server; fall back and say so
+            print(f"waitlist: DATABASE_URL unusable ({exc}); using data/waitlist.jsonl")
+    return Waitlist()
 
 
 # ---- notifiers ------------------------------------------------------------------------------------

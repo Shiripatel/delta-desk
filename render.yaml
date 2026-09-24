@@ -22,6 +22,8 @@ services:
         generateValue: true
       - key: DD_TRAFFIC_SALT
         generateValue: true
+      - key: DATABASE_URL
+        sync: false
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: DD_OWNER_CHAT
