@@ -1,4 +1,5 @@
 [project]
+license = { text = "All rights reserved (source-available, see LICENSE)" }
 name = "deltadesk"
 version = "0.1.0"
 description = "Sniper-style agentic F&O trading desk for NSE (paper mode first)."

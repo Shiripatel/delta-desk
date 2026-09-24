@@ -5,6 +5,8 @@ watchlist, a sector heatmap, a news wire with impact calls, IPO tracking with an
 market map, a stock analysis page (fundamental and technical), an agent council, and a sniper-style
 F&O desk that runs a typed, risk-checked pipeline in paper mode. Nothing here is investment advice.
 
+Status: private beta, paper trading only. Source is published to read and follow, all rights reserved (see LICENSE).
+
 `docs/STATUS.md` is the hand-off: what exists, what is real, what is next. Read it first.
 
 ## Layout
@@ -78,3 +80,9 @@ top pages, referrers and device mix.
 `Dockerfile` builds one container that runs the pipeline and the HTTP / WebSocket server on port 8000.
 Set `DD_QUOTES=yahoo` and the secrets from `.env.example` in the host's environment; mount or persist
 `data/` if you want watchlists, the waitlist and the traffic log to survive redeploys.
+
+## Licence
+
+Copyright (c) 2026 Shirish Patel. All rights reserved. The code is published for reading and personal,
+non-commercial use; copying it into another product or service needs written permission. See `LICENSE`.
+Lightweight Charts is Apache 2.0 (TradingView). Nothing here is investment advice.
