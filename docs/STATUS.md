@@ -73,6 +73,10 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 6. **Upstox live session:** create the Upstox app, `deltadesk login upstox`, run the sniper on the real chain during market hours; then the recorder and replay (roadmap days 6–7).
 7. Radar trails toggle, compare two stocks on the council, mobile pass, GitHub Pages demo.
 
+## Hosting
+
+`render.yaml` deploys the beta to Render's free tier from GitHub (sleeps when idle, disk resets on deploy; sign-ups are mirrored to the owner's Telegram via `DD_OWNER_CHAT`). Hugging Face Docker Spaces became paid; GitHub Pages cannot run the server. Real traffic → Oracle always-free VM with `data/` on disk, and the waitlist in a database.
+
 ## Checks
 
 `uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running: it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). CI parse-checks every page with node.

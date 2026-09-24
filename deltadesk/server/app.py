@@ -69,6 +69,13 @@ def _dump(x):
     return x
 
 
+def _safe_send(notifier, to: str, text: str) -> None:
+    try:
+        notifier.send(to, text)
+    except Exception:  # noqa: BLE001 - a failed owner ping must never fail the sign-up
+        pass
+
+
 def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None,
                waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0,
                traffic_log_store: Traffic | None = None) -> FastAPI:
@@ -141,7 +148,14 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     @app.post("/waitlist")
     async def waitlist_join(body: WaitlistIn):
-        return JSONResponse(waitlist.join(body.name, body.email, body.phone, body.interests, body.experience, body.whatsapp_ok))
+        out = waitlist.join(body.name, body.email, body.phone, body.interests, body.experience, body.whatsapp_ok)
+        owner = os.environ.get("DD_OWNER_CHAT", "")
+        if out.get("ok") and not out.get("duplicate") and owner:
+            parts = [f"New Delta Desk waitlist sign-up #{out.get('position')}: {body.name} · {body.email}", body.phone or "",
+                     ", ".join(body.interests) if body.interests else "", body.experience or ""]
+            text = " · ".join(x for x in parts if x)
+            asyncio.get_running_loop().run_in_executor(None, lambda: _safe_send(alerts.notifier, owner, text))
+        return JSONResponse(out)
 
     @app.get("/waitlist/stats")
     async def waitlist_stats():

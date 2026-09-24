@@ -77,9 +77,18 @@ top pages, referrers and device mix.
 
 ## Deploy
 
-`Dockerfile` builds one container that runs the pipeline and the HTTP / WebSocket server on port 8000.
-Set `DD_QUOTES=yahoo` and the secrets from `.env.example` in the host's environment; mount or persist
-`data/` if you want watchlists, the waitlist and the traffic log to survive redeploys.
+`Dockerfile` builds one container that runs the pipeline and the HTTP / WebSocket server; it listens on
+`$PORT` when the host sets one, else 8000. GitHub Pages cannot host it (it is a live server, not static
+files), so the free path is a container host wired to this repository:
+
+* **Render (free web service):** New → Blueprint → choose this repository; `render.yaml` sets everything.
+  Fill `TELEGRAM_BOT_TOKEN`, `DD_OWNER_CHAT` and `GROQ_API_KEY` in the dashboard. The free service sleeps
+  after 15 idle minutes and its disk resets on deploy; every waitlist sign-up is therefore also sent to the
+  owner's Telegram (`DD_OWNER_CHAT`).
+* **Hugging Face Spaces:** the Docker SDK is paid now; a Gradio Space can still run this app by launching
+  the FastAPI server from `app.py`, but Render is the simpler free option.
+* **A VM (Oracle always-free, any VPS):** `docker build -t deltadesk . && docker run -p 80:8000 --env-file .env -v ./data:/app/data deltadesk`
+  keeps `data/` across restarts.
 
 ## Licence
 

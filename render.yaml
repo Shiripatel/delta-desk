@@ -1,0 +1,32 @@
+# Render Blueprint: one free web service built from the Dockerfile, redeployed on every push to main.
+# In Render: New → Blueprint → pick this repository → Apply. Fill the "sync: false" secrets in the dashboard.
+# Free tier notes: the service sleeps after 15 minutes without traffic (first visit takes ~1 minute to wake)
+# and its disk is wiped on every deploy, so waitlist sign-ups are also pushed to the owner's Telegram.
+services:
+  - type: web
+    name: delta-desk
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    healthCheckPath: /limits
+    autoDeploy: true
+    envVars:
+      - key: DD_QUOTES
+        value: yahoo
+      - key: DD_FEED
+        value: synthetic
+      - key: DD_MODE
+        value: paper
+      - key: DD_ADMIN_TOKEN
+        generateValue: true
+      - key: DD_TRAFFIC_SALT
+        generateValue: true
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: DD_OWNER_CHAT
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PYTHONUNBUFFERED
+        value: "1"
