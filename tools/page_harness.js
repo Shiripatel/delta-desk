@@ -28,7 +28,8 @@ global.navigator = {}; global.CustomEvent = class { constructor(t, o) { this.typ
 global.getComputedStyle = () => ({ getPropertyValue: () => '#000' });
 global.LightweightCharts = null; global.confirm = () => false; global.prompt = () => null; global.alert = () => {};
 const realFetch = global.fetch;
-global.fetch = (u, o) => realFetch('http://127.0.0.1:8000' + u, o);
+const BASE = process.env.BASE || 'http://127.0.0.1:8000';
+global.fetch = (u, o) => realFetch(BASE + u, o);
 process.on('unhandledRejection', e => { errors.push('unhandled: ' + (e && e.stack || e)); });
 for (const f of ['web/static/js/common.js', 'web/static/js/ui.js']) { try { new Function(fs.readFileSync(f, 'utf8'))(); } catch (e) { errors.push(f + ': ' + e.stack); } }
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).filter(s => !s.includes("localStorage.getItem('dd.theme')"));
