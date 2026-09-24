@@ -9,7 +9,7 @@ services:
     plan: free
     region: singapore
     branch: main
-    healthCheckPath: /limits
+    healthCheckPath: /healthz
     autoDeploy: true
     envVars:
       - key: DD_QUOTES

@@ -51,6 +51,7 @@ def test_pages_and_assets():
         assert lim["margin_cap"] > 0 and "max_open_structures" in lim
         an = c.get("/analysis").text
         assert "TradingView" not in an and "addAreaSeries" in an and "/static/js/common.js" in an and 'id="pane-fundamental"' in an and 'id="pivBody"' in an  # noqa: E501
+        assert c.get("/healthz").json()["ok"] is True
         assert c.get("/chart", follow_redirects=False).status_code == 307 and "/analysis" in c.get("/chart", follow_redirects=False).headers["location"]  # noqa: E501
         bars = c.get("/markets/bars?symbol=NIFTY50&range=1d").json()
         assert bars["intraday"] and bars["interval"] == "5m" and len(bars["bars"]) > 20 and {"open", "high", "low", "close", "volume"} <= set(bars["bars"][0])  # noqa: E501

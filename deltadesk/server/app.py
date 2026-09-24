@@ -138,6 +138,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     for _path, _file in PAGE_ROUTES.items():
         app.add_api_route(_path, _page(_file), methods=["GET"], name=_file[:-5])
 
+    @app.get("/healthz")
+    async def healthz():
+        return JSONResponse({"ok": True, "quotes": markets.quotes.name, "mode": pipeline.s.mode})
+
     @app.get("/chart")
     async def chart_page():
         return RedirectResponse("/analysis", status_code=307)
