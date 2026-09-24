@@ -73,10 +73,19 @@
 .modes .model{margin-left:auto;font-size:11px;color:var(--ink-3)}
 .modes .model b{font-weight:500;color:var(--ink-2)}
 .chat{flex:1;overflow:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.m{max-width:min(720px,92%);padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;white-space:pre-wrap}
+.m{max-width:min(760px,96%);padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;white-space:pre-wrap}
 .m.user{align-self:flex-end;background:var(--ink);color:var(--bg);border-bottom-right-radius:4px}
 .m.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}
 .m.bot .tag{display:block;font-size:10.5px;color:var(--ink-3);margin-top:8px}
+.m.bot table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+.m.bot th{text-align:left;font-weight:600;font-size:11px;color:var(--ink-2);padding:6px 8px;border-bottom:1px solid var(--line-2);background:var(--thead)}
+.m.bot td{padding:6px 8px;border-bottom:1px solid var(--line)}
+.m.bot td:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap}
+.m.bot ul{margin:6px 0 0;padding-left:18px}
+.m.bot li{margin:0 0 4px}
+.m.bot p{margin:0 0 6px}
+.m.bot .note{padding:6px 0 0;font-size:11px;color:var(--ink-3)}
+
 .m.think{color:var(--ink-3);font-style:italic}
 .chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 20px 10px}
 .chips button{padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;font-size:12px;color:var(--ink-2);background:var(--card)}
@@ -178,6 +187,19 @@
   document.addEventListener('click',function(e){if(!e.target.closest('.side .search'))sug.style.display='none'});
 
   /* ---- centre: agent chat ---- */
+  /* markdown-lite for agent answers: paragraphs, bullets, **bold**, pipe tables */
+  function md(text){var lines=String(text||'').split(/\r?\n/),out=[],i=0;
+    function inline(t){return esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`(.+?)`/g,'<code>$1</code>')}
+    while(i<lines.length){var l=lines[i];
+      if(/^\s*\|/.test(l)){var rows=[];while(i<lines.length&&/^\s*\|/.test(lines[i])){rows.push(lines[i]);i++}
+        var cells=rows.map(function(r){return r.replace(/^\s*\|/,'').replace(/\|\s*$/,'').split('|').map(function(c){return c.trim()})}).filter(function(c){return !c.every(function(x){return /^:?-{2,}:?$/.test(x)})});
+        if(cells.length){out.push('<table><thead><tr>'+cells[0].map(function(c){return '<th>'+inline(c)+'</th>'}).join('')+'</tr></thead><tbody>'+cells.slice(1).map(function(r){return '<tr>'+r.map(function(c){return '<td>'+inline(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table>')}continue}
+      if(/^\s*[-*•]\s+/.test(l)){var items=[];while(i<lines.length&&/^\s*[-*•]\s+/.test(lines[i])){items.push(lines[i].replace(/^\s*[-*•]\s+/,''));i++}out.push('<ul>'+items.map(function(x){return '<li>'+inline(x)+'</li>'}).join('')+'</ul>');continue}
+      if(/^\s*\d+\.\s+/.test(l)){var nums=[];while(i<lines.length&&/^\s*\d+\.\s+/.test(lines[i])){nums.push(lines[i].replace(/^\s*\d+\.\s+/,''));i++}out.push('<ul>'+nums.map(function(x){return '<li>'+inline(x)+'</li>'}).join('')+'</ul>');continue}
+      if(!l.trim()){i++;continue}
+      var para=[];while(i<lines.length&&lines[i].trim()&&!/^\s*(\||[-*•]\s|\d+\.\s)/.test(lines[i])){para.push(lines[i].replace(/^#+\s*/,''));i++}
+      out.push('<p>'+inline(para.join(' '))+'</p>')}
+    return out.join('')}
   function select(key){sel=key;try{localStorage.setItem('dd.wl.sel',key)}catch(e){}renderList();renderCentre()}
   function renderCentre(){var r=rows().filter(function(x){return x.key===sel})[0];var on=!!r;
     ['chead','modes','chips','ask','cnote'].forEach(function(id){$('#'+id).hidden=!on});
@@ -190,7 +212,7 @@
     $('#cstats').innerHTML='<span>1W <b class="'+cls(st.ret_1w||0)+'">'+pct(st.ret_1w)+'</b></span><span>1M <b class="'+cls(st.ret_1m||0)+'">'+pct(st.ret_1m)+'</b></span><span>52w <b class="num">'+(st.lo_52w!=null?fmt(st.lo_52w,d)+' – '+fmt(st.hi_52w,d):'—')+'</b></span>'}
   function key(){return sel+'|'+mode}
   function renderChat(){var c=convo[key()]||[];var box=$('#chat');
-    box.innerHTML=c.length?c.map(function(m){return '<div class="m '+(m.role==='user'?'user':'bot')+(m.thinking?' think':'')+'">'+esc(m.content)+(m.model?'<span class="tag">'+esc(mode==='fundamental'?'Fundamental agent':'Technical agent')+' · '+esc(m.model)+'</span>':'')+'</div>'}).join(''):
+    box.innerHTML=c.length?c.map(function(m){return '<div class="m '+(m.role==='user'?'user':'bot')+(m.thinking?' think':'')+'">'+(m.role==='user'||m.thinking?esc(m.content):md(m.content))+(m.note?'<div class="note">'+esc(m.note)+'</div>':'')+(m.model?'<span class="tag">'+esc(mode==='fundamental'?'Fundamental agent':'Technical agent')+' · '+esc(m.model)+'</span>':'')+'</div>'}).join(''):
       '<div class="welcome"><b>'+esc(mode==='fundamental'?'Fundamental agent':'Technical agent')+' on '+esc(sel)+'</b>'+(mode==='fundamental'?'Ask about valuation, growth, the balance sheet, peers or the risks in the filings.':'Ask about the trend, momentum, key levels, or whether the timeframes agree.')+'</div>';
     box.scrollTop=box.scrollHeight;
     var chips=(convo[key()+'|sug']||(mode==='fundamental'?['Is it expensive against its peers?','How fast is it growing?','How strong is the balance sheet?','What are the risks in the filings?']:['What is the trend right now?','Is it overbought or oversold?','Which levels matter today?','Do the timeframes agree?']));
@@ -198,7 +220,7 @@
   function ask(text){if(!sel||busy||!text)return;var k=key();convo[k]=(convo[k]||[]).concat([{role:'user',content:text}]);busy=true;$('#send').disabled=true;
     convo[k].push({role:'assistant',content:'reading the data…',thinking:true});renderChat();
     var hist=convo[k].filter(function(m){return !m.thinking}).map(function(m){return {role:m.role,content:m.content}});
-    send('POST','/agent/chat',{symbol:sel,mode:mode,messages:hist}).then(function(d){convo[k]=convo[k].filter(function(m){return !m.thinking}).concat([{role:'assistant',content:d.reply,model:d.model}]);if(d.suggestions)convo[k+'|sug']=d.suggestions;$('#model').innerHTML='model: <b>'+esc(d.model)+'</b>'})
+    send('POST','/agent/chat',{symbol:sel,mode:mode,messages:hist}).then(function(d){convo[k]=convo[k].filter(function(m){return !m.thinking}).concat([{role:'assistant',content:d.reply,model:d.model,note:d.note||''}]);if(d.suggestions)convo[k+'|sug']=d.suggestions;$('#model').innerHTML='model: <b>'+esc(d.model)+'</b>'})
       .catch(function(e){convo[k]=convo[k].filter(function(m){return !m.thinking}).concat([{role:'assistant',content:'The agent could not answer: '+String(e.message||e)}])})
       .then(function(){busy=false;$('#send').disabled=false;renderChat()})}
   $('#modes').addEventListener('click',function(e){var b=e.target.closest('button[data-mode]');if(!b)return;mode=b.dataset.mode;renderCentre()});

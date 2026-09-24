@@ -1,9 +1,10 @@
-"""Fundamental agent and Technical agent chat: grounded answers about one stock.
+"""Fundamental agent and Technical agent chat: grounded, structured answers about one stock.
 
 The agent never sees the open web. It gets a DATA block built from the desk's own read model (quote, filings,
-ratios, pros and cons, peers, technicals, council votes, headlines) and answers from that. With a language
-model configured (see llm.py) the answer is free-form; without one, the same data is composed by rules.
-Either way the reply ends with the disclaimer and is explanation, not advice.
+ratios, pros and cons, peers, technicals, council votes, headlines) and answers from that in a fixed shape:
+one summary line, a small markdown table of the numbers that matter for the question, and two to four short
+bullets. With a language model configured (see llm.py) the model writes it; without one, rules compose the
+same shape from the same data. Either way it ends with the disclaimer and is explanation, not advice.
 """
 from __future__ import annotations
 
@@ -13,10 +14,18 @@ import re
 from deltadesk.markets.llm import LLM, LLMError
 
 MODES = {"fundamental": "Fundamental agent", "technical": "Technical agent"}
-SYSTEM = ("You are Delta Desk's {label} for Indian markets, talking to a retail investor. Answer ONLY from the DATA block; quote the numbers you "  # noqa: E501
-          "use; if something is not in the data say you do not have it. Plain English, short paragraphs or bullets, under 160 words. Explain what "  # noqa: E501
-          "the numbers show and what would change the read. Never tell the user to buy, sell or hold, and never predict prices. End with: "
-          "Not investment advice.")
+SYSTEM = (
+    "You are Delta Desk's {label} for Indian markets, talking to a retail investor. Answer ONLY from the DATA block (JSON). "
+    "Quote the numbers you use; if something is not in the data, say you do not have it. Never tell the user to buy, sell or hold, "
+    "and never predict prices.\n\n"
+    "FORMAT, exactly this, in markdown, no headings, no long paragraphs:\n"
+    "1. One summary line, at most 25 words, that answers the question directly.\n"
+    "2. A table with 4 to 8 rows of the numbers that matter for this question, columns: Metric | Value | Read. "
+    "'Read' is two or three words (e.g. 'below peers', 'rising', 'thin'). Use ₹ crore for money, % for ratios that are percentages.\n"
+    "3. Two to four bullets, each under 20 words, on what the numbers mean and what would change the read.\n"
+    "4. The last line: Not investment advice.\n"
+    "Keep the whole answer under 170 words outside the table."
+)
 SUGGEST = {"fundamental": ["Is it expensive against its peers?", "How fast is it growing?", "How strong is the balance sheet?", "What are the risks in the filings?"],  # noqa: E501
            "technical": ["What is the trend right now?", "Is it overbought or oversold?", "Which levels matter today?", "Do the timeframes agree?"]}  # noqa: E501
 
@@ -46,13 +55,15 @@ class AgentChat:
                 ctx["snapshot"] = f["snapshot"]
                 ctx["pros"], ctx["cons"] = f.get("pros", []), f.get("cons", [])
                 ctx["annual"] = [{"fy": dt, "revenue_cr": f["statements"]["annual"]["TotalRevenue"].get(dt), "net_income_cr": f["statements"]["annual"]["NetIncome"].get(dt),  # noqa: E501
-                                  "eps": f["statements"]["annual"]["DilutedEPS"].get(dt), "roe": f["ratios"]["annual"]["roe"].get(dt)} for dt in ad]  # noqa: E501
+                                  "eps": f["statements"]["annual"]["DilutedEPS"].get(dt), "roe": f["ratios"]["annual"]["roe"].get(dt),
+                                  "debt_equity": f["ratios"]["annual"]["debt_equity"].get(dt)} for dt in ad]
             else:
                 ctx["snapshot"] = None
                 ctx["fundamentals_note"] = (f or {}).get("error") or "no filings for this instrument (index, FX or commodity)"
             try:
                 pe = m.peers(sym)
-                ctx["peers"] = [{"symbol": r["symbol"], "pe": r["pe"], "roe": r["roe"], "market_cap_cr": r["market_cap_cr"]} for r in pe["rows"][:6]]  # noqa: E501
+                ctx["peers"] = [{"symbol": r["symbol"], "name": r["name"], "pe": r["pe"], "roe": r["roe"], "market_cap_cr": r["market_cap_cr"], "net_margin": r["net_margin"]}  # noqa: E501
+                                for r in pe["rows"][:6]]
             except Exception:  # noqa: BLE001
                 ctx["peers"] = []
             try:
@@ -91,101 +102,135 @@ class AgentChat:
         ctx = self.context(symbol, mode)
         history = [{"role": m["role"], "content": str(m.get("content", ""))[:2000]} for m in messages if m.get("role") in ("user", "assistant")][-8:]  # noqa: E501
         question = history[-1]["content"] if history and history[-1]["role"] == "user" else ""
-        text, model, grounded = "", self.llm.label(), True
+        note = ""
         if self.llm.available and question:
             system = SYSTEM.format(label=MODES[mode]) + "\n\nDATA:\n" + json.dumps(ctx, ensure_ascii=False, default=str)
             try:
-                text = self.llm.chat(system, history).strip()
+                text, model = self.llm.chat(system, history).strip(), self.llm.label()
             except LLMError as exc:
-                text = rules_answer(ctx, mode, question) + f"\n\n(language model unavailable: {exc}; this answer was composed by rules)"
-                model = "rules v0 (fallback)"
+                text, model, note = rules_answer(ctx, mode, question), "rules v0 (fallback)", f"language model unavailable: {exc}"
         else:
-            text = rules_answer(ctx, mode, question)
-            model = "rules v0"
+            text, model = rules_answer(ctx, mode, question), "rules v0"
         if "not investment advice" not in text.lower():
-            text += "\n\nNot investment advice."
-        return {"symbol": ctx["symbol"], "name": ctx["name"], "mode": mode, "reply": text, "model": model, "grounded": grounded,
+            text = text.rstrip() + "\n\nNot investment advice."
+        return {"symbol": ctx["symbol"], "name": ctx["name"], "mode": mode, "reply": text, "model": model, "grounded": True, "note": note,
                 "suggestions": SUGGEST[mode], "context": ctx}
 
 
-# ---- rules fallback: the same data, composed without a model ----------------------------------------
+# ---- rules fallback: the same shape, composed without a model ---------------------------------------
 def _n(v, d=1, suffix=""):
     return "—" if v is None else f"{v:,.{d}f}{suffix}"
+
+
+def _table(rows: list[tuple[str, str, str]]) -> str:
+    return "| Metric | Value | Read |\n|---|---|---|\n" + "\n".join(f"| {a} | {b} | {c} |" for a, b, c in rows if b != "—")
+
+
+def _median(xs: list[float]) -> float | None:
+    s = sorted(xs)
+    if not s:
+        return None
+    return s[len(s) // 2] if len(s) % 2 else (s[len(s) // 2 - 1] + s[len(s) // 2]) / 2
 
 
 def rules_answer(ctx: dict, mode: str, question: str) -> str:
     q = (question or "").lower()
     name, sym = ctx["name"], ctx["symbol"]
     qt = ctx.get("quote") or {}
-    head = f"{name} ({sym}) · ₹{_n(qt.get('ltp'), 2)} · {_n(qt.get('change_pct'), 2, ' %')} today."
-    parts = [head]
+    bullets: list[str] = []
     if mode == "fundamental":
         s = ctx.get("snapshot")
         if not s:
-            parts.append(ctx.get("fundamentals_note", "No filings available."))
-            return "\n".join(parts)
-        val = f"Valuation: P/E {_n(s.get('pe'))}, P/B {_n(s.get('pb'), 2)}, EV/EBITDA {_n(s.get('ev_ebitda'))}, market cap ₹{_n(s.get('market_cap_cr'), 0)} cr."  # noqa: E501
-        qual = f"Quality: ROE {_n(s.get('roe'), 1, ' %')}, ROCE {_n(s.get('roce'), 1, ' %')}, debt to equity {_n(s.get('debt_equity'), 2)}, interest coverage {_n(s.get('interest_coverage'))}×."  # noqa: E501
-        gro = f"Growth: revenue {_n(s.get('revenue_cagr_3y'), 1, ' %')} a year and EPS {_n(s.get('eps_cagr_3y'), 1, ' %')} a year over three years; TTM revenue {_n(s.get('revenue_ttm_growth'), 1, ' %')}, TTM profit {_n(s.get('net_income_ttm_growth'), 1, ' %')}."  # noqa: E501
+            return f"No filings for {name}. {ctx.get('fundamentals_note', '')}".strip()
         peers = ctx.get("peers") or []
         pes = [p["pe"] for p in peers[1:] if p.get("pe")]
-        peer_line = ""
-        if pes and s.get("pe"):
-            srt = sorted(pes)
-            med = srt[len(srt) // 2] if len(srt) % 2 else (srt[len(srt) // 2 - 1] + srt[len(srt) // 2]) / 2
-            peer_line = f"Peers: median P/E {_n(med)} across {len(pes)} sector peers, so {sym} trades {'above' if s['pe'] > med else 'below'} the group."  # noqa: E501
-        if any(w in q for w in ("expensive", "cheap", "valuation", "p/e", "pe ", "price")):
-            parts += [val, peer_line]
-        elif any(w in q for w in ("grow", "growth", "revenue", "sales", "profit")):
-            parts += [gro, "Last years: " + "; ".join(f"{a['fy'][:4]} revenue ₹{_n(a['revenue_cr'], 0)} cr, profit ₹{_n(a['net_income_cr'], 0)} cr" for a in ctx.get("annual", [])) + "."]  # noqa: E501
-        elif any(w in q for w in ("debt", "balance", "leverage", "cash", "strong")):
-            parts += [qual, f"Free cash flow (TTM) ₹{_n(s.get('fcf_ttm_cr'), 0)} cr."]
-        elif any(w in q for w in ("risk", "con", "worry", "bad", "weak")):
-            parts += ["Cons from the filings: " + ("; ".join(ctx.get("cons") or ["nothing stood out"])) + "."]
+        med = _median(pes)
+        rel = ("below" if s.get("pe") and med and s["pe"] < med else "above") if s.get("pe") and med else None
+        if any(w in q for w in ("expensive", "cheap", "valuation", "p/e", "pe ", "price", "value")):
+            summary = f"{name} trades at {_n(s.get('pe'))}× earnings, {rel} the sector median of {_n(med)}×." if rel else f"{name} trades at {_n(s.get('pe'))}× earnings; no peer median available."  # noqa: E501
+            rows = [("P/E (TTM)", _n(s.get("pe")), rel + " peers" if rel else "—"), ("Peer median P/E", _n(med), f"{len(pes)} peers"), ("P/B", _n(s.get("pb"), 2), "—"),  # noqa: E501
+                    ("EV / EBITDA", _n(s.get("ev_ebitda")), "—"), ("Market cap", "₹" + _n(s.get("market_cap_cr"), 0) + " cr", "—"), ("EPS growth 3y", _n(s.get("eps_cagr_3y"), 1, " %"), "per year"),  # noqa: E501
+                    ("ROE", _n(s.get("roe"), 1, " %"), "high" if (s.get("roe") or 0) >= 18 else "modest")]
+            bullets += [f"A P/E {rel} the peer median usually reflects {'slower growth or lower returns' if rel == 'below' else 'faster growth or higher returns'}; check the growth row." if rel else "No peer multiple to compare against; judge the P/E against the company's own growth.",  # noqa: E501
+                        "A re-rating needs earnings growth to speed up or the sector multiple to move."]
+            if rel:
+                bullets.append(f"Peer set: {', '.join(p['symbol'] for p in peers[1:])}; median P/E {_n(med)}, so {sym} trades {rel} the group.")  # noqa: E501
+        elif any(w in q for w in ("grow", "growth", "revenue", "sales", "profit", "earning")):
+            summary = f"Revenue compounded {_n(s.get('revenue_cagr_3y'), 1, ' %')} a year and EPS {_n(s.get('eps_cagr_3y'), 1, ' %')} over three years."  # noqa: E501
+            rows = [("Revenue CAGR 3y", _n(s.get("revenue_cagr_3y"), 1, " %"), "per year"), ("EPS CAGR 3y", _n(s.get("eps_cagr_3y"), 1, " %"), "per year"),  # noqa: E501
+                    ("Revenue growth TTM", _n(s.get("revenue_ttm_growth"), 1, " %"), "latest year"), ("Profit growth TTM", _n(s.get("net_income_ttm_growth"), 1, " %"), "latest year"),  # noqa: E501
+                    ("Net margin", _n(s.get("net_margin"), 1, " %"), "—")]
+            for a in ctx.get("annual", []):
+                rows.append((f"FY{a['fy'][:4]} revenue / profit", f"₹{_n(a['revenue_cr'], 0)} / ₹{_n(a['net_income_cr'], 0)} cr", "—"))
+            bullets += ["Growth above 15 % a year is strong for a large company; below 8 % is slow.", "Watch whether margins expand with revenue; profit growing faster than sales is the good sign."]  # noqa: E501
+        elif any(w in q for w in ("debt", "balance", "leverage", "cash", "strong", "solvent")):
+            summary = f"Debt to equity is {_n(s.get('debt_equity'), 2)} and interest is covered {_n(s.get('interest_coverage'))}×."
+            rows = [("Debt / equity", _n(s.get("debt_equity"), 2), "low" if (s.get("debt_equity") or 9) <= 0.5 else "high" if (s.get("debt_equity") or 0) >= 1.5 else "moderate"),  # noqa: E501
+                    ("Interest coverage", _n(s.get("interest_coverage")) + "×", "thin" if (s.get("interest_coverage") or 9) < 2 else "comfortable"),  # noqa: E501
+                    ("Free cash flow (TTM)", "₹" + _n(s.get("fcf_ttm_cr"), 0) + " cr", "positive" if (s.get("fcf_ttm_cr") or 0) > 0 else "negative"),  # noqa: E501
+                    ("ROCE", _n(s.get("roce"), 1, " %"), "—"), ("ROE", _n(s.get("roe"), 1, " %"), "—")]
+            bullets += ["Leverage under 0.5 and coverage above 5× leave room for a bad year.", "Negative free cash flow with rising debt is the combination to watch."]  # noqa: E501
+        elif any(w in q for w in ("risk", "con", "worry", "bad", "weak", "wrong")):
+            summary = f"The filings flag {len(ctx.get('cons') or [])} concerns for {name}." if ctx.get("cons") else f"Nothing in the filings stands out as a concern for {name}."  # noqa: E501
+            rows = [("ROE", _n(s.get("roe"), 1, " %"), "—"), ("Debt / equity", _n(s.get("debt_equity"), 2), "—"), ("Revenue CAGR 3y", _n(s.get("revenue_cagr_3y"), 1, " %"), "—"),  # noqa: E501
+                    ("Profit growth TTM", _n(s.get("net_income_ttm_growth"), 1, " %"), "—"), ("P/B", _n(s.get("pb"), 2), "—")]
+            bullets += list(ctx.get("cons") or [])[:4] or ["No red flags from the rules; read the annual report's risk section for what numbers cannot show."]  # noqa: E501
         else:
-            parts += [val, qual, gro, peer_line]
-            if ctx.get("pros"):
-                parts.append("Pros: " + "; ".join(ctx["pros"][:3]) + ".")
-            if ctx.get("cons"):
-                parts.append("Cons: " + "; ".join(ctx["cons"][:3]) + ".")
+            summary = f"{name}: P/E {_n(s.get('pe'))}×, ROE {_n(s.get('roe'), 1, ' %')}, revenue growing {_n(s.get('revenue_cagr_3y'), 1, ' %')} a year."  # noqa: E501
+            rows = [("Market cap", "₹" + _n(s.get("market_cap_cr"), 0) + " cr", "—"), ("P/E (TTM)", _n(s.get("pe")), rel + " peers" if rel else "—"), ("P/B", _n(s.get("pb"), 2), "—"),  # noqa: E501
+                    ("ROE", _n(s.get("roe"), 1, " %"), "—"), ("Debt / equity", _n(s.get("debt_equity"), 2), "—"), ("Revenue CAGR 3y", _n(s.get("revenue_cagr_3y"), 1, " %"), "—"),  # noqa: E501
+                    ("EPS CAGR 3y", _n(s.get("eps_cagr_3y"), 1, " %"), "—"), ("Dividend yield", _n(s.get("dividend_yield"), 1, " %"), "—")]
+            bullets += (ctx.get("pros") or [])[:2] + (ctx.get("cons") or [])[:2]
         c = ctx.get("council")
         if c:
-            parts.append(f"Council at one year: {c['stance']} ({c['confidence'] * 100:.0f} % confidence).")
+            bullets.append(f"Council at one year: {c['stance']} with {c['confidence'] * 100:.0f} % confidence.")
     else:
         t = ctx.get("technicals")
         if not t:
-            parts.append(ctx.get("technicals_note", "Technicals unavailable."))
-            return "\n".join(parts)
-        sm = t["summary"] or {}
-        overall = f"Daily read: {sm.get('overall', '—')}; moving averages {sm.get('moving_averages', {}).get('verdict', '—')} ({sm.get('moving_averages', {}).get('buy', 0)} buy / {sm.get('moving_averages', {}).get('sell', 0)} sell), indicators {sm.get('indicators', {}).get('verdict', '—')}."  # noqa: E501
-        tfs = "Timeframes: " + ", ".join(f"{x['tf']} {x['verdict']}" for x in t.get("timeframes", [])) + "."
+            return f"Technicals unavailable for {name}. {ctx.get('technicals_note', '')}".strip()
+        sm = t.get("summary") or {}
         ind = {i["name"]: i for i in t.get("indicators", [])}
-
-        def rd(nm):
-            i = ind.get(nm)
-            return f"{nm} {_n(i['value'], 2)} ({i['action']})" if i else nm
+        mas = {m["period"]: m for m in t.get("moving_averages", [])}
         piv = t.get("pivots_classic") or {}
-        lv = f"Classic pivots from the previous session: S2 {_n(piv.get('S2'), 2)}, S1 {_n(piv.get('S1'), 2)}, pivot {_n(piv.get('P'), 2)}, R1 {_n(piv.get('R1'), 2)}, R2 {_n(piv.get('R2'), 2)}."  # noqa: E501
-        if any(w in q for w in ("overbought", "oversold", "rsi", "stoch")):
-            parts += [rd("RSI (14)") + ", " + rd("STOCH (9,6)") + ", " + rd("Williams %R") + "."]
-        elif any(w in q for w in ("level", "support", "resistance", "pivot")):
-            parts += [lv]
-        elif any(w in q for w in ("trend", "average", "ma ", "direction")):
-            parts += [overall, rd("ADX (14)") + ", " + rd("MACD (12,26)") + "."]
-        elif any(w in q for w in ("timeframe", "agree", "weekly", "monthly", "hour")):
-            parts += [tfs]
+
+        def ir(nm):
+            i = ind.get(nm)
+            return (f"{i['value']:,.2f}" if i and i.get("value") is not None else "—", i["action"] if i else "—")
+        tfs = t.get("timeframes", [])
+        if any(w in q for w in ("overbought", "oversold", "rsi", "stoch", "momentum")):
+            summary = f"RSI is {ir('RSI (14)')[0]} ({ir('RSI (14)')[1].lower()}); stochastic {ir('STOCH (9,6)')[0]} ({ir('STOCH (9,6)')[1].lower()})."  # noqa: E501
+            rows = [("RSI (14)", *ir("RSI (14)")), ("STOCH (9,6)", *ir("STOCH (9,6)")), ("STOCHRSI (14)", *ir("STOCHRSI (14)")), ("Williams %R", *ir("Williams %R")),  # noqa: E501
+                    ("CCI (14)", *ir("CCI (14)")), ("Ultimate oscillator", *ir("Ultimate oscillator"))]
+            bullets += ["Above 70 on RSI or 80 on the stochastics is stretched; below 30 / 20 is washed out.", "Oversold in a downtrend can stay oversold; pair it with the trend read."]  # noqa: E501
+        elif any(w in q for w in ("level", "support", "resistance", "pivot", "target", "stop")):
+            summary = f"Pivot {_n(piv.get('P'), 2)}: supports {_n(piv.get('S1'), 2)} and {_n(piv.get('S2'), 2)}, resistances {_n(piv.get('R1'), 2)} and {_n(piv.get('R2'), 2)}."  # noqa: E501
+            rows = [("R2", _n(piv.get("R2"), 2), "resistance"), ("R1", _n(piv.get("R1"), 2), "resistance"), ("Pivot", _n(piv.get("P"), 2), "balance"),  # noqa: E501
+                    ("S1", _n(piv.get("S1"), 2), "support"), ("S2", _n(piv.get("S2"), 2), "support"), ("MA 50", _n(mas.get(50, {}).get("sma"), 2), mas.get(50, {}).get("action", "—").lower()),  # noqa: E501
+                    ("MA 200", _n(mas.get(200, {}).get("sma"), 2), mas.get(200, {}).get("action", "—").lower())]
+            bullets += ["Classic pivots come from yesterday's high, low and close; they reset every session.", "A close beyond R1 or S1 with volume is the usual sign the level has given way."]  # noqa: E501
+        elif any(w in q for w in ("timeframe", "agree", "weekly", "monthly", "hour", "minute")):
+            verdicts = [x["verdict"] for x in tfs]
+            agree = len(set(verdicts)) == 1
+            summary = ("All timeframes agree: " + verdicts[0] + ".") if agree and verdicts else "The timeframes disagree; short-term and long-term reads differ."  # noqa: E501
+            rows = [(x["tf"], x["verdict"], "—") for x in tfs]
+            bullets += ["Agreement across daily, weekly and monthly is rarer and carries more weight than any one of them.", "When they split, the longer timeframe usually sets the direction and the shorter one the timing."]  # noqa: E501
         else:
-            parts += [overall, tfs, rd("RSI (14)") + ", " + rd("MACD (12,26)") + ", " + rd("ADX (14)") + ".", lv]
+            summary = f"Daily read is {sm.get('overall', '—')}: moving averages {sm.get('moving_averages', {}).get('verdict', '—').lower()}, indicators {sm.get('indicators', {}).get('verdict', '—').lower()}."  # noqa: E501
+            rows = [("Overall (daily)", sm.get("overall", "—"), "—"), ("Moving averages", f"{sm.get('moving_averages', {}).get('buy', 0)} buy / {sm.get('moving_averages', {}).get('sell', 0)} sell", sm.get("moving_averages", {}).get("verdict", "—").lower()),  # noqa: E501
+                    ("Indicators", f"{sm.get('indicators', {}).get('buy', 0)} buy / {sm.get('indicators', {}).get('sell', 0)} sell", sm.get("indicators", {}).get("verdict", "—").lower()),  # noqa: E501
+                    ("RSI (14)", *ir("RSI (14)")), ("MACD (12,26)", *ir("MACD (12,26)")), ("ADX (14)", *ir("ADX (14)")), ("MA 200", _n(mas.get(200, {}).get("sma"), 2), mas.get(200, {}).get("action", "—").lower())]  # noqa: E501
+            bullets += ["ADX above 25 means the trend has strength; below 20 the market is drifting.", "Price above the 200-day average keeps the long-term read constructive."]  # noqa: E501
         ai = ctx.get("ai_score")
         if ai:
-            parts.append(f"AI score {ai['score']}/10 (short term), 1-month {_n(ai['ret_1m'], 1, ' %')}, 3-month {_n(ai['ret_3m'], 1, ' %')}, past win rate {_n(ai['win_rate'], 0, ' %')}.")  # noqa: E501
+            bullets.append(f"AI score {ai['score']}/10 short term; 1-month {_n(ai['ret_1m'], 1, ' %')}, 3-month {_n(ai['ret_3m'], 1, ' %')}, past win rate {_n(ai['win_rate'], 0, ' %')}.")  # noqa: E501
         c = ctx.get("council")
         if c:
-            parts.append(f"Council at one day: {c['stance']} ({c['confidence'] * 100:.0f} % confidence).")
+            bullets.append(f"Council at one day: {c['stance']} with {c['confidence'] * 100:.0f} % confidence.")
     heads = ctx.get("headlines") or []
-    if heads and any(w in q for w in ("news", "headline", "why")):
-        parts.append("Wire: " + "; ".join(f"{h['title']} ({h['impact']})" for h in heads[:3]) + ".")
-    return "\n".join(p for p in parts if p)
+    if heads and any(w in q for w in ("news", "headline", "why", "today")):
+        bullets.append("Wire: " + "; ".join(f"{h['title']} ({h['impact']})" for h in heads[:2]) + ".")
+    head = f"**{name}** ({sym}) · ₹{_n(qt.get('ltp'), 2)} · {_n(qt.get('change_pct'), 2, ' %')} today"
+    return head + "\n\n" + summary + "\n\n" + _table(rows) + "\n\n" + "\n".join(f"- {b}" for b in bullets[:4]) + "\n\nNot investment advice."  # noqa: E501
 
 
 def find_mode(text: str) -> str:

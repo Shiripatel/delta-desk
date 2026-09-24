@@ -13,6 +13,10 @@ def test_llm_picks_nothing_without_keys(monkeypatch):
     assert LLM().provider == "none"                 # a generated placeholder is not a key
     monkeypatch.setenv("GROQ_API_KEY", "gsk_x")
     assert LLM().provider == "groq" and LLM("gemini").provider == "none" and LLM("none").provider == "none"
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-abc")
+    assert LLM("deepseek").provider == "deepseek" and LLM("deepseek").model == "deepseek-chat"
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-abc")
+    assert LLM("openai").model == "gpt-4o-mini" and LLM().provider == "groq"
     monkeypatch.setenv("GEMINI_API_KEY", "AIzay")
     assert LLM("gemini").model.startswith("gemini")
 
@@ -24,7 +28,7 @@ def test_rules_answer_reads_the_context():
            "pros": ["Almost debt free"], "cons": ["Slow growth"], "annual": [], "peers": [{"symbol": "TESTCO", "pe": 20.0}, {"symbol": "A", "pe": 30.0}, {"symbol": "B", "pe": 40.0}],  # noqa: E501
            "council": {"stance": "hold", "confidence": 0.6}, "headlines": []}
     a = agent_chat.rules_answer(ctx, "fundamental", "is it expensive?")
-    assert "P/E 20.0" in a and "median P/E 35.0" in a and "below" in a
+    assert "| P/E (TTM) | 20.0 |" in a and "median P/E 35.0" in a and "below" in a and a.startswith("**Test Co**")
     b = agent_chat.rules_answer(ctx, "fundamental", "what are the risks")
     assert "Slow growth" in b
     tctx = {"symbol": "TESTCO", "name": "Test Co", "quote": {"ltp": 100.0, "change_pct": -0.5},
@@ -32,8 +36,8 @@ def test_rules_answer_reads_the_context():
                            "timeframes": [{"tf": "Daily", "verdict": "Sell"}], "indicators": [{"name": "RSI (14)", "value": 28.0, "action": "Oversold"}],  # noqa: E501
                            "moving_averages": [], "pivots_classic": {"S2": 90, "S1": 95, "P": 100, "R1": 105, "R2": 110}}, "ai_score": None, "council": None, "headlines": []}  # noqa: E501
     c = agent_chat.rules_answer(tctx, "technical", "is it oversold?")
-    assert "RSI (14) 28.00 (Oversold)" in c
+    assert "| RSI (14) | 28.00 | Oversold |" in c
     d = agent_chat.rules_answer(tctx, "technical", "which levels matter")
-    assert "S1 95.00" in d and "R1 105.00" in d
+    assert "| S1 | 95.00 | support |" in d and "| R1 | 105.00 | resistance |" in d
     assert agent_chat.find_mode("what is the trend") == "technical" and agent_chat.find_mode("is it cheap") == "fundamental"
     assert os.environ.get("DD_LLM", "auto") in ("auto", "none", "groq", "gemini", "openrouter", "ollama")

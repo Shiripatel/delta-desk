@@ -48,7 +48,7 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 ## Agent chat
 
-`deltadesk/markets/llm.py` picks a free provider from `.env` (DD_LLM, GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, or Ollama locally). `agent_chat.py` builds a DATA block (quote, filings, ratios, pros / cons, peers, technicals, council votes, headlines) and asks the model to answer only from it; without a key the same block is composed by rules. The reply always ends with the disclaimer.
+`deltadesk/markets/llm.py` picks a provider from `.env` (DD_LLM; free: GROQ_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY; paid: DEEPSEEK_API_KEY, OPENAI_API_KEY; Ollama locally). Requests send a browser-style User-Agent because Cloudflare in front of Groq rejects Python's default one (403 / 1010). Answers are shaped: one summary line, a Metric / Value / Read table, two to four bullets; the watchlist chat renders that markdown. `agent_chat.py` builds a DATA block (quote, filings, ratios, pros / cons, peers, technicals, council votes, headlines) and asks the model to answer only from it; without a key the same block is composed by rules. The reply always ends with the disclaimer.
 
 ## Decisions taken with the user
 

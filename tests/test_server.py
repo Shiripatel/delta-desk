@@ -99,7 +99,7 @@ def test_pages_and_assets():
         assert {"ret_1w", "ret_1m", "hi_52w", "lo_52w"} <= set(st["HDFCBANK"]) and st["HDFCBANK"]["hi_52w"] >= st["HDFCBANK"]["lo_52w"]
         assert c.get("/agent/model").json()["available"] is False
         ag = c.post("/agent/chat", json={"symbol": "HDFCBANK", "mode": "technical", "messages": [{"role": "user", "content": "What is the trend right now?"}]}).json()  # noqa: E501
-        assert ag["model"] == "rules v0" and "Daily read" in ag["reply"] and ag["reply"].strip().endswith("Not investment advice.") and len(ag["suggestions"]) == 4  # noqa: E501
+        assert ag["model"] == "rules v0" and "Daily read" in ag["reply"] and "| Metric | Value | Read |" in ag["reply"] and ag["reply"].strip().endswith("Not investment advice.") and len(ag["suggestions"]) == 4  # noqa: E501
         af = c.post("/agent/chat", json={"symbol": "HDFCBANK", "mode": "fundamental", "messages": [{"role": "user", "content": "Is it expensive?"}]}).json()  # noqa: E501
         assert af["mode"] == "fundamental" and "HDFC Bank" in af["reply"]
         wl2 = c.get("/watchlist").text
