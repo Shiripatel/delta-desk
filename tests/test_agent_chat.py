@@ -9,9 +9,11 @@ def test_llm_picks_nothing_without_keys(monkeypatch):
         monkeypatch.delenv(k, raising=False)
     llm = LLM()
     assert not llm.available and llm.provider == "none" and "rules" in llm.label()
-    monkeypatch.setenv("GROQ_API_KEY", "x")
+    monkeypatch.setenv("GROQ_API_KEY", "a51332ac6de056268ba2791e2928d4d1")
+    assert LLM().provider == "none"                 # a generated placeholder is not a key
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_x")
     assert LLM().provider == "groq" and LLM("gemini").provider == "none" and LLM("none").provider == "none"
-    monkeypatch.setenv("GEMINI_API_KEY", "y")
+    monkeypatch.setenv("GEMINI_API_KEY", "AIzay")
     assert LLM("gemini").model.startswith("gemini")
 
 

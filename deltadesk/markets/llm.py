@@ -28,9 +28,12 @@ class LLM:
     @staticmethod
     def _pick(want: str) -> tuple[str, str]:
         env = os.environ.get
-        table = [("groq", env("GROQ_API_KEY"), env("GROQ_MODEL", "llama-3.3-70b-versatile")),
-                 ("gemini", env("GEMINI_API_KEY"), env("GEMINI_MODEL", "gemini-2.0-flash")),
-                 ("openrouter", env("OPENROUTER_API_KEY"), env("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")),
+        def key(name: str, prefix: str) -> str | None:   # placeholder values (e.g. a host's generated hex) are ignored
+            v = env(name) or ""
+            return v if v.startswith(prefix) else None
+        table = [("groq", key("GROQ_API_KEY", "gsk_"), env("GROQ_MODEL", "llama-3.3-70b-versatile")),
+                 ("gemini", key("GEMINI_API_KEY", "AIza"), env("GEMINI_MODEL", "gemini-2.0-flash")),
+                 ("openrouter", key("OPENROUTER_API_KEY", "sk-or-"), env("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")),
                  ("ollama", "local" if want == "ollama" else None, env("OLLAMA_MODEL", "llama3.2"))]
         if want == "none":
             return "none", ""

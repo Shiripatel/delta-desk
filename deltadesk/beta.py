@@ -126,7 +126,7 @@ class TelegramNotifier(Notifier):
 def notifier_from_env() -> Notifier:
     if os.environ.get("WHATSAPP_TOKEN") and os.environ.get("WHATSAPP_PHONE_ID"):
         return WhatsAppNotifier(os.environ["WHATSAPP_TOKEN"], os.environ["WHATSAPP_PHONE_ID"])
-    if os.environ.get("TELEGRAM_BOT_TOKEN"):
+    if ":" in os.environ.get("TELEGRAM_BOT_TOKEN", ""):      # a real bot token is "<digits>:<secret>"; anything else is a placeholder
         return TelegramNotifier(os.environ["TELEGRAM_BOT_TOKEN"])
     return Notifier()
 
