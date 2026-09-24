@@ -52,6 +52,7 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 ## Decisions taken with the user
 
+* Repository is public on GitHub (24 Sep 2026) under an all-rights-reserved, source-available licence (LICENSE): read and run privately, no reuse in other products. Secrets stay in `.env`, runtime data in `data/`, both ignored.
 * Product shape: a small free tier that lands customers with unique data (radar and AI score, heatmap, watchlist, news wire with impact calls, IPO tracker with the IPO agent, fundamental and technical analysis, Telegram alerts), and a premium tier for the agentic side (council at every horizon with explanations, sniper desk, real-time WhatsApp alerts, desk assistant on an LLM, custom rules, real-time data). Do not add features beyond that basic set until launch.
 * WhatsApp: Meta Cloud API is wired (`WhatsAppNotifier`); replies inside a 24-hour window are free, business-initiated alerts are paid utility templates (about ₹0.12 each in India), so free-tier alerts go over Telegram and WhatsApp is a premium or daily-digest channel.
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. The old Markets page and the prototype were deleted in the restructure.
