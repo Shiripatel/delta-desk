@@ -1,0 +1,17 @@
+# Keeps the free Render instance awake (it sleeps after 15 idle minutes) so visitors never wait for a cold start.
+# GitHub cron is best effort; a few minutes of drift is fine. Public repositories get these minutes free.
+name: keep-alive
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the beta
+        run: |
+          for path in /healthz /markets/indices; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 60 "https://delta-desk.onrender.com$path")
+            echo "$path $code"
+          done

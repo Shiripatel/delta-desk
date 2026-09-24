@@ -16,7 +16,7 @@ import secrets
 import threading
 import time
 from collections import Counter, defaultdict
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 from pathlib import Path
 
 PAGE_PATHS = {"/", "/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper", "/analysis", "/beta", "/legal"}
@@ -66,7 +66,7 @@ class Traffic:
         pages, refs, uas = Counter(), Counter(), Counter()
         visitors_all: set[str] = set()
         for r in rows:
-            d = datetime.fromtimestamp(r["ts"], tz=UTC).date().isoformat()
+            d = datetime.fromtimestamp(r["ts"]).date().isoformat()   # local day, same clock as date.today()
             by_day[d]["views"] += 1
             by_day[d]["visitors"].add(r["visitor"])
             visitors_all.add(r["visitor"])

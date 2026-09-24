@@ -10,6 +10,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -21,6 +22,7 @@ from deltadesk.markets.service import MarketsService
 from deltadesk.markets.watchlist import WatchlistError
 from deltadesk.pipeline import Pipeline
 from deltadesk.server.traffic import Traffic
+from deltadesk.server.warm import Warmer
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
@@ -78,7 +80,7 @@ def _safe_send(notifier, to: str, text: str) -> None:
 
 def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None,
                waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0,
-               traffic_log_store: Traffic | None = None) -> FastAPI:
+               traffic_log_store: Traffic | None = None, warm: bool = False) -> FastAPI:
     markets = markets or MarketsService()
     waitlist = waitlist or waitlist_from_env()
     traffic = traffic_log_store or Traffic()
@@ -96,12 +98,16 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def lifespan(app: FastAPI):
         task = asyncio.create_task(pipeline.run(cycles))
         loop = asyncio.create_task(alert_loop())
+        warmer = asyncio.create_task(Warmer(markets).run()) if warm else None
         yield
         task.cancel()
         loop.cancel()
+        if warmer:
+            warmer.cancel()
 
     app = FastAPI(title="Delta Desk", lifespan=lifespan)
     app.mount("/static", StaticFiles(directory=WEB / "static"), name="static")
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     @app.middleware("http")
     async def traffic_log(request, call_next):

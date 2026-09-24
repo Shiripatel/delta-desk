@@ -119,7 +119,7 @@ def main() -> None:
         funda = YahooFundamentals() if quotes.name == "yahoo" else None
         council = Council(YahooBars() if quotes.name == "yahoo" else SyntheticBars(), fundamentals=funda.council_summary if funda else None)
         print(f"desk feed: {pipe.feed.name} · markets quotes: {quotes.name} · history: {history.name} · http://{args.host}:{args.port}/")
-        uvicorn.run(create_app(pipe, args.cycles, MarketsService(quotes=quotes, ai=AiRanker(history, history_long=history_long), council=council, fundamentals=funda)), host=args.host,  # noqa: E501
+        uvicorn.run(create_app(pipe, args.cycles, MarketsService(quotes=quotes, ai=AiRanker(history, history_long=history_long), council=council, fundamentals=funda), warm=True), host=args.host,  # noqa: E501
                     port=args.port, log_level="warning")
 
 

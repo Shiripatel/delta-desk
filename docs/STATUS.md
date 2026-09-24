@@ -79,6 +79,10 @@ Live beta: https://delta-desk.onrender.com (Render free web service `srv-daqb2is
 
 `render.yaml` deploys the beta to Render's free tier from GitHub (sleeps when idle, disk resets on deploy; sign-ups are mirrored to the owner's Telegram via `DD_OWNER_CHAT`; set `DATABASE_URL` to a free Neon or Supabase Postgres and the waitlist lives there instead of the disk). Hugging Face Docker Spaces became paid; GitHub Pages cannot run the server. Real traffic → Oracle always-free VM with `data/` on disk, and the waitlist in a database.
 
+## Speed on the free tier
+
+`deltadesk/server/warm.py` fills the caches at start (indices, rankings, news, global map, watchlist stats, investors, a few fundamentals) and refreshes the quote-driven ones every four minutes and rankings every ten, so a visitor never triggers the first Yahoo fetches. `.github/workflows/keepalive.yml` pings the Render instance every ten minutes so it never sleeps. Responses over 1 KB are gzipped.
+
 ## Checks
 
 `uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running: it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). CI parse-checks every page with node.

@@ -84,7 +84,8 @@ files), so the free path is a container host wired to this repository:
 * **Render (free web service):** New → Blueprint → choose this repository; `render.yaml` sets everything.
   Fill `TELEGRAM_BOT_TOKEN`, `DD_OWNER_CHAT` and `GROQ_API_KEY` in the dashboard. The free service sleeps
   after 15 idle minutes and its disk resets on deploy; every waitlist sign-up is therefore also sent to the
-  owner's Telegram (`DD_OWNER_CHAT`). Set `DATABASE_URL` to a free Postgres (Neon, Supabase) and the
+  owner's Telegram (`DD_OWNER_CHAT`). A GitHub Actions cron pings it every ten minutes so it stays awake,
+  and the server warms its own caches at start and on a timer. Set `DATABASE_URL` to a free Postgres (Neon, Supabase) and the
   waitlist is stored there instead, surviving every deploy.
 * **Hugging Face Spaces:** the Docker SDK is paid now; a Gradio Space can still run this app by launching
   the FastAPI server from `app.py`, but Render is the simpler free option.
