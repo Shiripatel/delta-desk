@@ -75,6 +75,8 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 
 ## Hosting
 
+Decision (25 Sep 2026): launch on an Oracle Cloud always-free Ampere VM in Mumbai (4 OCPU, 24 GB). `deploy/oracle/` holds the compose file (app + Caddy), `setup.sh` (one command on a fresh Ubuntu VM) and `deploy.sh` (five-minute pull-based auto-deploy from `main`). Render stays up as the fallback until the VM serves traffic; then the keep-alive cron can go.
+
 Live beta: https://delta-desk.onrender.com (Render free web service `srv-daqb2is9v7es73chalb0`, Singapore, auto-deploys from `main`; sleeps after 15 idle minutes). Verified 24 Sep 2026: all 13 pages 200, Yahoo quotes, ranking, filings and news all work from Render's network, admin endpoint locked, page harness clean against the live URL (`BASE=https://delta-desk.onrender.com node tools/page_harness.js web/pages/analysis.html "#TCS/3m/fundamental"`).
 
 `render.yaml` deploys the beta to Render's free tier from GitHub (sleeps when idle, disk resets on deploy; sign-ups are mirrored to the owner's Telegram via `DD_OWNER_CHAT`; set `DATABASE_URL` to a free Neon or Supabase Postgres and the waitlist lives there instead of the disk). Hugging Face Docker Spaces became paid; GitHub Pages cannot run the server. Real traffic → Oracle always-free VM with `data/` on disk, and the waitlist in a database.

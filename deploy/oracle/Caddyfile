@@ -1,0 +1,6 @@
+# Reverse proxy in front of the app. With a domain in SITE_ADDRESS Caddy fetches and renews the TLS
+# certificate itself; with ":80" it serves plain http on the VM's public IP.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	reverse_proxy app:8000
+}

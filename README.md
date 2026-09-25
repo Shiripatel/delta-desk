@@ -89,8 +89,11 @@ files), so the free path is a container host wired to this repository:
   waitlist is stored there instead, surviving every deploy.
 * **Hugging Face Spaces:** the Docker SDK is paid now; a Gradio Space can still run this app by launching
   the FastAPI server from `app.py`, but Render is the simpler free option.
-* **A VM (Oracle always-free, any VPS):** `docker build -t deltadesk . && docker run -p 80:8000 --env-file .env -v ./data:/app/data deltadesk`
-  keeps `data/` across restarts.
+* **Oracle Cloud always-free VM (the plan for launch):** on a fresh Ubuntu ARM instance run
+  `curl -fsSL https://raw.githubusercontent.com/Shiripatel/delta-desk/main/deploy/oracle/setup.sh | bash`.
+  It installs Docker, opens ports 80 / 443, clones the repository to `/opt/delta-desk`, writes a starter `.env`,
+  starts the app behind Caddy (automatic HTTPS once `SITE_ADDRESS` is a domain) and installs a five-minute
+  pull-based auto-deploy. `data/` lives on the VM disk. See `deploy/oracle/`.
 
 ## Licence
 
