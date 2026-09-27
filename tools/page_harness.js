@@ -1,5 +1,6 @@
 /* Runtime smoke test for a page: runs its inline script against a stub DOM with real fetches to a running local server and reports errors.
    Usage (server up on :8000):  node tools/page_harness.js web/pages/analysis.html "#TCS/3m/fundamental"
+   Stream pages:  WS_REPLAY=stream.json node tools/page_harness.js web/pages/sniper.html
    Catches what node --check cannot: handlers bound to elements that no longer exist, bad data paths. Forms and third-party libraries are stubbed. */
 const fs = require('fs');
 const page = process.argv[2], hash = process.argv[3] || '';
@@ -27,6 +28,11 @@ global.localStorage = { getItem() { return null; }, setItem() {} }; global.sessi
 global.navigator = {}; global.CustomEvent = class { constructor(t, o) { this.type = t; this.detail = o && o.detail; } };
 global.getComputedStyle = () => ({ getPropertyValue: () => '#000' });
 global.LightweightCharts = null; global.confirm = () => false; global.prompt = () => null; global.alert = () => {};
+/* WebSocket: a stub that replays recorded stream messages (WS_REPLAY=<json array file>) into onmessage, so the live-stream pages
+   (Sniper) run every handler deterministically without a socket. Record one with a short websockets client against /stream. */
+const WS_REPLAY = process.env.WS_REPLAY;
+global.WebSocket = class { constructor() { setTimeout(() => { if (this.onopen) this.onopen(); const msgs = WS_REPLAY ? JSON.parse(fs.readFileSync(WS_REPLAY, 'utf8')) : [];
+  for (const m of msgs) { try { this.onmessage && this.onmessage({ data: JSON.stringify(m) }); } catch (e) { errors.push('ws ' + m.topic + ': ' + e.stack); } } }, 50); } close() {} };
 const realFetch = global.fetch;
 const BASE = process.env.BASE || 'http://127.0.0.1:8000';
 global.fetch = (u, o) => realFetch(BASE + u, o);

@@ -1,12 +1,12 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-09-18 (end of day 1). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-09-27 (Sniper terminal + agent board; Render removed). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
-uv run pytest -q                                   # 35 tests
+uv run pytest -q                                   # 52 tests
 set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120     # then open http://127.0.0.1:8000/
 ```
 
@@ -26,7 +26,7 @@ Tell Claude: "read docs/STATUS.md and continue with the next item" — this file
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
 | IPO | `/ipo`, `/ipo/<slug>` | list with summary chips (open, upcoming, closed, listed in gain / loss, avg listing gain), board filter, tabs Open / Upcoming / Closed / Listed / Performance / Tracked with Groww-style columns; performance tracker per year and board (issue price, listing day close, listing gain, current price, profit / loss, CSV export); detail page per issue: facts, six-step timeline, IPO agent (rules v0: demand, growth, valuation, issue structure, news), about, financials table + bars, strengths / risks, objectives, subscription by category, issue details, key ratios, people, wire mentions | fictional example issues flagged `example`; `data/ipo.json` in the documented schema replaces them; current price for real listings via quotes |
 | Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals only for 3 example files |
-| Sniper | `/sniper` | five-step flow with a live stepper (Plan → Watch → Arm → Shoot → Manage): levels and zones, scope tiles, range chart with zones, chain around ATM, target board (pts and σ), the shot with approve / reject, risk meters, positions, agents, log | synthetic market (paper); Upstox adapter written, not yet run live |
+| Sniper | `/sniper` | dark trading terminal (always dark, sharp-edged panels with teal title bars, dense mono numbers) built around an **agent board**: the eight agents as nodes under the five stages (Plan → Watch → Arm → Shoot → Manage), each lit as it runs every cycle with a one-line thought derived from the live messages (regime features, chain read, distance of every zone from spot and whether the regime matches, strategy's structure, risk's verdict and caps, exec's book); click a node for the full reasoning table; a thought stream (log lines plus thoughts that changed, filter per agent). Below: market scope tiles, chain around ATM, range chart with levels and zones, zones/arming table, the shot as an order ticket with Approve/Reject, risk meters, positions, signals. `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`) through every handler. |
 | Global | `/global` | dotted world map with the key indices placed by city, region tabs (World, United States, Europe, China & Hong Kong, Japan & Asia, India), index cards for the region, then index futures, commodities, forex, bonds and crypto cards; every card opens the analysis page | Yahoo quotes for all world keys |
 | Investors | `/investors` | cards for well-known investors (style, vehicle, since, holdings count, valued total, today's average move, top holdings with logos); open a card for the full holdings table (stake, market cap, value, LTP, today), row → analysis; sort by value, move or count | seed list with approximate stakes until a shareholding feed fills `data/investors.json` |
 | Forex | `/forex` | INR crosses, world majors, a colour map of pairs, currency-strength meter, all pairs table; every pair links to its chart | Yahoo, delayed |
@@ -58,7 +58,7 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 * Product focus: Home (radar + table), News, IPO, Agents, Sniper. The old Markets page and the prototype were deleted in the restructure.
 * Free data first: Yahoo (no account) now; Upstox (free account) when the user creates the app; Kite Connect (₹500/month) or Angel One as alternatives. No nseindia.com scraping.
 * Look: light grey Mist theme default, filled dark header band with "Join beta" as the only call to action (no beta strip on pages), compact hero written in LLM / AI-agent terms, text nav, no watchlist rail on pages, "Nothing here is investment advice" everywhere. Groww lessons adopted as principles (cards, pill tabs, calm tables, monograms, own icons); see the design skill.
-* Sniper page is a five-step flow (Plan → Watch → Arm → Shoot → Manage) with a live stepper; keep any new agent output inside one of those steps.
+* Sniper page is a dark terminal around the agent board (Plan → Watch → Arm → Shoot → Manage); keep any new agent output as a node thought plus a focus row, and keep the page always dark whatever the site theme.
 * Radar: three bands; short term = daily momentum, long term = weekly momentum + fundamentals.
 * Work rhythm: one deliverable per day, tests + ruff green, commit and push each day, update this file at the end of each session.
 
@@ -71,7 +71,8 @@ Backend: FastAPI in `deltadesk/server/app.py`; markets read model in `deltadesk/
 4. **LLM behind the same endpoints:** news impact analyser, "why" text, assistant. Needs an API key; interface already isolated (`Analyzer`, `DeskAssistant`).
 5. **Alerts:** Telegram on verdict flips, new bad-impact story on a watchlist stock, sniper decisions, kill switch.
 6. **Upstox live session:** create the Upstox app, `deltadesk login upstox`, run the sniper on the real chain during market hours; then the recorder and replay (roadmap days 6–7).
-7. Radar trails toggle, compare two stocks on the council, mobile pass, GitHub Pages demo.
+7. **Sniper agent board follow-ups:** per-agent thoughts are rebuilt client-side from the stream today; emit a `thought` field from each agent (why it did or did not act this cycle) so the board shows the agent's own words, and replay a recorded session on the page when the market is closed so visitors always see the agents work.
+8. Radar trails toggle, compare two stocks on the council, mobile pass.
 
 ## Hosting
 

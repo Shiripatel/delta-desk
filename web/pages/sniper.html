@@ -7,115 +7,166 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@500;600&family=JetBrains+Mono:wght@300;400;500&display=swap">
-<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <style>
-.page{padding:18px 20px 28px}
-.page h1{margin:0 0 4px;font:600 22px/1.15 var(--sans);letter-spacing:-.02em}
-.page .lead{font-size:12.5px;color:var(--ink-2);margin:0 0 14px;max-width:96ch}
-/* stepper */
-.stepper{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-bottom:16px;position:relative}
-.stepper::before{content:"";position:absolute;left:10%;right:10%;top:18px;height:2px;background:var(--line-2);z-index:0}
-.step{position:relative;text-align:center;padding:0 8px;cursor:pointer}
-.step i{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--card);border:2px solid var(--line-2);font:600 13px var(--sans);font-style:normal;color:var(--ink-2);position:relative;z-index:1}
-.step b{display:block;font:600 12.5px/1.2 var(--sans);margin-top:8px}
-.step span{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
-.step.done i{background:var(--ink);border-color:var(--ink);color:var(--bg)}
-.step.now i{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent-deep) 22%,transparent)}
-.step.now b{color:var(--accent-deep)}
-/* stage cards */
-.stage{margin-bottom:12px;scroll-margin-top:70px}
-.stage .hd{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
-.stage .hd i{display:inline-grid;place-items:center;flex:0 0 26px;width:26px;height:26px;border-radius:50%;background:var(--fill-2);font:600 12px var(--sans);font-style:normal;color:var(--ink-2)}
-.stage .hd h2{margin:0;font:600 14px/1.2 var(--sans);white-space:nowrap}
-.stage .hd p{margin:0;font-size:11.5px;color:var(--ink-3);flex:1}
-.stage .hd .pill{margin-left:auto;white-space:nowrap}
-.split{display:grid;grid-template-columns:1fr 1fr}
-.split > div{min-width:0}
-.split > div:first-child{border-right:1px solid var(--line)}
-.split3{display:grid;grid-template-columns:1.3fr 1fr}
-.split3 > div{min-width:0}
-.split3 > div:first-child{border-right:1px solid var(--line)}
-.sub{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--ink-2)}
-.sub b{font-weight:600;color:var(--ink)}
-/* plan */
-.levels{display:grid;grid-template-columns:repeat(3,1fr)}
-.levels div{padding:10px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.levels .v{font:600 16px/1.1 var(--sans);margin-top:3px}
-.zones{font-size:12.5px}
-.zones div{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line)}
-.ico{width:18px;height:18px;margin:0;color:var(--ink-3);fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.zones .id{font-weight:600}.zones .rng{color:var(--ink-3);font-size:11px}
-/* watch */
-.scope{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
-.scope div{padding:9px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.scope .v{font:600 16px/1.1 var(--sans);margin-top:3px}
-.scope .v.small{font-size:12.5px}
-.chart{padding:10px 14px}
-.chart svg{width:100%;height:auto;display:block;font:400 10.5px var(--sans)}
+/* The trading terminal is always dark, whatever the site theme: sharp edges, teal title bars, dense numbers. */
+body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;--line:#1b2531;--line-2:#28374a;--fill:#121a23;--fill-2:#182331;--thead:#0f2a30;
+  --good:#1fc46a;--bad:#ff4d4d;--warn:#f5b301;--s1:#3aa9ff;--s2:#ff8a3d;--accent:#2dd4bf;--accent-deep:#14b8a6;--teal:#0e7079;--teal-2:#0a5058;--teal-ink:#e9fdff;
+  background:var(--bg);color:var(--ink)}
+.card,.btn,.pill,.tbl-wrap,.toast{border-radius:0}
+.wrap{border-inline-color:var(--line)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* status strip */
+.tbar{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--line);background:#0c1218;font-size:11px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
+.tbar > span{padding:7px 12px;border-right:1px solid var(--line);white-space:nowrap}
+.tbar .t1{font:600 11px var(--sans);letter-spacing:.1em;color:var(--teal-ink);background:var(--teal)}
+.tbar b{color:var(--ink);font-weight:500}
+.tbar .note{margin-left:auto;border-right:0;border-left:1px solid var(--line);color:var(--ink-3)}
+.tbar .live b{color:var(--good)}.tbar .off b{color:var(--warn)}
+/* panels */
+.panel{background:var(--card);border:1px solid var(--line-2);margin:0 0 8px;min-width:0}
+.phd{display:flex;align-items:center;gap:10px;padding:5px 10px;background:var(--teal);color:var(--teal-ink);font:600 10.5px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+.phd .r{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;color:#bfeef2;font-family:var(--mono);font-size:10.5px}
+.sub{display:flex;align-items:center;gap:10px;padding:4px 10px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--fill);font:600 10px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.sub .r{margin-left:auto;font-weight:400;letter-spacing:0;text-transform:none;font-family:var(--mono)}
+.page{padding:8px 8px 20px}
+/* agent board */
+.stages{display:grid;grid-template-columns:1fr 22px 3fr 22px 1fr 22px 2fr 22px 1fr;align-items:stretch;padding:10px 10px 8px;gap:0}
+.stg{border:1px solid var(--line-2);background:#0c1218;display:flex;flex-direction:column;min-width:0}
+.stgh{display:flex;align-items:center;gap:8px;padding:4px 8px;font:600 10px/1 var(--sans);letter-spacing:.12em;color:var(--ink-2);border-bottom:1px solid var(--line-2);background:var(--fill-2)}
+.stgh i{display:inline-grid;place-items:center;width:14px;height:14px;font-style:normal;font-size:9px;border:1px solid var(--line-2);color:var(--ink-2)}
+.stg.done .stgh{color:var(--ink)}.stg.done .stgh i{background:var(--ink-2);border-color:var(--ink-2);color:#000}
+.stg.now .stgh{background:var(--teal);color:var(--teal-ink)}.stg.now .stgh i{border-color:var(--teal-ink);color:var(--teal-ink)}
+.nodes{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;flex:1}
+.node{padding:7px 9px;border-right:1px solid var(--line);min-width:0;cursor:pointer;position:relative;transition:background .25s,box-shadow .25s}
+.node:last-child{border-right:0}
+.node:hover{background:var(--fill)}
+.node.sel{background:#10232a;box-shadow:inset 0 0 0 1px var(--accent-deep)}
+.node.run{background:#0f2f34;box-shadow:inset 0 0 0 1px var(--accent)}
+.node .nh{display:flex;align-items:center;gap:7px;font:600 11.5px/1 var(--sans)}
+.node .nh .ms{margin-left:auto;font:400 10px var(--mono);color:var(--ink-3)}
+.lamp{width:8px;height:8px;background:var(--line-2);flex:0 0 8px}
+.node.ok .lamp{background:var(--good);box-shadow:0 0 6px var(--good)}
+.node.err .lamp{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.node.stby .lamp{background:transparent;border:1px solid var(--ink-3)}
+.node.run .lamp{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.node .th{margin-top:5px;font:400 11px/1.35 var(--mono);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.node.err .th{color:var(--bad)}
+.node.run .th{color:var(--ink)}
+.node .th.hot{color:var(--warn)}
+.arrow{position:relative}
+.arrow::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line-2)}
+.arrow::after{content:"";position:absolute;right:2px;top:50%;width:6px;height:6px;border-top:1px solid var(--ink-3);border-right:1px solid var(--ink-3);transform:translateY(-50%) rotate(45deg)}
+.arrow.lit::before{background:var(--accent)}.arrow.lit::after{border-color:var(--accent)}
+.bsplit{display:grid;grid-template-columns:1.4fr 1fr;border-top:1px solid var(--line-2)}
+.bsplit > div{min-width:0}
+.bsplit > div:first-child{border-right:1px solid var(--line-2)}
+.stream{height:210px;overflow:auto;font:400 11px/1.45 var(--mono)}
+.stream div{display:grid;grid-template-columns:62px 62px 1fr;gap:10px;padding:2px 10px;border-bottom:1px solid var(--line)}
+.stream .t{color:var(--ink-3)}.stream .a{font-weight:500}
+.stream .a.feed{color:var(--s1)}.stream .a.planner{color:#c084fc}.stream .a.regime{color:#f0abfc}.stream .a.chain{color:#67e8f9}.stream .a.sniper{color:var(--warn)}.stream .a.strategy{color:#a3e635}.stream .a.risk{color:var(--bad)}.stream .a.exec{color:var(--good)}.stream .a.desk{color:var(--ink-2)}
+.stream .hot{color:var(--ink)}
+.filters{display:flex;gap:0;margin-left:auto}
+.filters button{background:none;border:0;border-left:1px solid var(--line);padding:0 8px;height:20px;font:500 10px var(--sans);letter-spacing:.04em;color:var(--ink-3);cursor:pointer}
+.filters button[aria-pressed="true"]{color:var(--teal-ink);background:var(--teal-2)}
+.focus{height:210px;overflow:auto;font-size:11.5px}
+.focus .head{padding:7px 10px;border-bottom:1px solid var(--line);font:500 11.5px/1.4 var(--sans);color:var(--ink)}
+.focus .head small{display:block;color:var(--ink-3);font-weight:400;font-size:10.5px;margin-top:2px}
+.focus table{font-size:11px}
+.focus td{padding:3px 10px;border-bottom:1px solid var(--line)}
+.focus td:first-child{color:var(--ink-3);white-space:nowrap;width:38%}
+.focus td.num{font-family:var(--mono)}
+/* three columns */
+.grid3{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:8px}
+.grid3 > div{min-width:0}
+/* scope tiles */
+.kvt{display:grid;grid-template-columns:repeat(3,1fr)}
+.kvt div{padding:6px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.kvt div:nth-child(3n){border-right:0}
+.kvt span{display:block;font:500 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.kvt b{display:block;font:500 14px/1.15 var(--mono);margin-top:4px;color:var(--ink)}
+.kvt b.small{font-size:11px;font-family:var(--sans)}
+/* chain */
+.oc{font:400 10.5px var(--mono)}
+.oc div{display:grid;grid-template-columns:1fr 58px 1fr;gap:6px;align-items:center;padding:2px 8px;border-bottom:1px solid var(--line)}
+.oc .k{text-align:center;font-weight:500;color:var(--ink)}.oc .k.atm{color:var(--teal-ink);background:var(--teal)}
+.oc .bar{position:relative;height:14px}
+.oc .bar i{position:absolute;top:2px;bottom:2px}
+.oc .ce i{right:0;background:var(--bad);opacity:.5}.oc .pe i{left:0;background:var(--good);opacity:.5}
+.oc .bar b{position:absolute;top:0;font-weight:400;color:var(--ink-2)}
+.oc .ce b{left:0}.oc .pe b{right:0}
+.oc .hd2{font:600 9.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+/* chart */
+.chart{padding:6px 8px 2px}
+.chart svg{width:100%;height:auto;display:block;font:400 10px var(--mono)}
 .chart .grid line{stroke:var(--line)}
 .chart text{fill:var(--ink-3)}
-.chart .zone.f{fill:var(--warn);opacity:.10}.chart .zone.b{fill:var(--s1);opacity:.10}.chart .zone.p{fill:var(--good);opacity:.06}
-.chart .zone.armed{opacity:.30}
+.chart .zone.f{fill:var(--warn);opacity:.12}.chart .zone.b{fill:var(--s1);opacity:.12}.chart .zone.p{fill:var(--good);opacity:.08}
+.chart .zone.armed{opacity:.32}
 .chart .lvl{stroke:var(--ink-3);stroke-dasharray:3 4}
-.chart .px{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
-.chart .cross{stroke:var(--accent-deep);stroke-width:1;stroke-dasharray:2 3}
-.oc{font-size:11.5px}
-.oc div{display:grid;grid-template-columns:1fr 64px 1fr;gap:8px;align-items:center;padding:3px 14px;border-bottom:1px solid var(--line)}
-.oc .k{text-align:center;font-weight:600}.oc .k.atm{color:var(--accent-deep)}
-.oc .bar{position:relative;height:14px}
-.oc .bar i{position:absolute;top:2px;bottom:2px;border-radius:2px}
-.oc .ce i{right:0;background:var(--s1);opacity:.55}.oc .pe i{left:0;background:var(--s2);opacity:.55}
-.oc .bar b{position:absolute;top:0;font-weight:400;font-size:10.5px;color:var(--ink-2)}
-.oc .ce b{left:0}.oc .pe b{right:0}
-.oc .hd2{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
-/* arm */
-.tg{font-size:12.5px}
-.tg div{display:grid;grid-template-columns:26px 1fr auto auto;gap:10px;align-items:center;padding:9px 16px;border-bottom:1px solid var(--line)}
-.tg .id{font-weight:600}.tg .rng{color:var(--ink-3);font-size:11px}
-.tg .dist{text-align:right;font-size:11.5px;color:var(--ink-2)}
-.tg .st{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);min-width:64px;text-align:right;font-weight:600}
-.tg .st.armed{color:var(--accent-deep)}.tg .st.fired{color:var(--good)}
-.tg div.armed{background:color-mix(in srgb,var(--accent) 10%,transparent)}
-/* shoot */
-.shot{padding:14px 16px}
-.shot .big{font:600 34px/1 var(--display);letter-spacing:-.03em}
-.conf{display:flex;align-items:center;gap:14px;margin:6px 0 10px}
-.conf .barx{flex:1;height:6px;background:var(--fill-2);position:relative;border-radius:999px}
-.conf .barx i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:999px}
-.conf .barx em{position:absolute;top:-4px;height:14px;width:2px;background:var(--accent-deep)}
-.legs{font-size:12.5px}
-.legs div{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)}
-.legs .sell{color:var(--bad)}.legs .buy{color:var(--good)}
-.kv2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 14px;margin-top:10px;font-size:11.5px}
-.kv2 span{color:var(--ink-3)}.kv2 b{font-weight:600;display:block}
-.act{display:flex;gap:8px;margin-top:12px}
-.why{font-size:11.5px;color:var(--ink-2);margin-top:10px}
+.chart .px{fill:none;stroke:#e6ecf2;stroke-width:1.4;stroke-linejoin:round}
+.chart .cross{stroke:var(--accent);stroke-width:1;stroke-dasharray:2 3}
+.levels{display:grid;grid-template-columns:repeat(6,1fr);border-top:1px solid var(--line)}
+.levels div{padding:5px 8px;border-right:1px solid var(--line)}
+.levels div:last-child{border-right:0}
+.levels span{display:block;font:500 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.levels b{display:block;font:500 12.5px/1.1 var(--mono);margin-top:3px}
+/* dense tables */
+table.dense{font-size:11px}
+table.dense th{padding:5px 8px;font:600 9.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#bfeef2;background:var(--thead);border-bottom:1px solid var(--line-2)}
+table.dense td{padding:4px 8px;border-bottom:1px solid var(--line);font-family:var(--sans)}
+table.dense td.num{font-family:var(--mono)}
+table.dense tbody tr:hover td{background:var(--fill)}
+table.dense tr.armed td{background:#2a2306}
+table.dense tr.fired td{background:#0f2a1a}
+.st{font:600 9.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.st.armed{color:var(--warn)}.st.fired{color:var(--good)}.st.watch{color:var(--ink-3)}
+/* the shot */
+.shot{padding:10px 10px 12px;font-size:11.5px}
+.shot .eyebrow{color:var(--ink-3);font-size:10px}
+.shot .big{font:500 32px/1 var(--mono);letter-spacing:-.02em}
+.conf{display:flex;align-items:center;gap:12px;margin:6px 0 10px}
+.conf .barx{flex:1;height:8px;background:var(--fill-2);position:relative}
+.conf .barx i{position:absolute;inset:0 auto 0 0;background:var(--accent-deep)}
+.conf .barx em{position:absolute;top:-4px;height:16px;width:2px;background:var(--warn)}
+.legs{font:400 11.5px var(--mono);border:1px solid var(--line-2)}
+.legs div{display:grid;grid-template-columns:52px 1fr auto;gap:10px;padding:5px 8px;border-bottom:1px solid var(--line)}
+.legs div:last-child{border-bottom:0}
+.legs .side{font-weight:600;letter-spacing:.06em}
+.legs .sell .side{color:var(--bad)}.legs .buy .side{color:var(--good)}
+.kv2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 12px;margin-top:10px;font-size:11px}
+.kv2 span{color:var(--ink-3);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;display:block}.kv2 b{font:500 12.5px var(--mono)}
+.act{display:flex;gap:6px;margin-top:12px}
+.act .btn{flex:1;padding:9px 12px;font:600 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.act .go{background:var(--good);border-color:var(--good);color:#04130a}
+.act .no{border-color:var(--bad);color:var(--bad)}
+.act .no:hover{background:var(--bad);color:#fff}
+.why{font-size:11px;color:var(--ink-2);margin-top:10px;line-height:1.5}
+.why b{color:var(--bad)}
 .cpill{display:inline-flex;align-items:center;gap:6px}
-.cpill i{display:inline-block;width:40px;height:5px;background:var(--fill-2);border-radius:999px;position:relative}
-.cpill i b{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:999px}
+.cpill i{display:inline-block;width:36px;height:5px;background:var(--fill-2);position:relative}
+.cpill i b{position:absolute;inset:0 auto 0 0;background:var(--accent-deep)}
 .cpill.low i b{background:var(--warn)}
-/* manage */
-.risk{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.risk div{padding:10px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:11.5px}
-.risk .m{height:6px;background:var(--fill-2);border-radius:999px;margin-top:6px;position:relative;overflow:hidden}
-.risk .m i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:999px}
+/* risk */
+.risk{display:grid;grid-template-columns:1fr 1fr}
+.risk div{padding:7px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:10.5px}
+.risk div:nth-child(2n){border-right:0}
+.risk .m{height:6px;background:var(--fill-2);margin-top:6px;position:relative;overflow:hidden}
+.risk .m i{position:absolute;inset:0 auto 0 0;background:var(--accent-deep)}
 .risk .m i.hot{background:var(--bad)}
-.risk .r{display:flex;justify-content:space-between;color:var(--ink-3)}
+.risk .r{display:flex;justify-content:space-between;color:var(--ink-3);font-family:var(--mono)}
+.risk .r span:first-child{font-family:var(--sans);letter-spacing:.06em;text-transform:uppercase;font-size:9.5px}
 .pnl.up{color:var(--good)}.pnl.dn{color:var(--bad)}
-.chips{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--line)}
-.chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-right:1px solid var(--line);font-size:11.5px;flex:1 1 auto}
-.chip b{font-weight:600}.chip .ms{color:var(--ink-3);font-size:10.5px}
-.chip.err{background:color-mix(in srgb,var(--bad) 10%,transparent)}
-.log{max-height:220px;overflow:auto;font-size:11.5px;font-family:var(--mono)}
-.log div{display:grid;grid-template-columns:70px 90px 1fr;gap:12px;padding:5px 16px;border-bottom:1px solid var(--line)}
-.log .t{color:var(--ink-3)}.log .a{color:var(--accent-deep)}
-@media (max-width:1000px){.split,.split3{grid-template-columns:1fr}.split > div:first-child,.split3 > div:first-child{border-right:0;border-bottom:1px solid var(--line)}.step b{font-size:11px}.step span{display:none}.stage .hd p{display:none}}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase}
+.kill{border:1px solid var(--bad);color:var(--bad)}
+@media (max-width:1100px){.grid3{grid-template-columns:1fr 1fr}.grid3 > div:nth-child(2){grid-column:1 / -1;order:-1}}
+@media (max-width:900px){.stages{grid-template-columns:1fr;gap:6px}.arrow{display:none}.nodes{grid-auto-flow:row}.node{border-right:0;border-bottom:1px solid var(--line)}.bsplit{grid-template-columns:1fr}.bsplit > div:first-child{border-right:0;border-bottom:1px solid var(--line-2)}.grid3{grid-template-columns:1fr}.levels{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">F&amp;O SNIPER</span></div>
+  <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b></div>
   <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/investors">Investors</a><a href="/desk">Agents</a><a href="/sniper" aria-current="page">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
@@ -125,48 +176,65 @@
 
 <main class="wrap">
 <div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
+<div class="tbar">
+  <span class="t1">F&amp;O SNIPER</span>
+  <span><b id="und">NIFTY</b> weekly options</span>
+  <span>mode <b id="mode">PAPER</b></span>
+  <span>cycle <b class="num" id="seq">—</b></span>
+  <span>last <b class="num" id="cyTs">—</b></span>
+  <span>latency <b class="num" id="cyMs">—</b></span>
+  <span>agents <b class="num" id="cyOk">—</b></span>
+  <span id="wsState" class="off">stream <b>connecting</b></span>
+  <span class="note">Eight agents · five steps · one typed shot · paper only · not investment advice</span>
+</div>
 <div class="page">
-  <h1>F&amp;O Sniper · <span id="und">NIFTY</span> weekly options</h1>
-  <p class="lead">Eight AI agents run the same five steps every session: plan from yesterday, watch the market, arm the levels, take one typed shot when everything agrees, then manage the position. Paper mode. Not advice.</p>
 
-  <div class="stepper" id="stepper">
-    <div class="step" data-step="1"><i>1</i><b>Plan</b><span>from yesterday's session</span></div>
-    <div class="step" data-step="2"><i>2</i><b>Watch</b><span>regime, chain, spot</span></div>
-    <div class="step" data-step="3"><i>3</i><b>Arm</b><span>price near a level</span></div>
-    <div class="step" data-step="4"><i>4</i><b>Shoot</b><span>one typed decision</span></div>
-    <div class="step" data-step="5"><i>5</i><b>Manage</b><span>stops, targets, risk</span></div>
-  </div>
+  <section class="panel">
+    <div class="phd">Agent board · what the desk is thinking<span class="r" id="boardMeta">waiting for the first cycle</span></div>
+    <div class="stages" id="stages">
+      <div class="stg" data-stage="1"><div class="stgh"><i>1</i>PLAN</div><div class="nodes">
+        <div class="node stby" data-a="planner"><div class="nh"><span class="lamp"></span>planner<span class="ms"></span></div><div class="th">reads yesterday's bars</div></div></div></div>
+      <div class="arrow" data-arrow="1"></div>
+      <div class="stg" data-stage="2"><div class="stgh"><i>2</i>WATCH</div><div class="nodes">
+        <div class="node stby" data-a="feed"><div class="nh"><span class="lamp"></span>feed<span class="ms"></span></div><div class="th">spot · future · VIX · chain</div></div>
+        <div class="node stby" data-a="regime"><div class="nh"><span class="lamp"></span>regime<span class="ms"></span></div><div class="th">trend · range · event</div></div>
+        <div class="node stby" data-a="chain"><div class="nh"><span class="lamp"></span>chain<span class="ms"></span></div><div class="th">IV · walls · expected move</div></div></div></div>
+      <div class="arrow" data-arrow="2"></div>
+      <div class="stg" data-stage="3"><div class="stgh"><i>3</i>ARM</div><div class="nodes">
+        <div class="node stby sel" data-a="sniper"><div class="nh"><span class="lamp"></span>sniper<span class="ms"></span></div><div class="th">distance to each zone</div></div></div></div>
+      <div class="arrow" data-arrow="3"></div>
+      <div class="stg" data-stage="4"><div class="stgh"><i>4</i>SHOOT</div><div class="nodes">
+        <div class="node stby" data-a="strategy"><div class="nh"><span class="lamp"></span>strategy<span class="ms"></span></div><div class="th">standby · needs a trigger</div></div>
+        <div class="node stby" data-a="risk"><div class="nh"><span class="lamp"></span>risk<span class="ms"></span></div><div class="th">standby · caps and Greeks</div></div></div></div>
+      <div class="arrow" data-arrow="4"></div>
+      <div class="stg" data-stage="5"><div class="stgh"><i>5</i>MANAGE</div><div class="nodes">
+        <div class="node stby" data-a="exec"><div class="nh"><span class="lamp"></span>exec<span class="ms"></span></div><div class="th">stops · targets · P&amp;L</div></div></div></div>
+    </div>
+    <div class="bsplit">
+      <div><div class="sub">Thought stream<span class="r"><span id="logCount">0</span> lines</span><div class="filters" id="filters"><button data-f="" aria-pressed="true">all</button><button data-f="sniper">sniper</button><button data-f="regime">regime</button><button data-f="risk">risk</button><button data-f="exec">exec</button></div></div><div class="stream" id="stream"></div></div>
+      <div><div class="sub">Agent focus · <span id="focusName">sniper</span><span class="r">click any agent</span></div><div class="focus" id="focus"></div></div>
+    </div>
+  </section>
 
-  <div class="card stage" id="s1">
-    <div class="hd"><i>1</i><h2>Plan</h2><p>The planner agent reads yesterday's bars and writes today's levels and opportunity zones. Nothing gets traded that is not in this plan.</p><span class="pill" id="p1">waiting</span></div>
-    <div class="split"><div><div class="levels" id="levels"></div></div><div><div class="sub"><b>Opportunity zones</b><span id="zoneMeta">—</span></div><div class="zones" id="zones"></div></div></div>
-  </div>
-
-  <div class="card stage" id="s2">
-    <div class="hd"><i>2</i><h2>Watch</h2><p>Feed, regime and chain agents refresh the market read every cycle: spot, future, VIX, expected move, walls, regime call.</p><span class="pill" id="p2">waiting</span></div>
-    <div class="scope" id="scope"></div>
-    <div class="split3"><div><div class="sub"><b>Today's range with levels and zones</b><span id="planMeta">—</span></div><div class="chart" id="chart"></div></div><div><div class="sub"><b>Chain around ATM · OI</b><span id="ocMeta">calls left · puts right</span></div><div class="oc" id="oc"></div></div></div>
-  </div>
-
-  <div class="card stage" id="s3">
-    <div class="hd"><i>3</i><h2>Arm</h2><p>The sniper agent arms a zone when price comes within reach and the regime matches. Distance is shown in points and in σ of the expected move.</p><span class="pill" id="p3">waiting</span></div>
-    <div class="tg" id="targets"><div class="muted" style="display:block;padding:12px 16px;font-size:12.5px">Waiting for the plan.</div></div>
-  </div>
-
-  <div class="card stage" id="s4">
-    <div class="hd"><i>4</i><h2>Shoot</h2><p>Strategy picks the structure and strikes, risk can veto, and one typed decision appears here with a calibrated confidence. You approve or reject.</p><span class="pill" id="p4">waiting</span></div>
-    <div class="split"><div class="shot" id="shot"><div class="muted" style="font-size:12.5px">No decision yet. When a target fires and regime, chain and risk agree, it appears here for approval.</div></div>
-      <div><div class="sub"><b>Signals today</b><span id="sigMeta">0 emitted</span></div><div class="tbl-wrap flush"><table><thead><tr><th>id</th><th>structure</th><th class="num">conf</th><th>state</th></tr></thead><tbody id="sigBody"><tr><td colspan="4" class="muted">no signals yet</td></tr></tbody></table></div></div></div>
-  </div>
-
-  <div class="card stage" id="s5">
-    <div class="hd"><i>5</i><h2>Manage</h2><p>Exec manages stops and targets; risk watches margin, drawdown and Greeks. The kill switch in the header flattens everything.</p><span class="pill" id="p5">waiting</span></div>
-    <div class="risk" id="risk"></div>
-    <div class="tbl-wrap flush"><table><thead><tr><th>instrument</th><th class="num">qty</th><th class="num">avg</th><th class="num">ltp</th><th class="num">Δ</th><th class="num">Θ / day</th><th class="num">P&amp;L</th></tr></thead><tbody id="posBody"><tr><td colspan="7" class="muted">no open positions</td></tr></tbody></table></div>
-    <div class="sub"><b>Agents</b><span id="pipeMeta">—</span></div>
-    <div class="chips" id="pipe"></div>
-    <div class="sub"><b>Agent log</b><span>newest last · <span id="logCount">0</span></span></div>
-    <div class="log" id="logBox"></div>
+  <div class="grid3">
+    <div>
+      <section class="panel"><div class="phd">Market scope<span class="r" id="scopeMeta">—</span></div><div class="kvt" id="scope"></div></section>
+      <section class="panel"><div class="phd">Chain · ATM ± 6<span class="r" id="ocMeta">calls left · puts right</span></div><div class="oc" id="oc"><div class="muted" style="display:block;padding:10px;font-family:var(--sans)">waiting for the chain</div></div></section>
+    </div>
+    <div>
+      <section class="panel"><div class="phd">Range · levels · zones<span class="r" id="planMeta">—</span></div><div class="chart" id="chart"><div class="muted" style="font-size:11px;padding:6px 2px">waiting for today's bars</div></div><div class="levels" id="levels"></div></section>
+      <section class="panel"><div class="phd">Zones · arming<span class="r" id="zoneMeta">—</span></div>
+        <div class="tbl-wrap flush"><table class="dense"><thead><tr><th>zone</th><th>kind</th><th class="num">range</th><th>structure</th><th>needs</th><th class="num">distance</th><th class="num">σ</th><th>state</th></tr></thead><tbody id="zoneBody"><tr><td colspan="8" class="muted">Waiting for the plan.</td></tr></tbody></table></div></section>
+    </div>
+    <div>
+      <section class="panel"><div class="phd">The shot · one typed decision<span class="r" id="p4">no decision yet</span></div>
+        <div class="shot" id="shot"><div class="muted">When a zone fires and regime, chain and risk agree, one decision appears here for approval.</div></div></section>
+      <section class="panel"><div class="phd">Risk<span class="r" id="p5">flat</span></div><div class="risk" id="risk"></div></section>
+      <section class="panel"><div class="phd">Positions</div>
+        <div class="tbl-wrap flush"><table class="dense"><thead><tr><th>instrument</th><th class="num">qty</th><th class="num">avg</th><th class="num">ltp</th><th class="num">Δ</th><th class="num">Θ/day</th><th class="num">P&amp;L</th></tr></thead><tbody id="posBody"><tr><td colspan="7" class="muted">no open positions</td></tr></tbody></table></div></section>
+      <section class="panel"><div class="phd">Signals today<span class="r" id="sigMeta">0 emitted</span></div>
+        <div class="tbl-wrap flush"><table class="dense"><thead><tr><th>id</th><th>structure</th><th class="num">conf</th><th>state</th></tr></thead><tbody id="sigBody"><tr><td colspan="4" class="muted">no signals yet</td></tr></tbody></table></div></section>
+    </div>
   </div>
 </div>
 </main>
@@ -178,46 +246,103 @@
 <script>
 (function(){
   var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-  var fmt=DD.fmt;
-  var esc=DD.esc;
-  var pct=DD.pct;
+  var fmt=DD.fmt,esc=DD.esc,get=DD.get,p=DD.pad;
   var cls=function(x){return DD.cls(x,0.05)};
   function hhmmss(iso){var m=/T(\d\d:\d\d:\d\d)/.exec(iso||'');return m?m[1]:''}
-  var get=DD.get;
   function post(u){return fetch(u,{method:'POST'}).then(function(r){return r.json()})}
-  var p=DD.pad;
   DD.boot();
-  var ICO={FADE:'<svg class="ico" viewBox="0 0 24 24"><path d="M4 8h16"/><path d="M8 4l-4 4 4 4"/><path d="M20 16H4"/><path d="M16 12l4 4-4 4"/></svg>',BREAK:'<svg class="ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>',PREMIUM:'<svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>'};
-  var box=$('#logBox'),count=0;
-  function log(agent,msg,t){var d=document.createElement('div');d.innerHTML='<span class="t num">'+esc(t||new Date().toTimeString().slice(0,8))+'</span><span class="a">'+esc(agent)+'</span><span>'+esc(msg)+'</span>';box.appendChild(d);while(box.children.length>400)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;$('#logCount').textContent=++count}
-  var plan=null,snap=null,stats=null,regime=null,limits=null,decisions={},threshold=0.65,last={},orders=null;
-  var AGENTS=['feed','planner','regime','chain','sniper','strategy','risk','exec'];
-  function pill(id,text,kind){var el=$('#'+id);el.textContent=text;el.className='pill '+(kind||'')}
+  var plan=null,snap=null,stats=null,regime=null,limits=null,decisions={},threshold=0.65,orders=null,lastTrig=null;
+  var AGENTS=['planner','feed','regime','chain','sniper','strategy','risk','exec'];
+  var STAGE={planner:1,feed:2,regime:2,chain:2,sniper:3,strategy:4,risk:4,exec:5};
+  var lastRun={},focusA='sniper',filter='';
   function dlist(){return Object.keys(decisions).map(function(k){return decisions[k]})}
+  function lastDecision(){return dlist().sort(function(a,b){return (b.ts||'').localeCompare(a.ts||'')})[0]}
+  function rupee(v){return '₹'+fmt(Math.round(v),0)}
+  function reg(r){return r?String(r).replace(/_/g,' ').toLowerCase():'—'}
 
-  /* stepper: which step is the desk on right now */
+  /* ---- thought stream: log lines plus agent thoughts that changed --------------------------------- */
+  var stream=$('#stream'),count=0,lastNote={};
+  function say(agent,msg,t,hot){var d=document.createElement('div');d.dataset.a=agent;d.innerHTML='<span class="t">'+esc(t||new Date().toTimeString().slice(0,8))+'</span><span class="a '+esc(agent)+'">'+esc(agent)+'</span><span class="'+(hot?'hot':'')+'">'+esc(msg)+'</span>';
+    if(filter&&agent!==filter)d.hidden=true;stream.appendChild(d);while(stream.children.length>500)stream.removeChild(stream.firstChild);stream.scrollTop=stream.scrollHeight;$('#logCount').textContent=++count}
+  function note(agent,msg,t,hot){if(lastNote[agent]===msg)return;lastNote[agent]=msg;say(agent,msg,t,hot)}
+  $('#filters').addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(!b)return;filter=b.dataset.f;$$('#filters button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});
+    $$('#stream div').forEach(function(d){d.hidden=!!filter&&d.dataset.a!==filter});stream.scrollTop=stream.scrollHeight});
+
+  /* ---- what each agent is thinking, rebuilt from the latest messages ------------------------------- */
+  function nearest(){if(!plan||!snap)return null;var best=null;plan.zones.forEach(function(z){var d=(z.lo+z.hi)/2-snap.spot;if(!best||Math.abs(d)<Math.abs(best.d))best={z:z,d:d}});return best}
+  function reach(){if(!plan)return null;var em=stats?stats.expected_move_pts*0.35:0;return Math.max(em,plan.pdc*0.002)}
+  function inWindow(ts){var L=limits||{},w=L.trading_window||['09:30','14:45'],m=/T(\d\d:\d\d)/.exec(ts||'');return !m?null:(m[1]>=w[0]&&m[1]<=w[1])}
+  function think(n){var s=snap||{},r=regime||{},st=stats||{},f=r.features||{},L=limits||{},d=lastDecision();
+    if(n==='planner'){if(!plan)return {line:'waiting for yesterday\'s bars',head:'No plan yet',sub:'The planner runs once at open from the previous session\'s bars.',rows:[]};
+      return {line:'bias '+plan.bias.toLowerCase()+' · '+plan.zones.length+' zones · PDH '+fmt(plan.pdh,0)+' / PDL '+fmt(plan.pdl,0),head:'Plan for '+plan.date+' · bias '+plan.bias.toLowerCase(),sub:'Levels from yesterday; zones are the only places a trade may start.',
+        rows:[['previous high',fmt(plan.pdh,0)],['previous low',fmt(plan.pdl,0)],['previous close',fmt(plan.pdc,0)],['pivot',fmt(plan.pivot,0)],['CPR',fmt(plan.bc,0)+' – '+fmt(plan.tc,0)],['zones',plan.zones.map(function(z){return z.id.replace(/_/g,' ')}).join(', ')]].concat((plan.notes||[]).map(function(x){return ['note',x]}))}}
+    if(n==='feed'){if(!snap)return {line:'connecting to the feed',head:'No snapshot yet',sub:'',rows:[]};
+      return {line:'spot '+fmt(s.spot)+' · '+(s.chain||[]).length+' strikes · '+(s.bars_1m||[]).length+' bars',head:'Spot '+fmt(s.spot)+' at '+hhmmss(s.ts)+' IST',sub:'Snapshot of spot, future, VIX and the option chain every cycle.',
+        rows:[['future',s.fut!=null?fmt(s.fut):'—'],['basis',s.fut!=null?(s.fut-s.spot>=0?'+':'')+fmt(s.fut-s.spot,1):'—'],['India VIX',s.vix!=null?fmt(s.vix):'—'],['expiry',s.expiry||'—'],['1-min bars today',String((s.bars_1m||[]).length)],['strikes in chain',String((s.chain||[]).length)],['ATM',s.atm!=null?fmt(s.atm,0):'—']]}}
+    if(n==='regime'){if(!regime)return {line:'waiting for bars',head:'No regime call yet',sub:'',rows:[]};
+      var rules=[['EVENT','VIX up > 8 % from open, or a 1-min move > 0.4 %'],['TRENDING UP','above PDH, EMA slope up, ADX ≥ 20'],['TRENDING DOWN','below PDL, EMA slope down, ADX ≥ 20'],['RANGE BOUND','inside yesterday\'s range, ADX < 35']];
+      return {line:reg(r.regime)+' · p '+r.p.toFixed(2)+' · ADX '+fmt(r.adx,0),head:reg(r.regime).toUpperCase()+' · confidence '+r.p.toFixed(2),sub:'Transparent rules model v0: the first rule that matches wins.',
+        rows:[['ADX (5-min)',fmt(r.adx,1)],['EMA-8 slope',f.ema_slope!=null?(f.ema_slope>=0?'+':'')+fmt(f.ema_slope*100,3)+' %':'—'],['VIX vs open',f.vix_jump!=null?(f.vix_jump>=0?'+':'')+fmt(f.vix_jump*100,1)+' %':'—'],['last 1-min move',f.last_1m_ret!=null?fmt(f.last_1m_ret*100,2)+' %':'—'],['inside prev range',f.inside_prev_range!=null?(f.inside_prev_range?'yes':'no'):'—'],['realised vol',fmt(r.realised_vol*100,1)+' %']].concat(rules.map(function(x){return ['rule · '+x[0],x[1]]}))}}
+    if(n==='chain'){if(!stats)return {line:'waiting for the chain',head:'No chain read yet',sub:'',rows:[]};
+      return {line:'IV '+fmt(st.atm_iv*100,1)+'% · ±'+fmt(st.expected_move_pts,0)+' · PCR '+fmt(st.pcr_oi),head:'ATM IV '+fmt(st.atm_iv*100,1)+' % · expected move ±'+fmt(st.expected_move_pts,0)+' pts',sub:'One-sigma move to expiry, OI walls and where premium is rich or cheap.',
+        rows:[['expected move',fmt(st.expected_move_pct*100,2)+' % to expiry'],['IV rank',st.iv_rank!=null?fmt(st.iv_rank,0):'no history'],['IV − realised',(st.iv_minus_rv>=0?'+':'')+fmt(st.iv_minus_rv,1)+' vol pts'+(st.iv_minus_rv>=2?' · premium rich':st.iv_minus_rv<0?' · premium cheap':'')],['PCR (OI)',fmt(st.pcr_oi)],['max pain',fmt(st.max_pain,0)],['call wall',fmt(st.call_wall,0)],['put wall',fmt(st.put_wall,0)],['skew (25Δ put − call)',(st.skew>=0?'+':'')+fmt(st.skew,1)]]}}
+    if(n==='sniper'){if(!plan)return {line:'waiting for the plan',head:'Nothing to arm yet',sub:'',rows:[]};
+      var nb=nearest(),rc=reach(),armed=plan.zones.filter(function(z){return z.armed&&!z.fired_at}),win=snap?inWindow(snap.ts):null;
+      var line=armed.length?'ARMED '+armed.map(function(z){return z.id.replace(/_/g,' ')}).join(', '):nb?'nearest '+nb.z.id.replace(/_/g,' ')+' '+(nb.d>0?'+':'')+fmt(nb.d,0)+' pts · reach ±'+fmt(rc,0):'watching';
+      var rows=[['arming reach','±'+fmt(rc,0)+' pts (35 % of expected move, min 0.2 % of PDC)'],['trading window',(L.trading_window||['09:30','14:45']).join(' – ')+(win==null?'':win?' · open':' · closed, no shots')],['regime now',reg(r.regime)]];
+      plan.zones.forEach(function(z){var mid=(z.lo+z.hi)/2,d=snap?mid-snap.spot:null,ok=regime?z.compatible.indexOf(regime.regime)>=0:null;
+        rows.push([z.id.replace(/_/g,' '),(d!=null?(d>0?'+':'')+fmt(d,0)+' pts':'—')+' · '+(z.fired_at?'fired '+hhmmss(z.fired_at).slice(0,5):z.armed?'armed':'watching')+(ok==null?'':ok?' · regime ok':' · regime mismatch, needs '+z.compatible.map(reg).join(' / '))])});
+      if(lastTrig)rows.push(['last trigger',lastTrig.zone.id.replace(/_/g,' ')+' q='+lastTrig.quality.toFixed(2)+' · '+lastTrig.why]);
+      return {line:line,head:armed.length?armed.length+' zone'+(armed.length>1?'s':'')+' armed':'No zone in reach',sub:'Arms a zone when spot comes within reach and the regime matches; fires only on confirmation.',rows:rows,hot:!!armed.length}}
+    if(n==='strategy'){if(!d)return {line:'standby · waits for a trigger',head:'Standby',sub:'Runs only when the sniper fires: picks the structure the zone allows for this regime and prices the legs.',rows:[['structures in plan',plan?plan.zones.map(function(z){return z.structures[0]}).filter(function(v,i,a){return a.indexOf(v)===i}).map(reg).join(', '):'—']]};
+      var t=d.trade;return {line:reg(t.structure)+' · conf '+t.confidence.toFixed(2)+' · '+d.state.replace('_',' '),head:reg(t.structure)+' · confidence '+t.confidence.toFixed(2),sub:t.why,
+        rows:[['decision',d.id+' · '+d.state.replace('_',' ')],['legs',t.legs.map(function(l){return l.side+' '+l.lots+'× '+l.symbol+' @ '+fmt(l.limit)}).join(' · ')],['stop / target',(t.stop!=null?fmt(t.stop):'—')+' / '+(t.target!=null?fmt(t.target):'—')],['valid until',hhmmss(t.valid_until)+' IST'],['threshold',String(d.threshold)]]}}
+    if(n==='risk'){var caps=[['margin cap',L.margin_cap!=null?rupee(L.margin_cap):'—'],['daily drawdown',L.daily_drawdown!=null?rupee(L.daily_drawdown):'—'],['max loss per trade',L.max_loss_per_trade!=null?rupee(L.max_loss_per_trade):'—'],['max open structures',L.max_open_structures!=null?String(L.max_open_structures):'—'],['net vega band',L.net_vega_min!=null?fmt(L.net_vega_min,0)+' … '+fmt(L.net_vega_max,0):'—']];
+      if(!d)return {line:'standby · caps '+(L.margin_cap?rupee(L.margin_cap):'—')+' · dd '+(L.daily_drawdown?rupee(L.daily_drawdown):'—'),head:'Standby',sub:'Checks every candidate against margin, drawdown, Greeks and structure caps. Can veto, never approve.',rows:caps};
+      var v=d.risk;return {line:(v.risk_ok?'APPROVED':'VETO')+(v.reasons.length?' · '+v.reasons[0]:'')+' · margin '+rupee(v.margin),head:v.risk_ok?'Approved by risk':'Vetoed by risk',sub:v.reasons.length?v.reasons.join('; '):'All caps respected.',
+        rows:[['this trade\'s margin',rupee(v.margin)],['margin after',rupee(v.margin_after)],['max loss',rupee(v.max_loss)],['net Δ / vega',v.net_delta.toFixed(2)+' / '+fmt(Math.round(v.net_vega),0)]].concat(caps)}}
+    if(n==='exec'){if(!orders)return {line:'flat',head:'Flat',sub:'',rows:[]};var o=orders,pnl=o.realised+o.unrealised;
+      return {line:(o.positions.length?o.positions.length+' pos':'flat')+' · P&L '+(pnl>=0?'+':'−')+rupee(Math.abs(pnl)),head:(o.positions.length?o.positions.length+' open position'+(o.positions.length>1?'s':''):'Flat')+' · day P&L '+(pnl>=0?'+':'−')+rupee(Math.abs(pnl)),sub:'Works stops and targets on open structures; the kill switch flattens everything.',
+        rows:[['mode',o.mode],['realised',rupee(o.realised)],['unrealised',rupee(o.unrealised)],['fills today',String((o.fills_today||[]).length)],['open orders',String(o.open_orders)]].concat(o.positions.map(function(q){return [q.symbol,(q.qty>0?'+':'')+q.qty+' @ '+fmt(q.avg)+' · ltp '+fmt(q.ltp)]}))}}
+    return {line:'',head:n,sub:'',rows:[]}}
+  function renderFocus(){var t=think(focusA);$('#focusName').textContent=focusA;
+    $('#focus').innerHTML='<div class="head">'+esc(t.head)+(t.sub?'<small>'+esc(t.sub)+'</small>':'')+'</div>'+(t.rows.length?'<table><tbody>'+t.rows.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="num">'+esc(r[1])+'</td></tr>'}).join('')+'</tbody></table>':'')}
+  $('#stages').addEventListener('click',function(e){var n=e.target.closest('.node');if(!n)return;focusA=n.dataset.a;$$('.node').forEach(function(x){x.classList.toggle('sel',x===n)});renderFocus()});
+
+  /* ---- board: one node per agent, lit as each runs -------------------------------------------------- */
+  function setNode(n,a){var el=$('.node[data-a="'+n+'"]');if(!el)return;var t=think(n);
+    var state=a?(a.ok?'ok':'err'):(n==='planner'&&plan?'ok':'stby');
+    el.className='node '+state+(el.classList.contains('sel')?' sel':'')+(el.classList.contains('run')?' run':'');
+    el.querySelector('.ms').textContent=a?a.ms.toFixed(a.ms<10?1:0)+' ms':(state==='stby'?'standby':'');
+    var th=el.querySelector('.th');th.textContent=a&&!a.ok?(a.error||'error'):(t.line||(a&&a.summary)||'—');th.className='th'+(t.hot?' hot':'')}
+  var animating=false;
+  function renderBoard(c){var by={};c.agents.forEach(function(a){by[a.name]=a;lastRun[a.name]=a});
+    AGENTS.forEach(function(n){setNode(n,by[n]||(n==='planner'?lastRun[n]:null))});
+    var ok=c.agents.filter(function(a){return a.ok}).length;
+    $('#seq').textContent=fmt(c.seq,0);$('#cyTs').textContent=hhmmss(c.ts)+' IST';$('#cyMs').textContent=c.ms.toFixed(0)+' ms';$('#cyOk').textContent=ok+' / '+c.agents.length+' ok';
+    $('#boardMeta').textContent='cycle '+fmt(c.seq,0)+' · '+hhmmss(c.ts)+' IST · '+c.agents.map(function(a){return a.name}).join(' → ')+' · '+c.ms.toFixed(0)+' ms';
+    c.agents.forEach(function(a){if(!a.ok)note(a.name,'ERROR '+(a.error||''),hhmmss(c.ts),true)});
+    renderFocus();
+    if(animating)return;animating=true;var seq=c.agents.map(function(a){return a.name});
+    seq.forEach(function(n,i){setTimeout(function(){var el=$('.node[data-a="'+n+'"]');if(!el)return;el.classList.add('run');var ar=$('.arrow[data-arrow="'+(STAGE[n]-1)+'"]');if(ar)ar.classList.add('lit');
+      setTimeout(function(){el.classList.remove('run');if(ar)ar.classList.remove('lit')},420)},i*160)});
+    setTimeout(function(){animating=false},Math.max(1200,seq.length*160+500))}
   function stage(){var open=!!(orders&&orders.positions.length);var awaiting=dlist().some(function(d){return d.state==='awaiting_approval'});var armed=!!(plan&&plan.zones.some(function(z){return z.armed&&!z.fired_at}));
     var cur=!plan?1:open?5:awaiting?4:armed?3:2;
-    $$('.step').forEach(function(s){var n=+s.dataset.step;s.className='step'+(n<cur?' done':n===cur?' now':'')});
-    pill('p1',plan?'ready · '+plan.zones.length+' zones':'waiting',plan?'open':'');
-    pill('p2',snap?'live · '+hhmmss(snap.ts).slice(0,5)+' IST':'waiting',snap?'open':'');
-    pill('p3',armed?'armed':'watching',armed?'upcoming':'');
-    pill('p4',awaiting?'awaiting your approval':dlist().length?dlist().length+' today':'no decision yet',awaiting?'open':'');
-    pill('p5',open?orders.positions.length+' open':'flat',open?'open':'')}
-  $('#stepper').addEventListener('click',function(e){var s=e.target.closest('.step');if(!s)return;var el=$('#s'+s.dataset.step);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+    $$('.stg').forEach(function(s){var n=+s.dataset.stage;s.className='stg'+(n<cur?' done':n===cur?' now':'')});
+    $('#p4').textContent=awaiting?'awaiting your approval':dlist().length?dlist().length+' today':'no decision yet';
+    $('#p5').textContent=open?orders.positions.length+' open':'flat'}
 
-  function renderPipe(c){var by={};c.agents.forEach(function(a){by[a.name]=a});
-    $('#pipe').innerHTML=AGENTS.map(function(n){var a=by[n]||last[n];if(a)last[n]=a;var ok=!a||a.ok;return '<div class="chip'+(ok?'':' err')+'"><span class="dot '+(a?(ok?'on':''):'')+'"></span><b>'+n+'</b><span class="muted" style="font-size:11px">'+(a?esc(a.error||a.summary||'idle'):'waiting')+'</span><span class="ms num">'+(a?a.ms.toFixed(0)+' ms':'')+'</span></div>'}).join('');
-    var ok=c.agents.filter(function(a){return a.ok}).length;$('#pipeMeta').textContent='last cycle '+hhmmss(c.ts)+' IST · '+(c.ms/1000).toFixed(2)+' s · '+ok+' / '+c.agents.length+' ok'}
+  /* ---- panels --------------------------------------------------------------------------------------- */
   function tclose(ts){var m=/T(\d\d):(\d\d)/.exec(ts||'');if(!m)return '—';var mins=(15*60+30)-(+m[1]*60+ +m[2]);return mins<=0?'closed':Math.floor(mins/60)+'h '+p(mins%60)+'m'}
   function renderScope(){var s=snap||{},st=stats||{},r=regime||{};
-    var tiles=[['spot',s.spot!=null?fmt(s.spot):'—',''],['future',s.fut!=null?fmt(s.fut):'—',''],['India VIX',s.vix!=null?fmt(s.vix):'—',''],['expiry',s.expiry?esc(s.expiry):'—','small'],['to close',s.ts?tclose(s.ts):'—',''],['regime',r.regime?esc(r.regime.replace('_',' ').toLowerCase())+' · '+r.p.toFixed(2):'—','small'],['ATM IV',st.atm_iv!=null?fmt(st.atm_iv*100,1)+' %':'—',''],['expected move',st.expected_move_pts!=null?'±'+fmt(st.expected_move_pts,0):'—',''],['PCR (OI)',st.pcr_oi!=null?fmt(st.pcr_oi):'—',''],['max pain',st.max_pain!=null?fmt(st.max_pain,0):'—',''],['walls',st.put_wall!=null?fmt(st.put_wall,0)+' / '+fmt(st.call_wall,0):'—','small']];
-    $('#scope').innerHTML=tiles.map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num '+x[2]+'">'+x[1]+'</div></div>'}).join('')}
+    var tiles=[['spot',s.spot!=null?fmt(s.spot):'—',''],['future',s.fut!=null?fmt(s.fut):'—',''],['India VIX',s.vix!=null?fmt(s.vix):'—',''],['regime',r.regime?reg(r.regime)+' · '+r.p.toFixed(2):'—','small'],['expiry',s.expiry?esc(s.expiry):'—','small'],['to close',s.ts?tclose(s.ts):'—',''],['ATM IV',st.atm_iv!=null?fmt(st.atm_iv*100,1)+' %':'—',''],['expected move',st.expected_move_pts!=null?'±'+fmt(st.expected_move_pts,0):'—',''],['IV − RV',st.iv_minus_rv!=null?(st.iv_minus_rv>=0?'+':'')+fmt(st.iv_minus_rv,1):'—',''],['PCR (OI)',st.pcr_oi!=null?fmt(st.pcr_oi):'—',''],['max pain',st.max_pain!=null?fmt(st.max_pain,0):'—',''],['walls P / C',st.put_wall!=null?fmt(st.put_wall,0)+' / '+fmt(st.call_wall,0):'—','small']];
+    $('#scope').innerHTML=tiles.map(function(x){return '<div><span>'+x[0]+'</span><b class="'+x[2]+'">'+x[1]+'</b></div>'}).join('');
+    $('#scopeMeta').textContent=s.ts?hhmmss(s.ts)+' IST':'—'}
   function renderPlan(){if(!plan)return;
-    $('#levels').innerHTML=[['previous high',plan.pdh],['previous low',plan.pdl],['previous close',plan.pdc],['pivot',plan.pivot],['CPR',null,fmt(plan.bc,0)+'–'+fmt(plan.tc,0)],['bias',null,plan.bias.toLowerCase()]].map(function(x){return '<div><span class="eyebrow">'+x[0]+'</span><div class="v num">'+(x[1]!=null?fmt(x[1],0):x[2])+'</div></div>'}).join('');
-    $('#zones').innerHTML=plan.zones.map(function(z){return '<div>'+(ICO[z.kind]||'')+'<span><span class="id">'+esc(z.id.replace(/_/g,' ').toLowerCase())+'</span><br><span class="rng num">'+fmt(z.lo,0)+' – '+fmt(z.hi,0)+' · '+esc((z.structures[0]||'').replace(/_/g,' '))+' · needs '+esc(z.compatible.join(' / ').replace(/_/g,' ').toLowerCase())+'</span></span><span class="pill">'+esc(z.kind.toLowerCase())+'</span></div>'}).join('');
-    $('#zoneMeta').textContent=plan.zones.length+' zones';$('#planMeta').textContent='PDH '+fmt(plan.pdh,0)+' · PDL '+fmt(plan.pdl,0)+' · PDC '+fmt(plan.pdc,0)}
-  function renderChart(){if(!snap||!snap.bars_1m||snap.bars_1m.length<2)return;var W=760,H=250,L=54,R=12,T=12,B=24,bars=snap.bars_1m;
+    $('#levels').innerHTML=[['PDH',fmt(plan.pdh,0)],['PDL',fmt(plan.pdl,0)],['PDC',fmt(plan.pdc,0)],['pivot',fmt(plan.pivot,0)],['CPR',fmt(plan.bc,0)+'–'+fmt(plan.tc,0)],['bias',plan.bias.toLowerCase()]].map(function(x){return '<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>'}).join('');
+    $('#planMeta').textContent=plan.date+' · '+plan.zones.length+' zones'}
+  function renderChart(){if(!snap||!snap.bars_1m||snap.bars_1m.length<2)return;var W=760,H=230,L=54,R=12,T=10,B=22,bars=snap.bars_1m;
     var lo=Math.min.apply(null,bars.map(function(b){return b.low})),hi=Math.max.apply(null,bars.map(function(b){return b.high}));if(plan){lo=Math.min(lo,plan.pdl);hi=Math.max(hi,plan.pdh)}var pad=(hi-lo)*0.06||10;lo-=pad;hi+=pad;
     var x=function(i){return L+(i/(bars.length-1))*(W-L-R)},y=function(v){return T+(1-(v-lo)/(hi-lo))*(H-T-B)};
     var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Today\'s spot with plan levels and zones"><g class="grid">';
@@ -227,40 +352,59 @@
       [['PDH',plan.pdh],['PDL',plan.pdl],['PDC',plan.pdc]].forEach(function(l){s+='<line class="lvl" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(l[1])+'" y2="'+y(l[1])+'"/><text x="'+(W-R)+'" y="'+(y(l[1])-3)+'" text-anchor="end">'+l[0]+' '+fmt(l[1],0)+'</text>'})}
     var d='';bars.forEach(function(b,i){d+=(i?'L':'M')+x(i).toFixed(1)+' '+y(b.close).toFixed(1)+' '});s+='<path class="px" d="'+d+'"/>';
     var lastB=bars[bars.length-1];s+='<line class="cross" x1="'+L+'" x2="'+(W-R)+'" y1="'+y(lastB.close)+'" y2="'+y(lastB.close)+'"/>';
-    [0,Math.floor(bars.length/2),bars.length-1].forEach(function(i){s+='<text x="'+x(i)+'" y="'+(H-8)+'" text-anchor="'+(i===0?'start':i===bars.length-1?'end':'middle')+'">'+hhmmss(bars[i].ts).slice(0,5)+'</text>'});
+    [0,Math.floor(bars.length/2),bars.length-1].forEach(function(i){s+='<text x="'+x(i)+'" y="'+(H-7)+'" text-anchor="'+(i===0?'start':i===bars.length-1?'end':'middle')+'">'+hhmmss(bars[i].ts).slice(0,5)+'</text>'});
     s+='</svg>';$('#chart').innerHTML=s}
   function renderChain(){if(!snap||!snap.chain||!snap.chain.length)return;var atm=snap.atm,rows=snap.chain.filter(function(r){return Math.abs(r.strike-atm)<=6*50});var mx=Math.max.apply(null,rows.map(function(r){return Math.max(r.ce_oi,r.pe_oi)}))||1;
-    $('#oc').innerHTML='<div><span class="hd2">call OI · IV</span><span class="k hd2">strike</span><span class="hd2" style="text-align:right">IV · put OI</span></div>'+rows.map(function(r){return '<div><span class="bar ce"><i style="width:'+(r.ce_oi/mx*100)+'%"></i><b>'+fmt(r.ce_oi/1e5,1)+' L · '+(r.ce_iv!=null?fmt(r.ce_iv*100,1)+'%':'—')+'</b></span><span class="k num'+(r.strike===atm?' atm':'')+'">'+fmt(r.strike,0)+'</span><span class="bar pe"><i style="width:'+(r.pe_oi/mx*100)+'%"></i><b>'+(r.pe_iv!=null?fmt(r.pe_iv*100,1)+'%':'—')+' · '+fmt(r.pe_oi/1e5,1)+' L</b></span></div>'}).join('');
-    $('#ocMeta').textContent='ATM '+fmt(atm,0)+' · expiry '+snap.expiry}
-  function renderTargets(){if(!plan)return;var spot=snap?snap.spot:null,em=stats?stats.expected_move_pts:null;
-    $('#targets').innerHTML=plan.zones.map(function(z){var mid=(z.lo+z.hi)/2,d=spot!=null?mid-spot:null,sig=d!=null&&em?d/em:null;var st=z.fired_at?'fired '+hhmmss(z.fired_at).slice(0,5):z.armed?'armed':'watching';
-      return '<div class="'+(z.armed&&!z.fired_at?'armed':'')+'">'+(ICO[z.kind]||'')+'<span><span class="id">'+esc(z.id.replace(/_/g,' ').toLowerCase())+'</span><br><span class="rng num">'+fmt(z.lo,0)+' – '+fmt(z.hi,0)+'</span></span><span class="dist num">'+(d!=null?(d>0?'+':'')+fmt(d,0)+' pts'+(sig!=null?'<br>'+(sig>0?'+':'')+fmt(sig,2)+' σ':''):'—')+'</span><span class="st '+(z.fired_at?'fired':z.armed?'armed':'')+'">'+st+'</span></div>'}).join('')}
+    $('#oc').innerHTML='<div><span class="hd2">call OI · IV</span><span class="k hd2">strike</span><span class="hd2" style="text-align:right">IV · put OI</span></div>'+rows.map(function(r){return '<div><span class="bar ce"><i style="width:'+(r.ce_oi/mx*100)+'%"></i><b>'+fmt(r.ce_oi/1e5,1)+'L · '+(r.ce_iv!=null?fmt(r.ce_iv*100,1)+'%':'—')+'</b></span><span class="k'+(r.strike===atm?' atm':'')+'">'+fmt(r.strike,0)+'</span><span class="bar pe"><i style="width:'+(r.pe_oi/mx*100)+'%"></i><b>'+(r.pe_iv!=null?fmt(r.pe_iv*100,1)+'%':'—')+' · '+fmt(r.pe_oi/1e5,1)+'L</b></span></div>'}).join('');
+    $('#ocMeta').textContent='ATM '+fmt(atm,0)+' · '+snap.expiry}
+  function renderZones(){if(!plan)return;var spot=snap?snap.spot:null,em=stats?stats.expected_move_pts:null;
+    $('#zoneBody').innerHTML=plan.zones.map(function(z){var mid=(z.lo+z.hi)/2,d=spot!=null?mid-spot:null,sig=d!=null&&em?d/em:null;var st=z.fired_at?'fired '+hhmmss(z.fired_at).slice(0,5):z.armed?'armed':'watching';var k=z.fired_at?'fired':z.armed?'armed':'watch';
+      return '<tr class="'+(z.armed&&!z.fired_at?'armed':z.fired_at?'fired':'')+'"><td>'+esc(z.id.replace(/_/g,' '))+'</td><td>'+esc(z.kind.toLowerCase())+'</td><td class="num">'+fmt(z.lo,0)+'–'+fmt(z.hi,0)+'</td><td>'+esc(reg(z.structures[0]||''))+'</td><td>'+esc(z.compatible.map(reg).join(' / '))+'</td><td class="num">'+(d!=null?(d>0?'+':'')+fmt(d,0):'—')+'</td><td class="num">'+(sig!=null?(sig>0?'+':'')+fmt(sig,2):'—')+'</td><td><span class="st '+k+'">'+st+'</span></td></tr>'}).join('');
+    var armed=plan.zones.filter(function(z){return z.armed&&!z.fired_at}).length,rc=reach();
+    $('#zoneMeta').textContent=(armed?armed+' armed · ':'')+'reach ±'+fmt(rc,0)+' pts'}
   function stateCls(s){return {executed:'open',rejected:'closed',held:'upcoming',vetoed:'closed',expired:'closed',approved:'open',awaiting_approval:'upcoming'}[s]||''}
   function renderShot(d){var t=d.trade,r=d.risk;threshold=d.threshold||threshold;
-    $('#shot').innerHTML='<div class="eyebrow">'+esc(d.id)+' · '+esc(t.structure.replace(/_/g,' '))+' · '+esc(t.regime.replace('_',' ').toLowerCase())+' · valid until '+hhmmss(t.valid_until)+' IST</div><div class="conf"><span class="big num">'+t.confidence.toFixed(2)+'</span><span class="barx"><i style="width:'+Math.round(t.confidence*100)+'%"></i><em style="left:'+Math.round(threshold*100)+'%"></em></span><span class="muted" style="font-size:11px">threshold '+threshold+'</span></div>'+
-      '<div class="legs">'+t.legs.map(function(l){return '<div><span class="'+l.side.toLowerCase()+'">'+esc(l.side)+' '+l.lots+'× '+esc(l.symbol)+'</span><span class="num">@ '+fmt(l.limit)+'</span></div>'}).join('')+'</div>'+
-      '<div class="kv2"><div><span>stop</span><b class="num">'+(t.stop!=null?fmt(t.stop):'—')+'</b></div><div><span>target</span><b class="num">'+(t.target!=null?fmt(t.target):'—')+'</b></div><div><span>lot size</span><b class="num">'+t.lot_size+'</b></div><div><span>margin after</span><b class="num">₹'+fmt(Math.round(r.margin_after),0)+'</b></div><div><span>max loss</span><b class="num">₹'+fmt(Math.round(r.max_loss),0)+'</b></div><div><span>net Δ / vega</span><b class="num">'+r.net_delta.toFixed(2)+' / '+fmt(Math.round(r.net_vega),0)+'</b></div></div>'+
+    $('#shot').innerHTML='<div class="eyebrow">'+esc(d.id)+' · '+esc(reg(t.structure))+' · '+esc(reg(t.regime))+' · valid until '+hhmmss(t.valid_until)+' IST</div><div class="conf"><span class="big">'+t.confidence.toFixed(2)+'</span><span class="barx"><i style="width:'+Math.round(t.confidence*100)+'%"></i><em style="left:'+Math.round(threshold*100)+'%"></em></span><span class="muted" style="font-size:10px">threshold '+threshold+'</span></div>'+
+      '<div class="legs">'+t.legs.map(function(l){return '<div class="'+l.side.toLowerCase()+'"><span class="side">'+esc(l.side)+'</span><span>'+l.lots+'× '+esc(l.symbol)+'</span><span>@ '+fmt(l.limit)+'</span></div>'}).join('')+'</div>'+
+      '<div class="kv2"><div><span>stop</span><b>'+(t.stop!=null?fmt(t.stop):'—')+'</b></div><div><span>target</span><b>'+(t.target!=null?fmt(t.target):'—')+'</b></div><div><span>lot size</span><b>'+t.lot_size+'</b></div><div><span>margin after</span><b>'+rupee(r.margin_after)+'</b></div><div><span>max loss</span><b>'+rupee(r.max_loss)+'</b></div><div><span>net Δ / vega</span><b>'+r.net_delta.toFixed(2)+' / '+fmt(Math.round(r.net_vega),0)+'</b></div></div>'+
       '<div class="why">'+esc(t.why)+(r.reasons.length?' <b>veto:</b> '+esc(r.reasons.join('; ')):'')+'</div>'+
-      (d.state==='awaiting_approval'?'<div class="act"><button class="btn primary" data-act="approve" data-id="'+esc(d.id)+'">Approve · paper fill</button><button class="btn" data-act="reject" data-id="'+esc(d.id)+'">Reject</button></div>':'<div class="act"><span class="pill '+stateCls(d.state)+'">'+esc(d.state.replace('_',' '))+'</span></div>')}
-  function renderDecision(d){decisions[d.id]=d;var latest=dlist().sort(function(a,b){return (b.ts||'').localeCompare(a.ts||'')})[0];renderShot(latest);
+      (d.state==='awaiting_approval'?'<div class="act"><button class="btn go" data-act="approve" data-id="'+esc(d.id)+'">Approve · paper fill</button><button class="btn no" data-act="reject" data-id="'+esc(d.id)+'">Reject</button></div>':'<div class="act"><span class="pill '+stateCls(d.state)+'">'+esc(d.state.replace('_',' '))+'</span></div>')}
+  function renderDecision(d){decisions[d.id]=d;renderShot(lastDecision());
     var tb=$('#sigBody');if(tb.querySelector('td.muted'))tb.innerHTML='';var tr=tb.querySelector('tr[data-id="'+d.id+'"]');if(!tr){tr=document.createElement('tr');tr.dataset.id=d.id;tb.insertBefore(tr,tb.firstChild)}
-    tr.innerHTML='<td>'+esc(d.id)+'</td><td>'+esc(d.trade.structure.replace(/_/g,' '))+'<br><span class="muted" style="font-size:11px">'+esc(d.trade.legs.map(function(l){return l.side+' '+l.lots+'× '+l.symbol}).join(' · '))+'</span></td><td class="num"><span class="cpill'+(d.trade.confidence<threshold?' low':'')+'"><i><b style="width:'+Math.round(d.trade.confidence*100)+'%"></b></i>'+d.trade.confidence.toFixed(2)+'</span></td><td><span class="pill '+stateCls(d.state)+'">'+esc(d.state.replace('_',' '))+'</span></td>';
+    tr.innerHTML='<td>'+esc(d.id)+'</td><td>'+esc(reg(d.trade.structure))+'<br><span class="muted" style="font-size:10px">'+esc(d.trade.legs.map(function(l){return l.side+' '+l.lots+'× '+l.symbol}).join(' · '))+'</span></td><td class="num"><span class="cpill'+(d.trade.confidence<threshold?' low':'')+'"><i><b style="width:'+Math.round(d.trade.confidence*100)+'%"></b></i>'+d.trade.confidence.toFixed(2)+'</span></td><td><span class="pill '+stateCls(d.state)+'">'+esc(d.state.replace('_',' '))+'</span></td>';
     var all=dlist(),n=function(s){return all.filter(function(x){return x.state===s}).length};
-    $('#sigMeta').textContent=all.length+' emitted · '+n('executed')+' executed · '+n('held')+' held · '+n('vetoed')+' vetoed';stage()}
-  $('#shot').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;post('/decisions/'+b.dataset.id+'/'+b.dataset.act).then(renderDecision)});
-  function meter(label,used,cap,fmtv){var r=cap?Math.min(1,Math.abs(used)/cap):0;return '<div><div class="r"><span>'+label+'</span><span class="num">'+fmtv(used)+' / '+fmtv(cap)+'</span></div><div class="m"><i class="'+(r>0.8?'hot':'')+'" style="width:'+Math.round(r*100)+'%"></i></div></div>'}
-  function renderOrders(o){orders=o;var pnl=o.realised+o.unrealised,L=limits||{};var rupee=function(v){return '₹'+fmt(Math.round(v),0)};
+    $('#sigMeta').textContent=all.length+' emitted · '+n('executed')+' exec · '+n('held')+' held · '+n('vetoed')+' veto';
+    note('strategy',d.id+' '+reg(d.trade.structure)+' conf '+d.trade.confidence.toFixed(2)+' · '+d.trade.why,hhmmss(d.ts),true);
+    note('risk',d.id+' '+(d.risk.risk_ok?'approved':'VETO')+(d.risk.reasons.length?' · '+d.risk.reasons.join('; '):'')+' · margin '+rupee(d.risk.margin)+' · max loss '+rupee(d.risk.max_loss),hhmmss(d.ts),!d.risk.risk_ok);
+    setNode('strategy',lastRun.strategy);setNode('risk',lastRun.risk);stage()}
+  $('#shot').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;post('/decisions/'+b.dataset.id+'/'+b.dataset.act).then(function(d){renderDecision(d);DD.toast(b.dataset.act==='approve'?'Approved · paper fill':'Rejected')})});
+  function meter(label,used,cap,fmtv){var r=cap?Math.min(1,Math.abs(used)/cap):0;return '<div><div class="r"><span>'+label+'</span><span>'+fmtv(used)+' / '+fmtv(cap)+'</span></div><div class="m"><i class="'+(r>0.8?'hot':'')+'" style="width:'+Math.round(r*100)+'%"></i></div></div>'}
+  function renderOrders(o){orders=o;var pnl=o.realised+o.unrealised,L=limits||{};
     var exec=dlist().filter(function(d){return d.state==='executed'});var margin=exec.reduce(function(a,d){return a+(d.risk.margin||0)},0);
-    $('#risk').innerHTML='<div><div class="r"><span>day P&L</span></div><div class="pnl num '+cls(pnl)+'" style="font:600 20px/1.1 var(--sans);margin-top:4px">'+(pnl>=0?'+':'−')+rupee(Math.abs(pnl))+'</div><div class="r"><span>realised '+rupee(o.realised)+' · unrealised '+rupee(o.unrealised)+'</span></div></div>'+meter('margin used',margin,L.margin_cap||0,rupee)+meter('daily drawdown',Math.max(0,-pnl),L.daily_drawdown||0,rupee)+meter('open structures',exec.length,L.max_open_structures||0,function(v){return String(v)});
+    $('#risk').innerHTML='<div><div class="r"><span>day P&L</span></div><div class="pnl num '+cls(pnl)+'" style="font:500 20px/1.1 var(--mono);margin-top:4px">'+(pnl>=0?'+':'−')+rupee(Math.abs(pnl))+'</div><div class="r"><span style="font-family:var(--mono);text-transform:none;letter-spacing:0;font-size:10px">realised '+rupee(o.realised)+' · unrealised '+rupee(o.unrealised)+'</span></div></div>'+meter('margin used',margin,L.margin_cap||0,rupee)+meter('daily drawdown',Math.max(0,-pnl),L.daily_drawdown||0,rupee)+meter('open structures',exec.length,L.max_open_structures||0,function(v){return String(v)});
     $('#posBody').innerHTML=o.positions.length?o.positions.map(function(q){var pl=(q.ltp-q.avg)*q.qty;return '<tr><td>'+esc(q.symbol)+' · '+(q.qty>0?'long':'short')+'</td><td class="num">'+(q.qty>0?'+':'')+q.qty+'</td><td class="num">'+fmt(q.avg)+'</td><td class="num">'+fmt(q.ltp)+'</td><td class="num">'+q.delta.toFixed(2)+'</td><td class="num">'+fmt(Math.round(q.theta_day*q.qty),0)+'</td><td class="num pnl '+cls(pl)+'">'+(pl>=0?'+':'')+fmt(Math.round(pl),0)+'</td></tr>'}).join(''):'<tr><td colspan="7" class="muted">no open positions</td></tr>';
+    $('#mode').textContent=(o.mode||'paper').toUpperCase();
+    note('exec',think('exec').line+' · '+(o.fills_today||[]).length+' fills',hhmmss(o.ts));
     stage()}
-  $('#kill').addEventListener('click',function(){if(!confirm('Flatten all positions and disarm every zone?'))return;post('/kill').then(function(d){if(d&&d.positions)renderOrders(d);log('risk','KILL SWITCH sent')})});
-  var handlers={log:function(m){var a=/^(planner|sniper|feed|regime|chain|strategy|risk|exec)\b/.exec(m);log(a?a[1]:(/^S-\d+/.test(m)?'exec':'desk'),String(m).replace(/^([a-z]+): /,''))},
-    plan:function(pl){plan=pl;renderPlan();renderTargets();renderChart();stage()},snapshot:function(s){snap=s;$('#und').textContent=s.underlying;renderScope();renderChart();renderChain();renderTargets();stage()},
-    regime:function(r){regime=r;renderScope()},chain:function(c){stats=c;renderScope();renderTargets()},trigger:function(t){log('sniper',t.zone.id+' fired · q='+t.quality.toFixed(2)+' · '+t.why);if(plan)renderTargets()},
-    decision:renderDecision,orders:renderOrders,cycle:function(c){renderPipe(c);if(plan)renderTargets();stage()}};
-  function connect(){var ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/stream');ws.onmessage=function(ev){try{var m=JSON.parse(ev.data);var h=handlers[m.topic];if(h)h(m.data)}catch(e){}};ws.onclose=function(){setTimeout(connect,3000)}}
-  get('/limits').then(function(l){limits=l}).catch(function(){});connect();stage();
+  $('#kill').addEventListener('click',function(){if(!confirm('Flatten all positions and disarm every zone?'))return;post('/kill').then(function(d){if(d&&d.positions)renderOrders(d);say('risk','KILL SWITCH sent · flattened, zones disarmed',null,true);DD.toast('Kill switch sent')})});
+
+  /* ---- stream handlers ------------------------------------------------------------------------------ */
+  var lastArmed='';
+  var handlers={log:function(m){var a=/^(planner|sniper|feed|regime|chain|strategy|risk|exec)\b/.exec(m);say(a?a[1]:(/^S-\d+/.test(m)?'exec':'desk'),String(m).replace(/^([a-z]+): /,''))},
+    plan:function(pl){plan=pl;renderPlan();renderZones();renderChart();setNode('planner',lastRun.planner);note('planner',think('planner').line+(pl.notes&&pl.notes.length?' · '+pl.notes.join(' '):''),null,true);stage()},
+    snapshot:function(s){snap=s;$('#und').textContent=s.underlying;renderScope();renderChart();renderChain();renderZones();
+      var armed=plan?plan.zones.filter(function(z){return z.armed&&!z.fired_at}).map(function(z){return z.id}).join(','):'';if(armed!==lastArmed){lastArmed=armed;note('sniper',armed?'ARMED '+armed.replace(/_/g,' ').replace(/,/g,', ')+' · spot '+fmt(s.spot)+' inside reach':'disarmed · spot '+fmt(s.spot)+' left the reach of every zone',hhmmss(s.ts),!!armed)}
+      if(!lastNote.feed)note('feed','first snapshot · spot '+fmt(s.spot)+' · '+(s.chain||[]).length+' strikes · expiry '+s.expiry,hhmmss(s.ts));stage()},
+    regime:function(r){var prev=regime;regime=r;renderScope();if(!prev||prev.regime!==r.regime)note('regime',reg(r.regime)+' p='+r.p.toFixed(2)+' · ADX '+fmt(r.adx,0)+(prev?' (was '+reg(prev.regime)+')':''),snap?hhmmss(snap.ts):null,true)},
+    chain:function(c){var prev=stats;stats=c;renderScope();renderZones();if(!prev||Math.abs(prev.expected_move_pts-c.expected_move_pts)/c.expected_move_pts>0.1||prev.call_wall!==c.call_wall||prev.put_wall!==c.put_wall)note('chain','IV '+fmt(c.atm_iv*100,1)+'% · expected move ±'+fmt(c.expected_move_pts,0)+' · walls '+fmt(c.put_wall,0)+'P / '+fmt(c.call_wall,0)+'C · PCR '+fmt(c.pcr_oi),snap?hhmmss(snap.ts):null)},
+    trigger:function(t){lastTrig=t;say('sniper','FIRED '+t.zone.id.replace(/_/g,' ')+' · q='+t.quality.toFixed(2)+' · '+t.why,hhmmss(t.ts),true);if(plan)renderZones()},
+    decision:renderDecision,orders:renderOrders,cycle:function(c){renderBoard(c);if(plan)renderZones();stage()}};
+  function connect(){var ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/stream');
+    ws.onopen=function(){var w=$('#wsState');w.className='live';w.innerHTML='stream <b>live</b>'};
+    ws.onmessage=function(ev){try{var m=JSON.parse(ev.data);var h=handlers[m.topic];if(h)h(m.data)}catch(e){}};
+    ws.onclose=function(){var w=$('#wsState');w.className='off';w.innerHTML='stream <b>reconnecting</b>';setTimeout(connect,3000)}}
+  get('/limits').then(function(l){limits=l;renderFocus()}).catch(function(){});
+  renderScope();renderFocus();connect();stage();
   DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
 })();
 </script>

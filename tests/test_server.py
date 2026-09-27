@@ -122,7 +122,7 @@ def test_pages_and_assets():
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text
-        assert 'id="stepper"' in sn and 'id="targets"' in sn and 'id="pipe"' in sn and 'id="oc"' in sn
+        assert 'id="stages"' in sn and 'id="zoneBody"' in sn and 'id="stream"' in sn and 'id="oc"' in sn and 'data-a="sniper"' in sn
         cn = c.get("/markets/council?symbol=HDFCBANK&horizon=1h").json()
         assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
         assert 'data-ix="SENSEX"' in home and "limit=10" in home and 'data-ix=""' not in home

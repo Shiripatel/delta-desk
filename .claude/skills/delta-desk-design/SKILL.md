@@ -23,7 +23,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/ipo`, `/ipo/<slug>` | `web/pages/ipo.html` | IPO |
 | `/analysis` | `web/pages/analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (stock-analysis layout: Overview / Financials / Statistics / Dividends / History / Profile sub-tabs; statement tables with fiscal years as columns newest first, Annual / Quarterly / TTM, bold totals, muted italic growth rows, a chart icon per row) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
 | `/desk` | `web/pages/agents.html` | Agents (the agent council: stock + horizon → verdict) |
-| `/sniper` | `web/pages/sniper.html` | Sniper (F&O desk: scope, range with zones, chain, targets, the shot, risk) |
+| `/sniper` | `web/pages/sniper.html` | Sniper: the one always-dark trading terminal (page-scoped tokens on `body`, square corners, teal `.phd` title bars, `table.dense`); agent board + thought stream on top, scope / chain / range / zones / shot / risk / positions / signals below |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
@@ -44,7 +44,7 @@ The header is a filled band (`--head`, dark ink on the light themes, near-black 
 `<header class="top"><div class="wrap">` with three zones in one 56px row:
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
 2. `.nav` text links (Home · News · IPO · Agents · Sniper),
-3. `.status` borderless items: theme select (injected by nav.js), clock; the Sniper page adds the paper/live `.seg` switch and the `.kill` button. The data source is shown in the ticker strip, not the header.
+3. `.status` borderless items: theme select (injected by nav.js), clock; the Sniper page adds the `.kill` button. The data source is shown in the ticker strip, not the header.
 
 The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
 
