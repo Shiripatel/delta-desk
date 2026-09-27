@@ -78,22 +78,18 @@ top pages, referrers and device mix.
 ## Deploy
 
 `Dockerfile` builds one container that runs the pipeline and the HTTP / WebSocket server; it listens on
-`$PORT` when the host sets one, else 8000. GitHub Pages cannot host it (it is a live server, not static
-files), so the free path is a container host wired to this repository:
+`$PORT` when the host sets one, else 8000, so any container host works. GitHub Pages cannot host it (it is
+a live server, not static files).
 
-* **Render (free web service):** New → Blueprint → choose this repository; `render.yaml` sets everything.
-  Fill `TELEGRAM_BOT_TOKEN`, `DD_OWNER_CHAT` and `GROQ_API_KEY` in the dashboard. The free service sleeps
-  after 15 idle minutes and its disk resets on deploy; every waitlist sign-up is therefore also sent to the
-  owner's Telegram (`DD_OWNER_CHAT`). A GitHub Actions cron pings it every ten minutes so it stays awake,
-  and the server warms its own caches at start and on a timer. Set `DATABASE_URL` to a free Postgres (Neon, Supabase) and the
-  waitlist is stored there instead, surviving every deploy.
-* **Hugging Face Spaces:** the Docker SDK is paid now; a Gradio Space can still run this app by launching
-  the FastAPI server from `app.py`, but Render is the simpler free option.
-* **Oracle Cloud always-free VM (the plan for launch):** on a fresh Ubuntu ARM instance run
+* **Oracle Cloud always-free VM (the launch target):** on a fresh Ubuntu ARM instance run
   `curl -fsSL https://raw.githubusercontent.com/Shiripatel/delta-desk/main/deploy/oracle/setup.sh | bash`.
   It installs Docker, opens ports 80 / 443, clones the repository to `/opt/delta-desk`, writes a starter `.env`,
   starts the app behind Caddy (automatic HTTPS once `SITE_ADDRESS` is a domain) and installs a five-minute
   pull-based auto-deploy. `data/` lives on the VM disk. See `deploy/oracle/`.
+* **Any other host:** run the image with the `.env` values as environment variables. `/healthz` is the
+  health check (it also reports the cache warmer's progress). Set `DATABASE_URL` to a Postgres (Neon,
+  Supabase, or the host's own) and the waitlist is stored there instead of `data/`; every sign-up is also
+  sent to the owner's Telegram (`DD_OWNER_CHAT`). The server warms its own caches at start and on a timer.
 
 ## Licence
 

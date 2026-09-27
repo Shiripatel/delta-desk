@@ -113,7 +113,7 @@ class WaitlistDB(Waitlist):
 
 
 def waitlist_from_env() -> Waitlist:
-    """Postgres when DATABASE_URL is set (Neon, Supabase, Render Postgres), else the local JSONL file."""
+    """Postgres when DATABASE_URL is set (Neon, Supabase, any Postgres), else the local JSONL file."""
     url = os.environ.get("DATABASE_URL", "")
     if url.startswith(("postgres://", "postgresql://")):
         try:

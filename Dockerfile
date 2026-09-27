@@ -13,5 +13,5 @@ COPY . .
 RUN uv sync --frozen --no-dev
 
 EXPOSE 8000
-# hosts such as Render set PORT; default to 8000 locally
+# container hosts set PORT; default to 8000 locally
 CMD ["sh", "-c", "uv run deltadesk serve --host 0.0.0.0 --port ${PORT:-8000} --speed 60"]
