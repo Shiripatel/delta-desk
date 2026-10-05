@@ -30,10 +30,11 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:0 0 16px}
 /* desk: palette + canvas */
 .desk{display:grid;grid-template-columns:210px 1fr}
-.palette{border-right:1px solid var(--line-2);background:#0c1218}
-.palette .hint{padding:6px 10px;font-size:10.5px;color:var(--ink-3);border-bottom:1px solid var(--line);line-height:1.4}
+.shelf{border-right:1px solid var(--line-2);background:#0c1218}
+.shelf .hint{padding:6px 10px;font-size:10.5px;color:var(--ink-3);border-bottom:1px solid var(--line);line-height:1.4}
 .pit{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);cursor:grab;color:var(--ink-2);user-select:none}
 .pit:hover{background:var(--fill)}
+.pit > span{min-width:0}
 .pit.on{color:var(--ink-3);cursor:default}
 .pit b{display:block;font:600 11.5px/1.2 var(--sans);color:var(--ink)}
 .pit.on b{color:var(--ink-3)}
@@ -138,7 +139,7 @@ table.dense td.num{font-family:var(--mono)}
 .stream .hot{color:var(--ink)}
 .kill{border:1px solid var(--bad);color:var(--bad)}
 @media (max-width:1100px){.row2{grid-template-columns:1fr}.flow{grid-template-columns:1fr 60px 1fr 60px 1fr}}
-@media (max-width:820px){.desk{grid-template-columns:1fr}.palette{border-right:0;border-bottom:1px solid var(--line-2)}.palette .list{display:grid;grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr;gap:10px}.spacer{display:none}#edges{display:none}.chartbox{height:320px}}
+@media (max-width:820px){.desk{grid-template-columns:1fr}.shelf{border-right:0;border-bottom:1px solid var(--line-2)}.shelf .list{display:grid;grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr;gap:10px}.spacer{display:none}#edges{display:none}.chartbox{height:320px}}
 </style>
 </head>
 <body>
@@ -168,7 +169,7 @@ table.dense td.num{font-family:var(--mono)}
   <section class="panel">
     <div class="phd">Agent desk · drag agents in, they vote, the gate fires<span class="r" id="boardMeta">loading…</span></div>
     <div class="desk">
-      <div class="palette" id="palette">
+      <div class="shelf" id="shelf">
         <div class="hint">Agents. Drag one onto the desk (or press +). Each watches one thing on the 3-min tape and votes long, short or neutral.</div>
         <div class="list" id="plist"></div>
       </div>
@@ -252,8 +253,8 @@ table.dense td.num{font-family:var(--mono)}
   $('#plist').addEventListener('click',function(e){var b=e.target.closest('button[data-add]');if(b)addMon(b.dataset.add)});
   $('#plist').addEventListener('dragstart',function(e){var p=e.target.closest('.pit');if(!p||p.classList.contains('on'))return;e.dataTransfer.setData('text/plain','add:'+p.dataset.n);e.dataTransfer.effectAllowed='move';p.classList.add('dragging')});
   $('#plist').addEventListener('dragend',function(e){var p=e.target.closest('.pit');if(p)p.classList.remove('dragging')});
-  $('#palette').addEventListener('dragover',function(e){e.preventDefault()});
-  $('#palette').addEventListener('drop',function(e){e.preventDefault();var d=e.dataTransfer.getData('text/plain');if(d.indexOf('rm:')===0)removeMon(d.slice(3))});
+  $('#shelf').addEventListener('dragover',function(e){e.preventDefault()});
+  $('#shelf').addEventListener('drop',function(e){e.preventDefault();var d=e.dataTransfer.getData('text/plain');if(d.indexOf('rm:')===0)removeMon(d.slice(3))});
   var canvas=$('#canvas');
   canvas.addEventListener('dragover',function(e){e.preventDefault();canvas.classList.add('over')});
   canvas.addEventListener('dragleave',function(){canvas.classList.remove('over')});

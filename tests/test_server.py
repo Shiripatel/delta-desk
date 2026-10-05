@@ -124,7 +124,7 @@ def test_pages_and_assets():
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text
-        assert 'id="palette"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="edges"' in sn
+        assert 'id="shelf"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="edges"' in sn
         cfg = c.get("/sniper/config").json()
         assert cfg["monitors"] == ["volume", "ma_vwap", "rsi", "trend"] and cfg["required"] is None and len(cfg["available"]) == 6
         assert {a["name"] for a in cfg["available"]} >= {"volume", "ma_vwap", "rsi", "trend", "options", "levels"}
