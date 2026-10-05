@@ -30,11 +30,18 @@ class FeedAgent:
         self.latency_ms = 0.0
         self._it = None
         self.ended = False
+        self._fut_vol: int | None = None   # last cumulative futures volume; its increments become bar volume
 
     # ---- ingestion ------------------------------------------------------------------------
     def _ingest(self, t: Tick) -> None:
         self.latest[t.token] = t
         self.last_ts = t.ts
+        if t.token == self.fut.token and t.volume:
+            # the index has no volume; the near future's traded volume (cumulative on broker feeds) stands in for it
+            inc = t.volume - self._fut_vol if self._fut_vol is not None and t.volume >= self._fut_vol else 0
+            self._fut_vol = t.volume
+            if self._cur is not None and inc:
+                self._cur = self._cur.model_copy(update={"volume": self._cur.volume + inc})
         if t.token == self.idx.token:
             slot = t.ts.replace(second=0, microsecond=0)
             if self._cur is None or self._cur.ts != slot:

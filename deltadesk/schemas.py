@@ -159,11 +159,44 @@ class Leg(BaseModel):
     limit: float
 
 
+class Signal(BaseModel):
+    """One monitor agent's vote this cycle: +1 long, -1 short, 0 neutral, with the reading that produced it."""
+    name: str                   # "volume", "ma_vwap", "rsi", "trend", "options", "levels"
+    label: str
+    vote: int = Field(ge=-1, le=1)
+    reading: str                # short live reading, e.g. "1.8x avg vol"
+    why: str                    # one sentence
+    value: float | None = None
+    active: bool = True         # part of the confluence set the user built
+
+
+class Confluence(BaseModel):
+    """The AND gate over the active monitors, with the order it would place in underlying points."""
+    ts: datetime
+    signals: list[Signal]
+    active: list[str]
+    required: int
+    agree: int
+    direction: Literal["LONG", "SHORT", "NONE"]
+    ready: bool
+    why: str
+    entry: float | None = None
+    stop: float | None = None
+    target: float | None = None
+    atr: float | None = None
+    blocked: str | None = None  # why a ready confluence did not fire this cycle
+
+
 class CandidateTrade(BaseModel):
     id: str
     ts: datetime
     structure: str              # "short_strangle", "bull_call_spread", ...
     zone_id: str = ""
+    source: Literal["zone", "confluence"] = "zone"
+    spot_dir: Literal["LONG", "SHORT"] | None = None   # set by the confluence engine: exits on the underlying
+    spot_entry: float | None = None
+    spot_stop: float | None = None
+    spot_target: float | None = None
     legs: list[Leg]
     lot_size: int
     stop: float | None          # on the structure's net premium per unit

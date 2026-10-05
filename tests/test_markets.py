@@ -37,8 +37,9 @@ def test_indices_and_constituents(tmp_path):
 
 def test_other_asset_classes(tmp_path):
     s = _svc(tmp_path)
-    futs = s.futures(date(2026, 9, 18))
-    assert len(futs) == 8 and futs[0]["expiry"] == "2026-09-29" and futs[1]["expiry"] == "2026-10-27"
+    futs = s.futures()                                   # today's near and next month; a fixed date goes stale once it expires
+    expected = [c["expiry"] for c in universe.futures_contracts(date.today())]
+    assert len(futs) == 8 and [f["expiry"] for f in futs] == expected and futs[0]["expiry"] < futs[1]["expiry"]
     assert all(f["quote"] and f["basis"] is not None for f in futs)
     etfs = s.etfs()
     assert any(e["symbol"] == "NIFTYBEES" and e["quote"] for e in etfs)

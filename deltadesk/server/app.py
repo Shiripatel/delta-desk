@@ -61,6 +61,11 @@ class AlertIn(BaseModel):
     horizon: str = "1d"
 
 
+class SniperConfigIn(BaseModel):
+    monitors: list[str]
+    required: int | None = None
+
+
 class ContactIn(BaseModel):
     contact: str = ""
 
@@ -234,6 +239,39 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.post("/kill")
     async def kill():
         return JSONResponse(_dump(pipeline.kill()))
+
+    # ---- sniper: which monitors sit on the desk and how many must agree -----------------
+    sniper_cfg = Path(os.environ.get("DD_SNIPER_CFG", "data/sniper.json"))
+    try:
+        _c = json.loads(sniper_cfg.read_text(encoding="utf-8"))
+        pipeline.confluence.configure(_c.get("monitors") or pipeline.confluence.active, _c.get("required"))
+    except (OSError, ValueError):
+        pass
+
+    def _sniper_config() -> dict:
+        c = pipeline.confluence
+        return {"monitors": list(c.active), "required": c.required, "required_effective": c.required or len(c.active),
+                "available": c.catalogue(), "cooldown_min": pipeline.s.sniper_cooldown_min,
+                "window": list(pipeline.s.limits.trading_window), "tf_min": 3}
+
+    @app.get("/sniper/config")
+    async def sniper_config():
+        return JSONResponse(_sniper_config())
+
+    @app.post("/sniper/config")
+    async def sniper_config_set(body: SniperConfigIn):
+        try:
+            pipeline.confluence.configure(body.monitors, body.required)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from e
+        try:
+            sniper_cfg.parent.mkdir(parents=True, exist_ok=True)
+            sniper_cfg.write_text(json.dumps({"monitors": pipeline.confluence.active, "required": body.required}), encoding="utf-8")
+        except OSError:
+            pass
+        pipeline._emit("log", f"confluence: desk set to {' + '.join(pipeline.confluence.active)} · needs "
+                              f"{body.required or len(pipeline.confluence.active)} of {len(pipeline.confluence.active)}")
+        return JSONResponse(_sniper_config())
 
     @app.websocket("/stream")
     async def stream(ws: WebSocket):

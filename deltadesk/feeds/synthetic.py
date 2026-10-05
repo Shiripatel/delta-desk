@@ -40,6 +40,9 @@ class SyntheticFeed:
         self.expiry = next_weekly_expiry(self.day)
         self.und = settings.underlying
         self._subscribed: set[str] = set()
+        self._fut_vol = 0                   # cumulative futures volume, like a broker feed reports it
+        self._last_spot: float | None = None
+        self._act = 0.0                     # slow activity cycle: volume clusters in bursts, as it does on the real tape
         self._prev_bars = self._make_prev_session()
         self.pdh = max(b.high for b in self._prev_bars)
         self.pdl = min(b.low for b in self._prev_bars)
@@ -154,9 +157,13 @@ class SyntheticFeed:
             self._vix_noise = 0.99 * self._vix_noise + self.rng.gauss(0, 0.03)
             yield Tick(ts=self.t, token=f"IDX:{self.und}", ltp=round(spot, 2))
             yield Tick(ts=self.t, token="IDX:INDIAVIX", ltp=round(self.base_iv * 100 + self._vix_noise, 2))
+            ret = abs(spot / self._last_spot - 1) if self._last_spot else 0.0
+            self._last_spot = spot
+            self._act = 0.995 * self._act + self.rng.gauss(0, 0.06)
+            self._fut_vol += max(1, int(abs(self.rng.gauss(12, 3)) * math.exp(self._act) * (1 + 3000 * ret)))
             yield Tick(ts=self.t, token=f"FUT:{self.und}:{self.expiry}", ltp=_round_tick(F),
                        bid=_round_tick(F - 0.5), ask=_round_tick(F + 0.5),
-                       volume=1000 * sec, oi=12_000_000)
+                       volume=self._fut_vol, oi=12_000_000)
             if sec % self.option_tick_every == 0:
                 for inst in self._instruments:
                     if inst.kind not in (Kind.CE, Kind.PE):

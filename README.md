@@ -65,6 +65,14 @@ Checks: `uv run ruff check .` and `uv run pytest -q`; CI also parse-checks every
   until a feed is wired. Grey market premium is deliberately not modelled.
 * Everything labelled "AI" is a transparent rules model (v0) until it is calibrated.
 
+## Sniper (signal confluence)
+
+Monitor agents each watch one thing on the 3-minute tape and vote long, short or neutral: relative volume,
+EMA 9/21 with VWAP, RSI, the regime call, put-call ratio, yesterday's levels. Drag agents onto the desk on
+`/sniper`; when every agent on the desk agrees (or `k` of `n`, with none against) inside the trading window the
+gate fires one paper order with a stop (1.5 ATR) and a target (2x) on the index, drawn on the live candle chart.
+Set the desk from the page or with `DD_SNIPER_MONITORS` / `DD_SNIPER_REQUIRED`. Paper only; not investment advice.
+
 ## Agent chat
 
 The Watchlist page hosts a Fundamental agent and a Technical agent. Set one key in `.env` (free: `GROQ_API_KEY`, `GEMINI_API_KEY`, `OPENROUTER_API_KEY`; paid: `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`; or Ollama locally with `DD_LLM=ollama`) and answers come from that model, grounded in the desk's data for the stock and shaped as one summary line, a table of the numbers that matter and a few short bullets. With no key the agents compose the same shape by rules.

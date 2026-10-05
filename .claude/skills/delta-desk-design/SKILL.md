@@ -23,7 +23,7 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/ipo`, `/ipo/<slug>` | `web/pages/ipo.html` | IPO |
 | `/analysis` | `web/pages/analysis.html` | (analysis for any symbol: `/analysis#SYMBOL/3m/<tab>`; every stock, index, FX and commodity click lands here; two tabs, Fundamental (stock-analysis layout: Overview / Financials / Statistics / Dividends / History / Profile sub-tabs; statement tables with fiscal years as columns newest first, Annual / Quarterly / TTM, bold totals, muted italic growth rows, a chart icon per row) and Technical (investing-style: chart, summary per timeframe, indicators, moving averages, pivots); no third-party widget; `/chart` redirects) |
 | `/desk` | `web/pages/agents.html` | Agents (the agent council: stock + horizon → verdict) |
-| `/sniper` | `web/pages/sniper.html` | Sniper: the one always-dark trading terminal (page-scoped tokens on `body`, square corners, teal `.phd` title bars, `table.dense`); agent board + thought stream on top, scope / chain / range / zones / shot / risk / positions / signals below |
+| `/sniper` | `web/pages/sniper.html` | Sniper: the one always-dark trading terminal (page-scoped tokens on `body`, square corners, teal `.phd` title bars, `table.dense`); pipeline canvas on top (palette of monitor agents → `.node.mon` → `.node.gate` → `.node.ord`, SVG edges coloured by vote), lightweight-charts candle chart with the order's lines below |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
 Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.

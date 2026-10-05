@@ -32,5 +32,8 @@ class Settings(BaseSettings):
     cycle_seconds: float = 2.0
     confidence_threshold: float = 0.65
     auto_approve: bool = False
+    sniper_monitors: list[str] = ["volume", "ma_vwap", "rsi", "trend"]   # confluence set; the page can change it
+    sniper_required: int | None = None  # votes needed to fire; None = every active monitor
+    sniper_cooldown_min: int = 20       # minutes between confluence shots
     risk_free: float = 0.065
     limits: Limits = Limits()

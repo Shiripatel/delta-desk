@@ -1,6 +1,6 @@
 """The desk: one cycle every `cycle_seconds` of market time, agents in a fixed order, typed outputs on the bus.
 
-Topics: plan, snapshot, regime, chain, trigger, decision, orders, cycle, log
+Topics: plan, snapshot, regime, chain, signals, trigger, decision, orders, cycle, log
 """
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from datetime import UTC, datetime, timedelta
 from deltadesk.agents.chain_agent import ChainAgent
 from deltadesk.agents.exec_agent import ExecAgent
 from deltadesk.agents.feed_agent import FeedAgent
+from deltadesk.agents.monitors import ConfluenceAgent
 from deltadesk.agents.planner import PlannerAgent
 from deltadesk.agents.regime import RegimeAgent
 from deltadesk.agents.risk import RiskAgent
@@ -36,6 +37,7 @@ class Pipeline:
         self.regime = RegimeAgent()
         self.chain = ChainAgent()
         self.sniper = SniperAgent(settings)
+        self.confluence = ConfluenceAgent(settings)
         self.strategy = StrategyAgent(settings)
         self.risk = RiskAgent(settings)
         self.exec = ExecAgent(settings, self.broker)
@@ -115,13 +117,35 @@ class Pipeline:
         open_ids = {d.trade.zone_id for d in self.exec.open.values()}
         margin_used = sum(d.risk.margin for d in self.exec.open.values())
         at_capacity = len(self.exec.open) >= self.s.limits.max_open_structures
-        trigger = None if (self.killed or at_capacity) else self._timed(
-            statuses, self.sniper, lambda: self.sniper.step(snap, self.plan, regime, stats, open_ids))
-        if trigger is not None:
+
+        # the monitors vote, the confluence gate combines the active ones
+        signals = []
+        for mon in self.confluence.monitors.values():
+            sig = self._timed(statuses, mon, lambda m=mon: m.step(snap, regime, stats, self.plan))
+            if sig is not None:
+                signals.append(sig)
+        open_dirs = {d.trade.spot_dir for d in self.exec.open.values() if d.trade.spot_dir}
+        conf = self._timed(statuses, self.confluence, lambda: self.confluence.step(
+            snap, regime, stats, signals, self.sniper._in_window(snap.ts), open_dirs, self.killed or at_capacity))
+        if conf is not None:
+            self._emit("signals", conf)
+        trigger = None
+        if conf is not None and conf.ready and conf.blocked is None:
+            trigger = self.confluence.trigger(conf, snap)
             self._emit("trigger", trigger)
-            self._emit("log", f"sniper: {trigger.zone.id} fired q={trigger.quality:.2f}")
+            self._emit("log", f"confluence: {conf.direction} {conf.agree}/{len(conf.active)} fired · entry {conf.entry:,.0f}"
+                              f" · stop {conf.stop:,.0f} · target {conf.target:,.0f}")
+        elif not (self.killed or at_capacity):
+            trigger = self._timed(statuses, self.sniper, lambda: self.sniper.step(snap, self.plan, regime, stats, open_ids))
+            if trigger is not None:
+                self._emit("trigger", trigger)
+                self._emit("log", f"sniper: {trigger.zone.id} fired q={trigger.quality:.2f}")
+        if trigger is not None:
             trade = self._timed(statuses, self.strategy,
                                 lambda: self.strategy.step(trigger, snap, regime, stats, self.plan))
+            if trade is not None and conf is not None and trigger.zone.source == "confluence":
+                trade = trade.model_copy(update={"source": "confluence", "spot_dir": conf.direction, "spot_entry": conf.entry,
+                                                 "spot_stop": conf.stop, "spot_target": conf.target})
             if trade is not None:
                 verdict = self._timed(statuses, self.risk, lambda: self.risk.step(
                     trade, snap, book, day_pnl, margin_used, len(self.exec.open)))
@@ -148,6 +172,9 @@ class Pipeline:
                 self._emit("decision", self.decisions[d.id])
 
         self.orders = self._timed(statuses, self.exec, lambda: self.exec.step(snap))
+        while self.exec.closed:
+            x = self.exec.closed.pop(0)
+            self._emit("log", f"exec: {x['id']} closed · {x['reason']} at {x['spot']:,.0f}")
         self._emit("orders", self.orders)
         rep = CycleReport(ts=snap.ts, seq=self.seq, ms=(_time.perf_counter() - t0) * 1000, agents=statuses)
         self._emit("cycle", rep)
@@ -215,4 +242,8 @@ def _summary(out) -> str:
         return "APPROVED" if out.risk_ok else "VETO"
     if n == "OrderState":
         return f"{len(out.positions)} pos · P&L {out.realised + out.unrealised:+,.0f}"
+    if n == "Signal":
+        return f"{out.vote:+d} · {out.reading}"
+    if n == "Confluence":
+        return f"{out.direction} {out.agree}/{len(out.active)}" + (f" · {out.blocked}" if out.blocked else "")
     return n

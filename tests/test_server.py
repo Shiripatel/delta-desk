@@ -9,6 +9,7 @@ from deltadesk.server.app import create_app
 
 def _client():
     warnings.simplefilter("ignore")
+    import os
     import tempfile
     from pathlib import Path
 
@@ -17,6 +18,7 @@ def _client():
     from deltadesk.beta import Alerts, Notifier, Waitlist
 
     d = Path(tempfile.mkdtemp())
+    os.environ["DD_SNIPER_CFG"] = str(d / "sniper.json")      # the sniper desk config must not touch the repo's data/
     s = Settings(feed="synthetic", cycle_seconds=30, _env_file=None)
     from deltadesk.markets.service import MarketsService
     from deltadesk.markets.watchlist import Watchlist as WL
@@ -122,7 +124,15 @@ def test_pages_and_assets():
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text
-        assert 'id="stages"' in sn and 'id="zoneBody"' in sn and 'id="stream"' in sn and 'id="oc"' in sn and 'data-a="sniper"' in sn
+        assert 'id="palette"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="edges"' in sn
+        cfg = c.get("/sniper/config").json()
+        assert cfg["monitors"] == ["volume", "ma_vwap", "rsi", "trend"] and cfg["required"] is None and len(cfg["available"]) == 6
+        assert {a["name"] for a in cfg["available"]} >= {"volume", "ma_vwap", "rsi", "trend", "options", "levels"}
+        r = c.post("/sniper/config", json={"monitors": ["rsi", "trend", "options"], "required": 2})
+        assert r.status_code == 200 and r.json()["monitors"] == ["rsi", "trend", "options"] and r.json()["required_effective"] == 2
+        assert c.post("/sniper/config", json={"monitors": ["bogus"]}).status_code == 400
+        assert c.post("/sniper/config", json={"monitors": [], "required": None}).status_code == 400
+        assert c.post("/sniper/config", json={"monitors": ["volume", "ma_vwap", "rsi", "trend"]}).status_code == 200
         cn = c.get("/markets/council?symbol=HDFCBANK&horizon=1h").json()
         assert len(cn["agents"]) == 10 and cn["verdict"]["stance"] in ("buy", "hold", "sell")
         assert 'data-ix="SENSEX"' in home and "limit=10" in home and 'data-ix=""' not in home
