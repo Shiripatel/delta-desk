@@ -1,12 +1,12 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-18 (reevaluation after six idle weeks; stabilisation: calendar samples dated relative to today, owner lock on every route that changes desk state). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-18 (reevaluation after six idle weeks; stabilisation: calendar samples dated relative to today, owner lock on every route that changes desk state; the AI score now carries a measured track record on Home, and the first real numbers say the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
-uv run pytest -q                                   # 59 tests
+uv run pytest -q                                   # 63 tests
 set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120     # then open http://127.0.0.1:8000/
 ```
 
@@ -74,11 +74,28 @@ for 30 days (HttpOnly, SameSite Lax, Secure behind HTTPS); `GET /owner` reports 
 with the server's reason, so no page changed. `deploy/oracle/setup.sh` generates the token with the other secrets and prints the
 unlock link. Test: `tests/test_server.py::test_owner_lock`.
 
+## Track record of the AI score (18 Nov 2026)
+
+`deltadesk/markets/track.py`: every past bar of every stock in the universe is scored exactly as the live ranking scores it (`features`
+and `score` on the last 63 daily closes, or 104 weekly closes in long-term mode, price only), the zone is noted (buy 7–10, hold 4–6,
+sell 1–3) and the forward return over 5 and 20 sessions (4 and 13 weeks) is recorded. Per zone: windows, share that closed higher,
+mean and median move, against the base rate of every window. Walk-forward, no look-ahead, overlapping windows, no costs. `GET
+/markets/track?index=&mode=`; cached six hours; warmed for NIFTY 50 with the rankings and for BANK NIFTY and SENSEX in the slow pass.
+On Yahoo the serve command feeds it a year of daily closes and five years of weekly closes. Home shows it as the "track record" section
+under the top-10 table (`DDAI.track` in `ai.js`, zone dot, delta to the base rate, base-rate row, one-line headline), following the
+index tabs and the short / long switch. Tests: `tests/test_track.py`, `test_server.py::test_track_record_endpoint_and_home_section`.
+
+**First real numbers, NIFTY 50, scored windows 16 Feb to 16 Oct 2026 (8,085 windows, 49 stocks):** the buy zone was higher 20
+sessions later 38 % of the time against a base rate of 46 %; the sell zone 58 %; the hold zone 41 %. Directional hit rate 41 % at 20
+sessions, 49 % at 5. Long-term mode (weekly, since Nov 2023): buy zone 54 % against a base of 55 %, so no edge there either. In plain
+words: on the past year the momentum rule v0 was anti-predictive on NIFTY 50 (a choppy, mean-reverting period), and the "AI score"
+must not be sold as predictive until it beats its own table. That table is now the acceptance test for every change to the rule.
+
 ## What is real and what is placeholder
 
 * Real: Yahoo quotes and bars (delayed), RSS headlines, NSE constituent CSVs, Upstox instrument master, Yahoo fundamentals, all maths (Greeks, indicators, scoring rules).
 * Placeholder, clearly tagged in the UI or the JSON: IPO rows, earnings dates, FII/DII flows, financial calendar events, investor stakes. Each reads a `data/*.json` file the moment one exists; schemas are in the module docstrings. Calendar, earnings and flows samples are now dated relative to today (`deltadesk/markets/calendar.py`: `sample_calendar`, `sample_earnings`, `sample_flows`, `quarter_label`), so they never expire; no sample holiday, because a holiday moves computed expiries. Those three endpoints have no page consumer any more (they served the deleted Markets page) and stay API-only.
-* Rules v0 everywhere an "AI" label appears (radar score, council votes, news impact, assistant, IPO agent). Designed so a trained model or an LLM slots in behind the same endpoints. None has a measured hit rate yet; that is the point of the next sessions.
+* Rules v0 everywhere an "AI" label appears (radar score, council votes, news impact, assistant, IPO agent). Designed so a trained model or an LLM slots in behind the same endpoints. The AI score now has a measured, walk-forward track record (above) and it is negative on the past year; the council, news impact and IPO agent still have none.
 
 ## UX
 
@@ -104,11 +121,11 @@ unlock link. Test: `tests/test_server.py::test_owner_lock`.
 ## Next up, in order (pick from the top)
 
 0. **User-only unblockers:** create the Upstox app and log in once; provision the Oracle VM and run `setup.sh`; answer the direction question above. None of the items below needs them to start, but 1 and 2 only become real with the Upstox feed.
-1. **Recorder and replay (roadmap days 6–7):** record every tick, bar and chain snapshot per session to Parquet under `data/ticks/`, with a `replay` feed that replays a recorded day into the pipeline at any speed (`DD_FEED=replay`, `--day`). Runs on the synthetic feed today, on Upstox the day the app exists. The page harness already replays a stream; this is the feed-level version.
-2. **Journal (roadmap days 8 and 12):** SQLite store of decisions, fills, cycle reports and agent errors; each decision joined to its outcome (P&L, MAE / MFE, time in trade); `/journal` endpoint and a table on the sniper page. Restart keeps yesterday's journal.
-3. **Track record for the free-tier "AI" labels:** persist each day's radar bands and council verdicts, score them against later closes, and back-fill from Yahoo daily history so the hit rate per band and per agent exists on day one. Show the number next to every "AI score" and council verdict. This is what makes the free tier honest and the premium weights learnable.
-4. **Calibration report (roadmap day 13):** confidence bucket versus hit rate over recorded and back-filled days; threshold recommendation; the confluence gate's `required` learns from it.
-5. **Options agents on the council:** IV rank, OI walls, max pain, expected move; per-agent accuracy badges from item 3.
+1. **Make the score beat its own table (roadmap day 13, calibration):** the track record says momentum v0 lost to the base rate over the past year. Candidates, each judged only by the walk-forward table with the last quarter held out: a regime gate (momentum only while the index sits above its own 200-day average, otherwise neutral), a mean-reversion term for the 2-week leg, a longer look-back, and a per-stock choice between the two by past hit rate. Also show the track record where the score appears elsewhere (analysis head, watchlist column) and the per-agent version on the Agents page (council agents scored the same way, which gives the accuracy badges).
+2. **Recorder and replay (roadmap days 6–7):** record every tick, bar and chain snapshot per session to Parquet under `data/ticks/`, with a `replay` feed that replays a recorded day into the pipeline at any speed (`DD_FEED=replay`, `--day`). Runs on the synthetic feed today, on Upstox the day the app exists. The page harness already replays a stream; this is the feed-level version.
+3. **Journal (roadmap days 8 and 12):** SQLite store of decisions, fills, cycle reports and agent errors; each decision joined to its outcome (P&L, MAE / MFE, time in trade); `/journal` endpoint and a table on the sniper page. Restart keeps yesterday's journal.
+4. **Calibration of the sniper (roadmap day 13):** confidence bucket versus hit rate over recorded and back-filled days; threshold recommendation; the confluence gate's `required` learns from it.
+5. **Options agents on the council:** IV rank, OI walls, max pain, expected move; per-agent accuracy badges from item 1.
 6. **LLM behind the same endpoints:** news impact analyser, "why" text, assistant. Needs a key; interfaces are isolated (`Analyzer`, `DeskAssistant`). Add a per-IP rate limit on `/chat` and `/agent/chat` first.
 7. **Alerts:** Telegram on verdict flips, new bad-impact story on a watchlist stock, sniper decisions, kill switch.
 8. **Accounts (UX round 3):** single-user login first (roadmap day 20), then per-user watchlists; retire the owner lock on watchlist writes.
@@ -132,7 +149,7 @@ Hosting checks done while the beta ran on a free container host (24 Sep 2026): a
 
 ## Checks
 
-`uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running: it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). CI parse-checks every page with node.
+`uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running (`BASE=http://127.0.0.1:<port>` for another port): it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). Since 18 Nov it also loads the shared scripts a page references under `/static/js` (so Home, which needs `ai.js`, runs). CI parse-checks every page with node.
 
 ## Known rough edges
 
@@ -140,4 +157,5 @@ Hosting checks done while the beta ran on a free container host (24 Sep 2026): a
 * Yahoo's unofficial chart and fundamentals endpoints are the only quote source until Upstox runs; if they change, every page goes blank at once. The Upstox REST quotes provider is the fallback once the app exists.
 * News tagging is alias-based; obscure company names may go untagged. Impact lexicon is deliberately simple.
 * One shared watchlist for the whole site until accounts; locked to the owner on a public host.
+* `SyntheticHistory(weekly=True)` used to loop until the calendar overflowed when its start date fell on a weekend (fixed 18 Nov); the synthetic serve command's long-term mode depended on the day of the week.
 * Branch protection on `main` is unavailable on GitHub Free for private repos.

@@ -48,6 +48,7 @@ class Warmer:
         self._step("ranking NIFTY50", lambda: m.ai_rank("NIFTY50", 50, "short"))
         self._step("ranking all", lambda: m.ai_rank(None, 500, "short"))
         self._step("radar NIFTY50", lambda: m.ai_radar("NIFTY50", 5, "short"))
+        self._step("track NIFTY50", lambda: m.ai_track("NIFTY50", "short"))
         for code in ("BANKNIFTY", "SENSEX"):
             self._step(f"ranking {code}", lambda c=code: m.ai_rank(c, 50, "short"))
 
@@ -59,6 +60,8 @@ class Warmer:
         except Exception:  # noqa: BLE001
             pass
         self._step("investors", m.investors)
+        for code in ("BANKNIFTY", "SENSEX"):
+            self._step(f"track {code}", lambda c=code: m.ai_track(c, "short"))
         if getattr(m, "funda", None) is not None:
             try:
                 keys = [k for v in m.watchlist.lists.values() for k in v if m._name(k)[1] == "stock"][:8]

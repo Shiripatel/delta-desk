@@ -37,7 +37,11 @@ const realFetch = global.fetch;
 const BASE = process.env.BASE || 'http://127.0.0.1:8000';
 global.fetch = (u, o) => realFetch(BASE + u, o);
 process.on('unhandledRejection', e => { errors.push('unhandled: ' + (e && e.stack || e)); });
-for (const f of ['web/static/js/common.js', 'web/static/js/ui.js']) { try { new Function(fs.readFileSync(f, 'utf8'))(); } catch (e) { errors.push(f + ': ' + e.stack); } }
+/* shared scripts: the two every page loads, then whatever else the page references under /static/js (ai.js on Home); nav.js is
+   header chrome tested by hand and stays out */
+const shared = ['web/static/js/common.js', 'web/static/js/ui.js'];
+const extra = [...html.matchAll(/<script src="\/static\/js\/([A-Za-z0-9_-]+\.js)"/g)].map(m => 'web/static/js/' + m[1]).filter(f => !shared.includes(f) && !f.endsWith('/nav.js'));
+for (const f of [...shared, ...extra]) { try { new Function(fs.readFileSync(f, 'utf8'))(); } catch (e) { errors.push(f + ': ' + e.stack); } }
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).filter(s => !s.includes("localStorage.getItem('dd.theme')"));
 for (const s of scripts) { try { new Function(s)(); } catch (e) { errors.push('inline: ' + e.stack); } }
 setTimeout(() => {

@@ -45,10 +45,14 @@ class SyntheticHistory:
         px, drift, vol = rng.uniform(100, 3000), rng.gauss(0.0004, 0.0012), rng.uniform(0.010, 0.025)
         out, day = [], 0
         from datetime import date, timedelta
-        d = date.today() - timedelta(days=int(self.days * 1.45))
+        # weekly bars step seven days and close on a Friday, so the weekend skip below must not apply to them
+        # (a weekend start would never move off the weekend and the loop would run until the calendar overflows)
+        d = date.today() - timedelta(days=self.days * 7 if self.weekly else int(self.days * 1.45))
+        if self.weekly:
+            d -= timedelta(days=(d.weekday() - 4) % 7)
         while len(out) < self.days:
             d += timedelta(days=7 if self.weekly else 1)
-            if d.weekday() > 4:
+            if not self.weekly and d.weekday() > 4:
                 continue
             px *= math.exp(drift + rng.gauss(0, vol))
             out.append((d.isoformat(), round(px, 2)))

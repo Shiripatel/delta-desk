@@ -186,3 +186,15 @@ def test_owner_lock():
         finally:
             del os.environ["DD_OWNER_TOKEN"]
         assert c.post("/kill").status_code == 200
+
+
+def test_track_record_endpoint_and_home_section():
+    with _client() as c:
+        t = c.get("/markets/track?index=BANKNIFTY").json()
+        assert t["index"] == "BANKNIFTY" and t["unit"] == "sessions" and t["horizons"] == [5, 20] and t["stocks"] == 12
+        assert [z["zone"] for z in t["zones"]] == ["buy", "hold", "sell"] and t["windows"] == sum(z["n"] for z in t["zones"]) > 0
+        assert set(t["base"]) == {"5", "20"} and "rate" in t["hit"]["20"] and t["headline"] and t["note"].endswith("Not investment advice.")
+        assert c.get("/markets/track?index=BANKNIFTY&mode=long").json()["unit"] == "weeks"
+        home = c.get("/").text
+        assert 'id="trBody"' in home and 'id="trLine"' in home and "track record" in home
+        assert "DDAI.track(" in home and "track:track" in c.get("/static/js/ai.js").text and ".zdot" in c.get("/static/css/ai.css").text

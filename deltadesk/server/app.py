@@ -491,6 +491,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def m_radar(index: str | None = None, days: int = 5, mode: str = "short"):
         return JSONResponse(await asyncio.to_thread(markets.ai_radar, index, max(2, min(10, days)), mode))
 
+    @app.get("/markets/track")
+    async def m_track(index: str | None = None, mode: str = "short"):
+        """How the AI score's zones fared on past bars of this universe (walk-forward, see markets/track.py)."""
+        return JSONResponse(await asyncio.to_thread(markets.ai_track, index, mode))
+
     @app.post("/markets/watchlist/{name}", dependencies=OWNER)
     async def m_watchlist_create(name: str):
         try:

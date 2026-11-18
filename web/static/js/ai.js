@@ -89,5 +89,25 @@ window.DDAI=(function(){
     document.addEventListener('dd:watchlist',function(){if(rd)draw()});
     return {load:load,refresh:draw,data:function(){return rd}};
   }
-  return {ranking:ranking,radar:radar,ring:ring,spark:spark,fmt:fmt,esc:esc,pct:pct,cls:cls,get:get};
+  /* ---- track record: how the score's zones fared on past bars (/markets/track) ------------ */
+  function track(o){
+    var head=document.getElementById(o.head),body=document.getElementById(o.body),meta=document.getElementById(o.meta),note=o.note&&document.getElementById(o.note),line=o.headline&&document.getElementById(o.headline);
+    var data=null,index=o.index||'NIFTY50',mode=o.mode||'short';
+    function cell(st,base){if(!st||st.up==null)return '<td class="num muted">—</td><td class="num muted">—</td>';
+      var d=base&&base.up!=null?st.up-base.up:null;
+      return '<td class="num"><b>'+fmt(st.up,0)+' %</b>'+(d==null?'':' <small class="'+(d>0.5?'up':d<-0.5?'dn':'muted')+'">'+(d>0?'+':'')+fmt(d,0)+'</small>')+'</td><td class="num '+cls(st.mean)+'">'+pct(st.mean)+'</td>'}
+    function render(){if(!data)return;var hs=data.horizons||[],u=data.unit||'sessions';
+      head.innerHTML='<tr><th>zone</th><th class="num">windows</th>'+hs.map(function(h){return '<th class="num">higher after '+h+' '+u+'<br><small>vs base rate</small></th><th class="num">avg move · '+h+' '+u+'</th>'}).join('')+'</tr>';
+      var rows=(data.zones||[]).map(function(z){return '<tr><td><i class="zdot '+band(z.hi)+'"></i>'+esc(z.label)+'</td><td class="num muted">'+fmt(z.n,0)+' · '+fmt(z.share,0)+' %</td>'+hs.map(function(h){return cell(z.h[String(h)],data.base[String(h)])}).join('')+'</tr>'});
+      rows.push('<tr class="base"><td>every window · base rate</td><td class="num muted">'+fmt(data.windows||0,0)+'</td>'+hs.map(function(h){return cell(data.base[String(h)],null)}).join('')+'</tr>');
+      body.innerHTML=rows.join('');
+      if(meta)meta.textContent=(data.stocks||0)+' stocks · '+(data.from||'—')+' to '+(data.to||'—')+' · '+(data.mode||'short')+' term · every bar scored as it would be today · history: '+data.source;
+      if(line)line.textContent=data.headline||'';
+      if(note)note.textContent=data.note||'';
+      if(o.onData)o.onData(data)}
+    function load(ix,md){if(ix!=null)index=ix;if(md!=null)mode=md;if(meta)meta.textContent='scoring every past bar… (first run fetches a year of history per symbol)';
+      return get('/markets/track?index='+encodeURIComponent(index)+'&mode='+mode).then(function(d){data=d;render()}).catch(function(e){if(meta)meta.textContent='failed: '+e;body.innerHTML='<tr><td colspan="6" class="muted">track record unavailable</td></tr>'})}
+    return {load:load,refresh:render,data:function(){return data}};
+  }
+  return {ranking:ranking,radar:radar,track:track,ring:ring,spark:spark,fmt:fmt,esc:esc,pct:pct,cls:cls,get:get};
 })();

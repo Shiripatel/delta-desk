@@ -17,15 +17,17 @@ from deltadesk.markets.council import Council, SyntheticBars, chart_bars
 from deltadesk.markets.fundamentals import YahooFundamentals
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
+from deltadesk.markets.track import TrackRecord
 from deltadesk.markets.watchlist import Watchlist, presets
 
 
 class MarketsService:
     def __init__(self, quotes: QuoteProvider | None = None, watchlist: Watchlist | None = None,
                  news: NewsService | None = None, ai: AiRanker | None = None, council: Council | None = None,
-                 fundamentals: YahooFundamentals | None = None) -> None:
+                 fundamentals: YahooFundamentals | None = None, track: TrackRecord | None = None) -> None:
         self.quotes = quotes or SyntheticQuotes()
         self.ai = ai or AiRanker(SyntheticHistory())
+        self.track = track or TrackRecord(SyntheticHistory(days=260), SyntheticHistory(days=200, weekly=True))
         self.council = council or Council(SyntheticBars())
         self.funda = fundamentals
         if self.funda is not None and self.council.fundamentals is None:
@@ -366,6 +368,9 @@ class MarketsService:
 
     def ai_radar(self, index: str | None = None, days: int = 5, mode: str = "short") -> dict:
         return self.ai.radar(index, days, mode)
+
+    def ai_track(self, index: str | None = None, mode: str = "short") -> dict:
+        return self.track.report(index, mode)
 
     def bars(self, symbol: str, range_key: str = "3m") -> dict:
         return chart_bars(self.council.bars, symbol.upper(), range_key)
