@@ -42,6 +42,7 @@ DD_MODE=paper
 PYTHONUNBUFFERED=1
 DD_ADMIN_TOKEN=$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32)
 DD_TRAFFIC_SALT=$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)
+DD_OWNER_TOKEN=$(head -c 24 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 32)
 TELEGRAM_BOT_TOKEN=
 DD_OWNER_CHAT=
 GROQ_API_KEY=
@@ -66,3 +67,5 @@ echo "Delta Desk is starting. In about two minutes open:  http://$IP/"
 echo "Health:  curl -s http://127.0.0.1/healthz"
 echo "Logs:    sudo docker compose -f $DIR/deploy/oracle/docker-compose.yml logs -f app"
 echo "Secrets: nano $DIR/.env  then  $DIR/deploy/oracle/deploy.sh"
+OWNER=$(grep '^DD_OWNER_TOKEN=' .env | cut -d= -f2-)
+echo "Owner:   open  http://$IP/owner?token=$OWNER  once in your browser; it unlocks the kill switch, approvals, sniper desk and watchlist edits (visitors only read)"

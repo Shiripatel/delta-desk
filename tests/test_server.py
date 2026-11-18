@@ -145,3 +145,44 @@ def test_pages_and_assets():
         assert ai["count"] == 12 and len(ai["entries"]) == 3
         rd = c.get("/markets/radar?index=BANKNIFTY&days=3").json()
         assert len(rd["frames"]) == 3
+
+
+def test_owner_lock():
+    """DD_OWNER_TOKEN empty: every route open. Set: state-changing routes need the header, query or cookie; reads stay open."""
+    import os
+
+    with _client() as c:
+        assert c.post("/kill").status_code == 200 and c.get("/healthz").json()["locked"] is False
+        os.environ["DD_OWNER_TOKEN"] = "0wn3r-t0k3n"
+        try:
+            assert c.get("/healthz").json()["locked"] is True and c.get("/owner").json() == {"locked": True, "owner": False}
+            locked = (("post", "/kill", None), ("post", "/sniper/config", {"monitors": ["rsi"]}), ("post", "/markets/watchlist/mine", None),
+                      ("post", "/markets/watchlist/My%20watchlist/HDFCBANK", None),
+                      ("delete", "/markets/watchlist/My%20watchlist/HDFCBANK", None),
+                      ("post", "/markets/watchlist/preset/BANKNIFTY", None), ("post", "/alerts/run", None),
+                      ("post", "/alerts", {"contact": "+911", "symbol": "HDFCBANK", "kind": "price_move", "value": 1}),
+                      ("post", "/alerts/test", {"contact": "+911"}), ("post", "/markets/refresh-constituents", None),
+                      ("post", "/decisions/nope/approve", None))
+            for method, path, body in locked:
+                r = getattr(c, method)(path, json=body) if body is not None else getattr(c, method)(path)
+                assert r.status_code == 401 and "owner only" in r.json()["detail"], (method, path, r.status_code)
+            # reads, the waitlist and the chat stay public
+            assert c.get("/markets/watchlist").status_code == 200 and c.get("/sniper/config").status_code == 200
+            assert c.post("/waitlist", json={"name": "Visitor", "email": "v@example.com"}).json()["ok"]
+            assert c.post("/chat", json={"question": "hdfc bank today?"}).status_code == 200
+            # header and query forms
+            assert c.post("/kill", headers={"X-Owner-Token": "0wn3r-t0k3n"}).status_code == 200
+            assert c.post("/kill", headers={"X-Owner-Token": "wrong"}).status_code == 401
+            assert c.post("/kill?token=0wn3r-t0k3n").status_code == 200
+            # cookie form: /owner?token= sets it once, /owner/logout clears it, only same-site paths are redirect targets
+            assert c.get("/owner?token=wrong").status_code == 401
+            r = c.get("/owner?token=0wn3r-t0k3n&next=/sniper", follow_redirects=False)
+            assert r.status_code == 303 and r.headers["location"] == "/sniper" and "dd_owner=" in r.headers["set-cookie"] and "HttpOnly" in r.headers["set-cookie"]  # noqa: E501
+            assert c.get("/owner").json() == {"locked": True, "owner": True}
+            assert c.post("/sniper/config", json={"monitors": ["rsi", "trend"], "required": None}).status_code == 200
+            assert c.get("/owner?token=0wn3r-t0k3n&next=//evil.example", follow_redirects=False).headers["location"] == "/"
+            assert c.get("/owner/logout", follow_redirects=False).status_code == 303
+            assert c.post("/kill").status_code == 401 and c.get("/owner").json()["owner"] is False
+        finally:
+            del os.environ["DD_OWNER_TOKEN"]
+        assert c.post("/kill").status_code == 200

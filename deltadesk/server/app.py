@@ -9,7 +9,7 @@ import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -83,6 +83,35 @@ def _safe_send(notifier, to: str, text: str) -> None:
         pass
 
 
+# ---- owner lock ------------------------------------------------------------------------------
+# DD_OWNER_TOKEN empty (local use): every route is open, as before. Set (any public host): the routes that
+# change desk state answer 401 unless the request carries the token in the X-Owner-Token header, a ?token=
+# query or the dd_owner cookie that GET /owner?token=... sets once per browser. Reads and the stream stay open.
+OWNER_COOKIE = "dd_owner"
+
+
+def _owner_token() -> str:
+    return os.environ.get("DD_OWNER_TOKEN", "").strip()
+
+
+def _is_owner(request: Request) -> bool:
+    expected = _owner_token()
+    if not expected:
+        return True
+    for got in (request.headers.get("x-owner-token", ""), request.query_params.get("token", ""), request.cookies.get(OWNER_COOKIE, "")):
+        if got and secrets.compare_digest(got, expected):
+            return True
+    return False
+
+
+async def owner_only(request: Request) -> None:
+    if not _is_owner(request):
+        raise HTTPException(401, "owner only: this desk is locked. Open /owner?token=<DD_OWNER_TOKEN> once in this browser.")
+
+
+OWNER = [Depends(owner_only)]
+
+
 def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsService | None = None,
                waitlist: Waitlist | None = None, alerts: Alerts | None = None, alert_interval: float = 60.0,
                traffic_log_store: Traffic | None = None, warm: bool = False) -> FastAPI:
@@ -153,8 +182,28 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/healthz")
     async def healthz():
         w = getattr(app.state, "warmer", None)
-        return JSONResponse({"ok": True, "quotes": markets.quotes.name, "mode": pipeline.s.mode,
+        return JSONResponse({"ok": True, "quotes": markets.quotes.name, "mode": pipeline.s.mode, "locked": bool(_owner_token()),
                              "warm": {"runs": w.runs, "steps": len(w.last)} if w else None})
+
+    @app.get("/owner")
+    async def owner(request: Request, token: str = "", next: str = "/"):  # noqa: A002
+        """No token: report whether the desk is locked and whether this browser is the owner. With the right token:
+        set the owner cookie for 30 days and go to `next` (a path on this site)."""
+        if not token:
+            return JSONResponse({"locked": bool(_owner_token()), "owner": _is_owner(request)})
+        if not _is_owner(request):
+            raise HTTPException(401, "wrong owner token")
+        target = next if next.startswith("/") and not next.startswith("//") else "/"
+        resp = RedirectResponse(target, status_code=303)
+        secure = request.headers.get("x-forwarded-proto", request.url.scheme) == "https"
+        resp.set_cookie(OWNER_COOKIE, token, max_age=30 * 24 * 3600, httponly=True, samesite="lax", secure=secure)
+        return resp
+
+    @app.get("/owner/logout")
+    async def owner_logout():
+        resp = RedirectResponse("/", status_code=303)
+        resp.delete_cookie(OWNER_COOKIE)
+        return resp
 
     @app.get("/chart")
     async def chart_page():
@@ -183,11 +232,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def alerts_list(contact: str = ""):
         return JSONResponse(alerts.for_contact(contact) if contact else [])
 
-    @app.post("/alerts")
+    @app.post("/alerts", dependencies=OWNER)
     async def alerts_add(body: AlertIn):
         return JSONResponse(alerts.add(body.contact, body.kind, body.symbol, body.value, body.horizon))
 
-    @app.delete("/alerts/{rule_id}")
+    @app.delete("/alerts/{rule_id}", dependencies=OWNER)
     async def alerts_remove(rule_id: str):
         return JSONResponse({"ok": alerts.remove(rule_id)})
 
@@ -203,11 +252,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
                 "dry-run": "No WhatsApp or Telegram credentials yet: alerts are evaluated and logged here, not delivered. Set WHATSAPP_TOKEN + WHATSAPP_PHONE_ID or TELEGRAM_BOT_TOKEN in .env."}[n]  # noqa: E501
         return JSONResponse({"channel": n, "note": note, "kinds": list(__import__("deltadesk.beta", fromlist=["KINDS"]).KINDS)})
 
-    @app.post("/alerts/test")
+    @app.post("/alerts/test", dependencies=OWNER)
     async def alerts_test(body: ContactIn):
         return JSONResponse(await asyncio.to_thread(alerts.test, body.contact))
 
-    @app.post("/alerts/run")
+    @app.post("/alerts/run", dependencies=OWNER)
     async def alerts_run():
         return JSONResponse(await asyncio.to_thread(alerts.evaluate))
 
@@ -224,19 +273,19 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def decisions():
         return JSONResponse([_dump(d) for d in pipeline.decisions.values()])
 
-    @app.post("/decisions/{did}/approve")
+    @app.post("/decisions/{did}/approve", dependencies=OWNER)
     async def approve(did: str):
         if did not in pipeline.decisions:
             raise HTTPException(404)
         return JSONResponse(_dump(pipeline.approve(did)))
 
-    @app.post("/decisions/{did}/reject")
+    @app.post("/decisions/{did}/reject", dependencies=OWNER)
     async def reject(did: str):
         if did not in pipeline.decisions:
             raise HTTPException(404)
         return JSONResponse(_dump(pipeline.reject(did)))
 
-    @app.post("/kill")
+    @app.post("/kill", dependencies=OWNER)
     async def kill():
         return JSONResponse(_dump(pipeline.kill()))
 
@@ -258,7 +307,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def sniper_config():
         return JSONResponse(_sniper_config())
 
-    @app.post("/sniper/config")
+    @app.post("/sniper/config", dependencies=OWNER)
     async def sniper_config_set(body: SniperConfigIn):
         try:
             pipeline.confluence.configure(body.monitors, body.required)
@@ -392,7 +441,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def m_watchlist_presets():
         return JSONResponse(markets.watchlist_presets())
 
-    @app.post("/markets/watchlist/preset/{code}")
+    @app.post("/markets/watchlist/preset/{code}", dependencies=OWNER)
     async def m_watchlist_preset(code: str):
         try:
             loaded = markets.watchlist.load_preset(code)
@@ -402,7 +451,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         out["loaded"] = loaded
         return JSONResponse(out)
 
-    @app.post("/markets/watchlist/{name}/rename/{new}")
+    @app.post("/markets/watchlist/{name}/rename/{new}", dependencies=OWNER)
     async def m_watchlist_rename(name: str, new: str):
         try:
             markets.watchlist.rename(name, new)
@@ -442,7 +491,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def m_radar(index: str | None = None, days: int = 5, mode: str = "short"):
         return JSONResponse(await asyncio.to_thread(markets.ai_radar, index, max(2, min(10, days)), mode))
 
-    @app.post("/markets/watchlist/{name}")
+    @app.post("/markets/watchlist/{name}", dependencies=OWNER)
     async def m_watchlist_create(name: str):
         try:
             markets.watchlist.create(name)
@@ -450,12 +499,12 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(409, str(exc)) from exc
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
-    @app.delete("/markets/watchlist/{name}")
+    @app.delete("/markets/watchlist/{name}", dependencies=OWNER)
     async def m_watchlist_delete(name: str):
         markets.watchlist.delete(name)
         return JSONResponse(markets.watchlists())
 
-    @app.post("/markets/watchlist/{name}/{symbol}")
+    @app.post("/markets/watchlist/{name}/{symbol}", dependencies=OWNER)
     async def m_watchlist_add(name: str, symbol: str):
         symbol = symbol.upper() if not symbol.startswith("FUT:") else symbol
         if not markets.known(symbol):
@@ -466,7 +515,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(409, str(exc)) from exc
         return JSONResponse(await asyncio.to_thread(markets.watchlists))
 
-    @app.delete("/markets/watchlist/{name}/{symbol}")
+    @app.delete("/markets/watchlist/{name}/{symbol}", dependencies=OWNER)
     async def m_watchlist_remove(name: str, symbol: str):
         markets.watchlist.remove(name, symbol.upper() if not symbol.startswith("FUT:") else symbol)
         return JSONResponse(markets.watchlists())
@@ -494,7 +543,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(404, f"unknown ipo {slug}")
         return JSONResponse(out)
 
-    @app.post("/markets/refresh-constituents")
+    @app.post("/markets/refresh-constituents", dependencies=OWNER)
     async def m_refresh():
         done = await asyncio.to_thread(universe.refresh_from_nse)
         return JSONResponse({"refreshed": done})

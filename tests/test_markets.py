@@ -152,3 +152,18 @@ def test_nse_csv_parser_overrides_seed():
         assert c.symbol == "TESTCO" and c.sector == "Widgets" and c.weight == 100.0
     finally:
         universe.INDICES["BANKNIFTY"].constituents = old
+
+
+def test_calendar_samples_track_today():
+    """Sample rows are dated relative to today, so they never expire and never move a real expiry."""
+    today = date(2026, 11, 18)
+    assert cal.quarter_label(today) == "Q2 FY27" and cal.quarter_label(date(2027, 1, 15)) == "Q3 FY27"
+    assert cal.quarter_label(date(2027, 4, 20)) == "Q4 FY27" and cal.quarter_label(date(2027, 7, 20)) == "Q1 FY28"
+    e = cal.earnings(today)["entries"]
+    assert len(e) == 3 and all(r["example"] and r["date"] > today.isoformat() and r["quarter"] == "Q2 FY27" for r in e)
+    assert all(date.fromisoformat(r["date"]).weekday() < 5 for r in e)
+    f = cal.flows(today)
+    assert f["totals"]["days"] == 5 and f["entries"][-1]["date"] == "2026-11-17" and f["entries"][0]["date"] == "2026-11-11"
+    c = cal.financial_calendar(today)["entries"]
+    assert all(r["date"] >= today.isoformat() for r in c) and not any(r.get("kind") == "holiday" for r in c)
+    assert any(r.get("computed") and "NIFTY weekly" in r["title"] for r in c)

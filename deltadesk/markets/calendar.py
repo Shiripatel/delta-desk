@@ -10,7 +10,7 @@ JSON files under data/ and are the only source for dated events that cannot be d
 Sources to fill them: NSE holiday circular and F&O expiry circulars; NSE corporate announcements and
 board-meeting pages for results dates; NSE "FII/DII trading activity" daily report (also on SEBI and
 via most broker apps). None has an official free API; a small daily job that scrapes or copies the
-official pages is the usual answer. Until the files exist, example rows are shown and flagged.
+official pages is the usual answer. Until the files exist, sample rows dated relative to today are shown and flagged.
 """
 from __future__ import annotations
 
@@ -82,29 +82,58 @@ def expiries(today: date, holidays: set[date] | None = None, weeks: int = 8) -> 
     return out
 
 
-CAL_EXAMPLES = [
-    {"date": "2026-10-02", "title": "Gandhi Jayanti · market holiday (sample entry)", "kind": "holiday"},
-    {"date": "2026-10-07", "title": "RBI monetary policy decision (sample entry, verify date)", "kind": "rbi"},
-]
-EARN_EXAMPLES = [
-    {"symbol": "TCS", "company": "Tata Consultancy Services (sample entry)", "date": "2026-10-09", "quarter": "Q2 FY27",
-     "time": "post-market"},
-    {"symbol": "HDFCBANK", "company": "HDFC Bank (sample entry)", "date": "2026-10-18", "quarter": "Q2 FY27", "time": "mid-day"},
-    {"symbol": "RELIANCE", "company": "Reliance Industries (sample entry)", "date": "2026-10-17", "quarter": "Q2 FY27",
-     "time": "post-market"},
-]
-FLOW_EXAMPLES = [
-    {"date": "2026-09-11", "fii_net_cr": -1850.4, "dii_net_cr": 2410.7},
-    {"date": "2026-09-14", "fii_net_cr": -920.1, "dii_net_cr": 1305.2},
-    {"date": "2026-09-15", "fii_net_cr": 640.8, "dii_net_cr": 890.5},
-    {"date": "2026-09-16", "fii_net_cr": -2210.0, "dii_net_cr": 2985.3},
-    {"date": "2026-09-17", "fii_net_cr": 310.2, "dii_net_cr": 1120.9},
-]
+def _weekday_on_or_after(d: date) -> date:
+    while d.weekday() > 4:
+        d += timedelta(days=1)
+    return d
+
+
+def _trading_days_back(today: date, n: int) -> list[date]:
+    out, d = [], today - timedelta(days=1)
+    while len(out) < n:
+        if d.weekday() < 5:
+            out.append(d)
+        d -= timedelta(days=1)
+    return out[::-1]
+
+
+def quarter_label(today: date) -> str:
+    """The quarter whose results are being reported around `today` (Indian fiscal year, April to March):
+    quarters end in March, June, September and December; results follow in the next one to two months."""
+    m = today.month
+    ended = ((m - 1) // 3) * 3          # month the last quarter ended: 0 (Dec), 3 (Mar), 6 (Jun), 9 (Sep)
+    q = {0: 3, 3: 4, 6: 1, 9: 2}[ended]
+    fy_end_year = today.year + (1 if ended in (6, 9) else 0)   # June and September quarters belong to the FY ending next March
+    return f"Q{q} FY{fy_end_year % 100:02d}"
+
+
+def sample_calendar(today: date) -> list[dict]:
+    """Illustrative rows, dated relative to today so they never go stale. No sample holiday: a holiday moves
+    computed expiries, and an invented one would show wrong expiry dates."""
+    return [{"date": _weekday_on_or_after(today + timedelta(days=9)).isoformat(),
+             "title": "RBI monetary policy decision (sample entry, verify date)", "kind": "rbi"},
+            {"date": _weekday_on_or_after(today + timedelta(days=16)).isoformat(),
+             "title": "CPI inflation print (sample entry, verify date)", "kind": "macro"}]
+
+
+def sample_earnings(today: date) -> list[dict]:
+    q = quarter_label(today)
+    return [{"symbol": "TCS", "company": "Tata Consultancy Services (sample entry)",
+             "date": _weekday_on_or_after(today + timedelta(days=3)).isoformat(), "quarter": q, "time": "post-market"},
+            {"symbol": "RELIANCE", "company": "Reliance Industries (sample entry)",
+             "date": _weekday_on_or_after(today + timedelta(days=10)).isoformat(), "quarter": q, "time": "post-market"},
+            {"symbol": "HDFCBANK", "company": "HDFC Bank (sample entry)",
+             "date": _weekday_on_or_after(today + timedelta(days=11)).isoformat(), "quarter": q, "time": "mid-day"}]
+
+
+def sample_flows(today: date) -> list[dict]:
+    vals = [(-1850.4, 2410.7), (-920.1, 1305.2), (640.8, 890.5), (-2210.0, 2985.3), (310.2, 1120.9)]
+    return [{"date": d.isoformat(), "fii_net_cr": f, "dii_net_cr": i} for d, (f, i) in zip(_trading_days_back(today, 5), vals, strict=True)]
 
 
 def financial_calendar(today: date | None = None) -> dict:
     today = today or date.today()
-    rows, source = _load("calendar.json", CAL_EXAMPLES)
+    rows, source = _load("calendar.json", sample_calendar(today))
     hol = _holidays(rows)
     allrows = [r for r in rows if r.get("date", "") >= today.isoformat()] + expiries(today, hol)
     allrows.sort(key=lambda r: (r.get("date", ""), r.get("kind", "")))
@@ -113,14 +142,15 @@ def financial_calendar(today: date | None = None) -> dict:
 
 def earnings(today: date | None = None) -> dict:
     today = today or date.today()
-    rows, source = _load("earnings.json", EARN_EXAMPLES)
+    rows, source = _load("earnings.json", sample_earnings(today))
     rows = [r for r in rows if r.get("date", "") >= (today - timedelta(days=7)).isoformat()]
     rows.sort(key=lambda r: r.get("date", ""))
     return {"source": source, "entries": rows}
 
 
-def flows() -> dict:
-    rows, source = _load("flows.json", FLOW_EXAMPLES)
+def flows(today: date | None = None) -> dict:
+    today = today or date.today()
+    rows, source = _load("flows.json", sample_flows(today))
     rows.sort(key=lambda r: r.get("date", ""))
     for r in rows:
         r["net_cr"] = round(float(r.get("fii_net_cr", 0)) + float(r.get("dii_net_cr", 0)), 1)

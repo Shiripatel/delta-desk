@@ -53,6 +53,11 @@ uv run deltadesk run --fast --auto-approve       # one synthetic range day in th
 
 Checks: `uv run ruff check .` and `uv run pytest -q`; CI also parse-checks every page script with node.
 
+Owner lock: on a public host set `DD_OWNER_TOKEN` in `.env`. The kill switch, approve / reject, the sniper desk
+config, watchlist edits and alert rules then answer 401 unless the request carries the token; open
+`/owner?token=…` once in your browser to set the cookie. Everything visitors read stays open. Unset, as on a
+laptop, nothing is locked.
+
 ## Data
 
 * Quotes, bars, history: Yahoo Finance public endpoints (about 15 minutes delayed, no account). Upstox
