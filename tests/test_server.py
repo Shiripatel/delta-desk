@@ -39,7 +39,7 @@ def test_pages_and_assets():
         dom = c.get("/markets/domains").json()
         assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
         assert c.get("/static/js/ui.js").status_code == 200 and "/static/js/ui.js" in home
-        assert 'id="fxmap"' in c.get("/forex").text and len(c.get("/markets/forex-market").json()["world"]) == 10
+        assert 'id="fxmap"' in c.get("/forex").text and len(c.get("/markets/forex-market").json()["world"]) == 10   # parked, still served
         assert "waitlist" in c.get("/beta").text and "Risk disclosure" in c.get("/legal").text
         w = c.post("/waitlist", json={"name": "Test User", "email": "t@example.com", "phone": "+919999999999", "interests": ["ipo"], "whatsapp_ok": True}).json()  # noqa: E501
         assert w["ok"] and w["position"] >= 1 and c.get("/waitlist/stats").json()["total"] >= 1
@@ -83,20 +83,23 @@ def test_pages_and_assets():
         pe = c.get("/markets/peers/HDFCBANK").json()
         assert pe["sector"] == "Financials" and pe["rows"][0]["self"] and len(pe["rows"]) > 3
         gl = c.get("/global").text
-        assert 'id="map"' in gl and 'id="regions"' in gl and 'href="/global" aria-current="page"' in gl
+        assert 'id="map"' in gl and 'id="regions"' in gl
         g = c.get("/markets/global").json()
         assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
         assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
-        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap"):  # noqa: E501
+        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
             body = c.get(page).text
-            for h in ("/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/investors", "/desk", "/sniper"):
-                assert 'href="' + h + '"' in body, (page, h)
+            nav = body[body.index('<nav class="nav">'):body.index("</nav>")]
+            for h in ("/", "/watchlist", "/heatmap", "/news", "/desk", "/sniper"):
+                assert 'href="' + h + '"' in nav, (page, h)
+            for h in ("/ipo", "/forex", "/global", "/investors"):          # parked pages: reachable by URL, out of the nav
+                assert 'href="' + h + '"' not in nav, (page, h)
         wl = c.get("/watchlist").text
         assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
         assert c.get("/markets/watchlist/presets").json()[0]["code"] == "NIFTY50"
         iv = c.get("/markets/investors").json()
         assert iv["count"] >= 6 and iv["investors"][0]["holdings"] and "summary" in iv["investors"][0] and iv["investors"][0]["seed"]
-        assert 'id="grid"' in c.get("/investors").text and 'href="/investors">Investors</a>' in home
+        assert 'id="grid"' in c.get("/investors").text
         st = c.get("/markets/watchlist/stats?symbols=HDFCBANK,RELIANCE").json()
         assert {"ret_1w", "ret_1m", "hi_52w", "lo_52w"} <= set(st["HDFCBANK"]) and st["HDFCBANK"]["hi_52w"] >= st["HDFCBANK"]["lo_52w"]
         assert c.get("/agent/model").json()["available"] is False
@@ -110,7 +113,7 @@ def test_pages_and_assets():
         assert pl["loaded"] == "NIFTY BANK" and len(pl["lists"]["NIFTY BANK"]) > 5 and pl["max_symbols"] == 50
         assert c.post("/markets/watchlist/preset/NOPE").status_code == 409
         ipo = c.get("/ipo").text
-        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'href="/ipo" aria-current="page"' in ipo and 'id="perfBody"' in ipo
+        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'id="perfBody"' in ipo
         det = c.get("/ipo/meridian").text
         assert 'id="timeline"' in det and 'id="agent"' in det and 'id="fin"' in det
         lst = c.get("/markets/ipo").json()
@@ -120,7 +123,7 @@ def test_pages_and_assets():
         assert c.get("/markets/ipo/nope").status_code == 404
         perf = c.get("/markets/ipo-performance").json()
         assert perf["summary"]["count"] == len(perf["rows"]) and "avg_listing_gain" in perf["summary"]
-        assert 'href="/ipo">IPO</a>' in home and 'href="/markets"' not in home
+        assert 'href="/markets"' not in home and "rdMovers" not in home and 'class="how"' not in home
         desk = c.get("/desk").text
         assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
         sn = c.get("/sniper").text

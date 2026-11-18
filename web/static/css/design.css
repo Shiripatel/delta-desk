@@ -97,7 +97,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .ico{width:16px;height:16px;vertical-align:-3px;margin-right:6px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---- ticker strip ------------------------------------------------------------------------- */
-.ticker{display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none;position:sticky;top:var(--header-h);z-index:4;background:var(--bg)}
+/* sticky under the header: nav.js sets --sticky-top to the header's real height (two rows on a tablet), so the
+   ticker never sits over the content; --header-h itself stays a constant so the measurement cannot feed back */
+.ticker{display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none;position:sticky;top:var(--sticky-top,var(--header-h));z-index:4;background:var(--bg)}
 .ticker::-webkit-scrollbar{display:none}
 .ticker a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;padding:9px 16px;border-right:1px solid var(--line);font-size:12.5px}
 .ticker a:hover{background:var(--fill)}
@@ -188,7 +190,8 @@ footer .legal .l3 a:hover{color:var(--ink)}
 footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 20px;font-size:11px;color:var(--ink-3)}
 @media (max-width:1000px){
   .top .wrap{grid-template-columns:1fr auto;height:auto;padding:10px 16px;row-gap:6px}
-  .nav{grid-column:1 / -1;justify-self:start;overflow-x:auto;gap:20px}
+  .brand{grid-row:1;grid-column:1}.status{grid-row:1;grid-column:2}
+  .nav{grid-row:2;grid-column:1 / -1;justify-self:start;overflow-x:auto;gap:20px}
   .status .clock{display:none}
   footer .wrap{grid-template-columns:1fr}
 }
@@ -215,8 +218,9 @@ footer .wrap{display:grid;grid-template-columns:1fr auto;gap:16px;padding:18px 2
 .bottom,.sheet,.sheet-bg{display:none}
 @media (max-width:760px){
   .nav{display:none}
-  .top .wrap{grid-template-columns:auto 1fr;gap:12px;padding:0 14px}
-  .status{gap:10px}.status .clock,.sbtn kbd,.sbtn span{display:none}
+  .top .wrap{grid-template-columns:auto 1fr;gap:12px;padding:0 14px;height:var(--header-h);row-gap:0}
+  .status{min-width:0}
+  .status{gap:10px}.status .clock,.status select,.sbtn kbd,.sbtn span{display:none}
   .bottom{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,1fr);background:var(--card);border-top:1px solid var(--line-2);padding-bottom:env(safe-area-inset-bottom,0px)}
   .bottom a,.bottom button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 6px;font-size:10.5px;color:var(--ink-3);background:none}
   .bottom svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

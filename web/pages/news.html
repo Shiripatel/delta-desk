@@ -72,12 +72,19 @@
 .chat .hint button{padding:3px 9px;border:1px solid var(--line-2);border-radius:3px;font-size:11px;color:var(--ink-2);background:var(--bg)}
 .chat .hint button:hover{color:var(--ink);border-color:var(--ink)}
 @media (max-width:1000px){.wire{grid-template-columns:1fr}.wire .left{border-right:0;max-height:none;border-bottom:1px solid var(--line)}}
+@media (max-width:760px){
+  /* phone: time · source · impact on one line, the headline under them */
+  .flowhead{display:none}
+  .item{grid-template-columns:auto 1fr auto;grid-template-areas:"t src imp" "body body body";gap:4px 10px;padding:10px 16px}
+  .item .t{grid-area:t}.item .src{grid-area:src;padding-top:0}.item .imp{grid-area:imp}.item > div{grid-area:body}
+  .item .src br{display:none}.item .src .muted{margin-left:6px}
+}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">NEWS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news" aria-current="page">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/investors">Investors</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news" aria-current="page">News</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
   </div>

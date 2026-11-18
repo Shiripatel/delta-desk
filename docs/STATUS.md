@@ -1,14 +1,18 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-18 (reevaluation after six idle weeks; stabilisation: calendar samples dated relative to today, owner lock on every route that changes desk state; the AI score now carries a measured track record on Home, and the first real numbers say the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-18, third pass (local launch: six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed on every kept page, one-click `tools/serve.cmd`). Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
 uv run pytest -q                                   # 63 tests
-set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120     # then open http://127.0.0.1:8000/
+tools\serve.cmd                                    # or: set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120 ; then http://127.0.0.1:8000/
 ```
+
+Local hosting (18 Nov 2026): the site runs on this machine at http://127.0.0.1:8000/ from `tools/serve.cmd` (double-click; it writes a
+`.env` with `DD_QUOTES=yahoo` if none exists). The user's plan: check it locally first, then launch the integrated site; the Oracle kit
+is ready for that step.
 
 Tell Claude: "read docs/STATUS.md and continue with the next item" — this file is the memory.
 
@@ -43,7 +47,22 @@ Two things only the user can do, both unblockers:
 
 `deltadesk/` is the Python package (agents, feeds, markets read model, server, beta, cli). `web/pages/` holds one HTML file per page, `web/static/css|js|vendor` the shared design system and scripts. `data/` is runtime state (gitignored). `tests/` mirrors the package. `docs/` is this file, the roadmap, the plan and the UX review.
 
-## What exists (all on the shared design system, three themes, Home · News · IPO · Agents · Sniper)
+## Less content, clean design (18 Nov 2026)
+
+The user asked for less content and a very clean design before launch. Decisions:
+
+* **Nav is six links:** Home · Watchlist · Heatmap · News · Agents · Sniper. The same on every page and in the phone More sheet.
+* **Parked, not deleted:** IPO (fictional issues), Forex, Global and Investors (seed stakes). Their routes and APIs still work and carry
+  the six-link nav, but nothing links to them. Each comes back with one nav line the day a real feed fills its data file.
+* **Home is five things:** one hero line with the three sentiment boxes, the radar with its picks and breadth, the top 10, the track
+  record, and one explanatory note. Gone: the eyebrow and paragraph, "biggest moves over the replay", the four-cell explainer.
+* **Phone layout fixed on every kept page** (checked with Chrome device emulation at 400 px, not plain headless screenshots, which
+  Chrome crops at its minimum window width): the ticker sticks under the header's real height (`--sticky-top` set by `nav.js`, with
+  `--header-h` left constant so the measurement cannot feed back), the tablet header keeps brand and status on row one and the nav on
+  row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
+  boxes and radar controls wrap. The design skill records the "less is the rule" principle.
+
+## What exists (all on the shared design system, three themes, Home · Watchlist · Heatmap · News · Agents · Sniper; four pages parked)
 
 | page | route | what it does | data today |
 |---|---|---|---|
@@ -131,7 +150,7 @@ must not be sold as predictive until it beats its own table. That table is now t
 8. **Accounts (UX round 3):** single-user login first (roadmap day 20), then per-user watchlists; retire the owner lock on watchlist writes.
 9. **Sniper follow-ups:** more monitor agents (OI change, order-flow imbalance, news impact), a `thought` field from each agent, several desks per user, backtest a desk over recorded days.
 10. **Data feeds that need a licence or a scraper:** BSE quarterly shareholding (fills `data/investors.json` and the ownership agent), IPO calendar (Trendlyne / Tickertape / TrueData, or SEBI + BSE fetcher into `data/ipo.json`; GMP stays out, user decision), earnings dates and FII/DII flows into the `data/*.json` schemas.
-11. Radar trails toggle, compare two stocks on the council, mobile pass.
+11. Radar trails toggle, compare two stocks on the council; phone pass for the parked pages and the Sniper terminal (the kept pages are done).
 
 ## Signal confluence engine (sniper v2, 5 Oct 2026)
 
@@ -149,7 +168,7 @@ Hosting checks done while the beta ran on a free container host (24 Sep 2026): a
 
 ## Checks
 
-`uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running (`BASE=http://127.0.0.1:<port>` for another port): it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). Since 18 Nov it also loads the shared scripts a page references under `/static/js` (so Home, which needs `ai.js`, runs). CI parse-checks every page with node.
+`uv run ruff check .`, `uv run pytest -q`, and for the pages `node tools/page_harness.js web/pages/<page>.html "#SYMBOL/3m/fundamental"` with the server running (`BASE=http://127.0.0.1:<port>` for another port): it executes the page script against a stub DOM with live data and reports runtime errors (this is what caught the blank Fundamental tab). Since 18 Nov it also loads the shared scripts a page references under `/static/js` (so Home, which needs `ai.js`, runs). CI parse-checks every page with node. For layout, do not trust plain headless `--screenshot` below about 500 px wide: Chrome clamps the window and crops the image; use the DevTools protocol with `Emulation.setDeviceMetricsOverride` (a 40-line node script did it on 18 Nov) and check that `document.documentElement.scrollWidth` equals the viewport.
 
 ## Known rough edges
 

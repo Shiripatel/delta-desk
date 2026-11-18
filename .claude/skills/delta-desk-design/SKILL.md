@@ -26,8 +26,8 @@ new shared thing, add it to `design.css` and use it from every page.
 | `/sniper` | `web/pages/sniper.html` | Sniper: the one always-dark trading terminal (page-scoped tokens on `body`, square corners, teal `.phd` title bars, `table.dense`); pipeline canvas on top (palette of monitor agents → `.node.mon` → `.node.gate` → `.node.ord`, SVG edges coloured by vote), lightweight-charts candle chart with the order's lines below |
 | `/prototype` | `prototype/index.html` | (legacy design prototype, not linked) |
 
-Navigation is five text links in the header (Home · News · IPO · Agents · Sniper), the current one underlined in accent.
-The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same ten links on every page, in this order: Home, Watchlist, Heatmap, News, IPO, Forex, Global, Investors, Agents, Sniper; a test checks every page carries all of them. Keep the right side to the minimum: the search button (opens the palette, Ctrl K or `/`), clock, theme, and on the Sniper page the kill switch. Under 760 px the text nav hides and nav.js injects a five-item bottom bar (Home, Watchlist, Search, News, More). The index ticker is sticky under the header. Section headings carry no numbers. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
+Navigation is six text links in the header (Home · Watchlist · Heatmap · News · Agents · Sniper), the current one underlined in accent. IPO, Forex, Global and Investors are parked since 18 Nov 2026: their routes still work and keep the same six-link nav, but nothing links to them until a real data feed replaces their sample data.
+The header is a filled band (`--head`, dark ink on the light themes, near-black on the dark ones) with its own text tokens (`--head-ink`, `--head-ink-2`, `--head-line`); the accent pink marks the current page and the single call to action, the "Join beta" pill. Nothing else in the header is filled. The nav is the same six links on every page, in this order: Home, Watchlist, Heatmap, News, Agents, Sniper; a test checks every page carries exactly these and none of the parked ones. Keep the right side to the minimum: the search button (opens the palette, Ctrl K or `/`), clock, theme, and on the Sniper page the kill switch. Under 760 px the text nav hides and nav.js injects a five-item bottom bar (Home, Watchlist, Search, News, More). The index ticker is sticky under the header. Section headings carry no numbers. No page tag beside the brand (the nav shows where you are), no mode toggles. Section anchors go in the page body (tabs, `.sec-head`), not in the nav.
 
 ## Tokens (from `design.css`)
 
@@ -45,6 +45,8 @@ The header is a filled band (`--head`, dark ink on the light themes, near-black 
 1. `.brand` (✢ Delta Desk + a `.tag` naming the page),
 2. `.nav` text links (Home · News · IPO · Agents · Sniper),
 3. `.status` borderless items: theme select (injected by nav.js), clock; the Sniper page adds the `.kill` button. The data source is shown in the ticker strip, not the header.
+
+Less is the rule (18 Nov 2026): a page is one idea with the fewest sections that carry it. Home is the hero line, the sentiment boxes, the radar with its picks and breadth, the top 10, the track record and one explanatory note. Add a section only when it brings data the page does not already show.
 
 The watchlist rail (`static/watchlist.*`) is not on any page for now; the watchlist lives as a view on Markets.
 

@@ -47,22 +47,19 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 .side .block{margin-top:18px}
 .more{display:block;width:100%;padding:12px;text-align:center;font-size:12px;color:var(--ink-2);border-top:1px solid var(--line)}
 .more:hover{color:var(--ink);background:var(--fill)}
-/* ---- how it works ---- */
-.how{display:grid;grid-template-columns:repeat(4,1fr)}
-.how div{padding:16px 20px;border-right:1px solid var(--line)}
-.how div:last-child{border-right:0}
-.how b{display:block;font:600 14px/1.2 var(--sans);margin-bottom:6px}
-.how b::before{content:"✢ ";color:var(--accent-deep)}
-.how span{font-size:12px;color:var(--ink-2)}
+.rd-ctl{flex-wrap:wrap}
+.radar svg{width:100%;height:auto}
 @media (max-width:1000px){
-  .hero,.rgrid{grid-template-columns:1fr}.rgrid .left{border-right:0;border-bottom:1px solid var(--line)}.zones{flex-wrap:wrap}.how{grid-template-columns:1fr 1fr}
+  .hero,.rgrid{grid-template-columns:1fr}.rgrid .left{border-right:0;border-bottom:1px solid var(--line)}.zones{flex-wrap:wrap}
+  .zones div{min-width:0;flex:1 1 100px;padding:8px 10px}
+  #tabs{flex-wrap:wrap}#tabs .meta{width:100%;padding:6px 12px 8px}
 }
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">HOME · AI RADAR</span></div>
-  <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/ipo">IPO</a><a href="/forex">Forex</a><a href="/global">Global</a><a href="/investors">Investors</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/" aria-current="page">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/desk">Agents</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
   </div>
@@ -73,9 +70,8 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section class="hero">
   <div class="left">
-    <div class="eyebrow">AI radar · agentic desk for Indian markets</div>
     <h1>LLM agents scan the index. <em>Buy zone</em>, hold, sell: today.</h1>
-    <p>An AI agent scores every stock 1 to 10 and places it on the radar. Switch short term (technical) or long term (fundamentals), replay five sessions. Not advice.</p>
+    <p>Every stock scored 1 to 10 by a transparent rule. Not advice.</p>
   </div>
   <div>
     <div class="eyebrow">Market sentiment · <span id="zoneIdx">NIFTY 50</span> · today</div>
@@ -102,8 +98,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
     <div class="side">
       <h3>in the buy zone now</h3>
       <div id="rdPicks"></div>
-      <div class="block"><h3>biggest moves over the replay</h3>
-      <table><thead><tr><th>symbol</th><th class="num">then</th><th class="num">now</th></tr></thead><tbody id="rdMovers"></tbody></table></div>
       <div class="block"><h3>breadth today</h3><div id="breadth" class="muted">—</div></div>
     </div>
   </div>
@@ -130,13 +124,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 
 <section>
   <div class="sec-head"><h2>how the score works</h2><span class="meta">rules model v0 · <a href="/desk" style="text-decoration:underline">agent council</a> · <a href="/sniper" style="text-decoration:underline">F&amp;O sniper</a></span></div>
-  <div class="how">
-    <div><b>AI score 1–10</b><span>Momentum over 3 months, 1 month and 2 weeks, plus how clean the trend is (R² of the price path), minus a penalty for deep drawdowns.</span></div>
-    <div><b>Past win rate</b><span>The same rule was scored on every day of the last three months. Win rate is how often the direction it called was right ten sessions later. The track record above does the same for every zone over a year, against the base rate.</span></div>
-    <div><b>Forecast 3M</b><span>A momentum-continuation estimate for the next three months, clipped to a sane range. A number to compare stocks, not a promise.</span></div>
-    <div><b>Low risk 1–10</b><span>From annualised daily volatility. 10 is the calmest name in the set, 1 the wildest.</span></div>
-  </div>
-  <div class="note" id="aiNote">Nothing here is investment advice.</div>
+  <div class="note" id="aiNote">AI score 1–10: momentum over 3 months, 1 month and 2 weeks, plus how clean the trend is, minus a penalty for deep drawdowns. Past win rate: how often the direction it called was right ten sessions later, over the last three months. Forecast 3M: a momentum-continuation estimate, a number to compare stocks, not a promise. Low risk 1–10 from volatility, 10 the calmest. The track record above is how the rule did on the past year. Nothing here is investment advice.</div>
 </section>
 
 </main>
@@ -155,9 +143,9 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   var index='NIFTY50',limit=10,mode='short',names={NIFTY50:'NIFTY 50',BANKNIFTY:'BANK NIFTY',SENSEX:'SENSEX'};
   function zones(f){var b=0,h=0,s=0;f.points.forEach(function(q){if(q.score>=7)b++;else if(q.score>=4)h++;else s++});
     $('#zBuy').textContent=b;$('#zHold').textContent=h;$('#zSell').textContent=s;$('#zoneIdx').textContent=names[index]}
-  var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',movers:'rdMovers',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
+  var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
     onFrame:function(f,i,d){zones(f);$('#asof').textContent='as of '+(f.asof||'—')+(i===d.frames.length-1?' · latest session':' · replaying session '+(i+1)+' of '+d.frames.length)+' · history: '+d.source}});
-  var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',note:'aiNote',index:index,limit:limit});
+  var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',index:index,limit:limit});
   var track=DDAI.track({head:'trHead',body:'trBody',meta:'trMeta',note:'trNote',headline:'trLine',index:index});
   function loadAll(){$('#rkIdx').textContent=names[index];$('#trIdx').textContent=names[index];radar.load(index,mode);rank.load(index,limit,mode);track.load(index,mode);breadth()}
   $('#rdMode').addEventListener('click',function(e){var b=e.target.closest('button[data-mode]');if(!b)return;mode=b.dataset.mode;Array.prototype.forEach.call(document.querySelectorAll('#rdMode button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});

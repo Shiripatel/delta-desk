@@ -11,6 +11,10 @@
     var cur=theme||(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'ink':'mist');sel.value=cur;
     sel.addEventListener('change',function(){document.documentElement.dataset.theme=sel.value;try{localStorage.setItem('dd.theme',sel.value)}catch(e){}});
     status.appendChild(sel)}
+  /* the ticker sticks under the header: --sticky-top follows the header's real height at every width */
+  var top=document.querySelector('header.top');
+  if(top){var fit=function(){var h=top.offsetHeight;if(h)document.documentElement.style.setProperty('--sticky-top',h+'px')};fit();
+    if(window.ResizeObserver){new ResizeObserver(fit).observe(top)}else{window.addEventListener('resize',fit)}}
   /* beta pill in the header, standard footer on every page */
   if(status&&!document.getElementById('betaLink')&&location.pathname!=='/beta'){var b=document.createElement('a');b.id='betaLink';b.href='/beta';b.className='beta';b.textContent='Join beta';status.insertBefore(b,status.firstChild)}
   var foot=document.querySelector('footer .wrap');
@@ -53,7 +57,7 @@
     bar.innerHTML='<a href="/"'+cur('/')+'>'+ICON.home+'Home</a><a href="/watchlist"'+cur('/watchlist')+'>'+ICON.star+'Watchlist</a><button type="button" id="ddBottomSearch">'+ICON.search+'Search</button><a href="/news"'+cur('/news')+'>'+ICON.news+'News</a><button type="button" id="ddMore">'+ICON.more+'More</button>';
     document.body.appendChild(bar);bar.querySelector('#ddBottomSearch').addEventListener('click',open);
     var bg=document.createElement('div');bg.className='sheet-bg';var sh=document.createElement('div');sh.className='sheet';sh.setAttribute('role','menu');
-    sh.innerHTML=[['/heatmap','Heatmap'],['/ipo','IPO'],['/forex','Forex'],['/global','Global'],['/investors','Investors'],['/desk','Agents'],['/sniper','Sniper'],['/beta','Beta & alerts'],['/legal','Legal']].map(function(x){return '<a href="'+x[0]+'"'+cur(x[0])+'>'+x[1]+'</a>'}).join('');
+    sh.innerHTML=[['/heatmap','Heatmap'],['/desk','Agents'],['/sniper','Sniper'],['/beta','Beta & alerts'],['/legal','Legal']].map(function(x){return '<a href="'+x[0]+'"'+cur(x[0])+'>'+x[1]+'</a>'}).join('');
     document.body.appendChild(bg);document.body.appendChild(sh);
     function toggle(on){sh.classList.toggle('open',on);bg.classList.toggle('open',on)}
     bar.querySelector('#ddMore').addEventListener('click',function(){toggle(!sh.classList.contains('open'))});bg.addEventListener('click',function(){toggle(false)})}
