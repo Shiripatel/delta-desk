@@ -209,6 +209,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def chart_page():
         return RedirectResponse("/analysis", status_code=307)
 
+    @app.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        return FileResponse(WEB / "static" / "favicon.svg", media_type="image/svg+xml")
+
     @app.get("/markets/forex-market")
     async def m_forex_market():
         return JSONResponse(await asyncio.to_thread(markets.forex_market))

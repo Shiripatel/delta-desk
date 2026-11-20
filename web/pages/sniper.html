@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <title>Delta Desk · F&O Sniper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,7 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .tbar b{color:var(--ink);font-weight:500}
 .tbar .note{margin-left:auto;border-right:0;border-left:1px solid var(--line);color:var(--ink-3)}
 .tbar .live b{color:var(--good)}.tbar .off b{color:var(--warn)}
+.status select{display:none}
 .panel{background:var(--card);border:1px solid var(--line-2);min-width:0}
 .phd{display:flex;align-items:center;gap:10px;padding:5px 10px;background:var(--teal);color:var(--teal-ink);font:600 10.5px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
 .phd .r{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;color:#bfeef2;font-family:var(--mono);font-size:10.5px}
@@ -31,7 +33,7 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 /* desk: palette + canvas */
 .desk{display:grid;grid-template-columns:210px 1fr}
 .shelf{border-right:1px solid var(--line-2);background:#0c1218}
-.shelf .hint{padding:6px 10px;font-size:10.5px;color:var(--ink-3);border-bottom:1px solid var(--line);line-height:1.4}
+.shelf .hint{padding:6px 10px;font:600 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .pit{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);cursor:grab;color:var(--ink-2);user-select:none}
 .pit:hover{background:var(--fill)}
 .pit > span{min-width:0}
@@ -59,13 +61,12 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .node .nh .x:hover{color:var(--bad)}
 .node .nb{padding:8px 10px}
 .mon{cursor:grab}
-.mon .vote{display:flex;align-items:center;gap:8px;font:600 12px var(--sans)}
+.mon .vote{display:flex;align-items:center;gap:8px;font:600 12px var(--sans);white-space:nowrap}
+.mon .vote .read{margin-left:auto;font:500 12px var(--mono);color:var(--ink);overflow:hidden;text-overflow:ellipsis}
 .mon .vote .lamp{flex:0 0 9px;width:9px;height:9px;background:var(--line-2)}
 .mon .vote.v1{color:var(--good)}.mon .vote.v1 .lamp{background:var(--good);box-shadow:0 0 6px var(--good)}
 .mon .vote.vm1{color:var(--bad)}.mon .vote.vm1 .lamp{background:var(--bad);box-shadow:0 0 6px var(--bad)}
 .mon .vote.v0{color:var(--ink-3)}
-.mon .read{font:500 12.5px/1.2 var(--mono);margin-top:5px;color:var(--ink)}
-.mon .why{font-size:10.5px;color:var(--ink-3);margin-top:4px;line-height:1.4;max-height:2.8em;overflow:hidden}
 .mon.run{box-shadow:inset 0 0 0 1px var(--accent)}
 .lamp{display:inline-block;width:8px;height:8px;background:var(--line-2)}
 .lamp.v1{background:var(--good)}.lamp.vm1{background:var(--bad)}
@@ -76,11 +77,10 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .gate .votes{display:flex;gap:4px;margin-top:8px}
 .gate .votes i{flex:1;height:7px;background:var(--line-2)}
 .gate .votes i.v1{background:var(--good)}.gate .votes i.vm1{background:var(--bad)}
-.gate .rule{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--ink-2);flex-wrap:wrap}
+.gate .rule{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:var(--ink-3);flex-wrap:wrap}
 .gate select{background:var(--fill-2);color:var(--ink);border:1px solid var(--line-2);font:500 11px var(--mono);padding:2px 4px}
 .gate .st{margin-top:8px;font:600 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
 .gate .st.ready{color:var(--good)}.gate .st.blocked{color:var(--warn)}.gate .st.fired{color:var(--accent)}
-.gate .why{font-size:10.5px;color:var(--ink-3);margin-top:6px;line-height:1.4}
 .gate.ready{box-shadow:inset 0 0 0 1px var(--good)}
 /* order */
 .ord .hd{display:flex;align-items:baseline;gap:8px}
@@ -132,7 +132,10 @@ table.dense td.num{font-family:var(--mono)}
 .cpill i{display:inline-block;width:36px;height:5px;background:var(--fill-2);position:relative}
 .cpill i b{position:absolute;inset:0 auto 0 0;background:var(--accent-deep)}
 /* log */
-.stream{height:170px;overflow:auto;font:400 11px/1.45 var(--mono)}
+.logp .phd{cursor:pointer}
+.logp .stream{display:none}.logp.open .stream{display:block}
+.logp .last{font-weight:400;letter-spacing:0;text-transform:none;color:#bfeef2;font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
+.stream{height:150px;overflow:auto;font:400 11px/1.45 var(--mono)}
 .stream div{display:grid;grid-template-columns:62px 72px 1fr;gap:10px;padding:2px 10px;border-bottom:1px solid var(--line)}
 .stream .t{color:var(--ink-3)}.stream .a{font-weight:500;color:var(--ink-2)}
 .stream .a.volume{color:var(--s1)}.stream .a.ma_vwap{color:#c084fc}.stream .a.rsi{color:#67e8f9}.stream .a.trend{color:#f0abfc}.stream .a.options{color:#a3e635}.stream .a.levels{color:#fb923c}.stream .a.confluence{color:var(--accent)}.stream .a.risk{color:var(--bad)}.stream .a.exec{color:var(--good)}.stream .a.sniper{color:var(--warn)}
@@ -155,22 +158,20 @@ table.dense td.num{font-family:var(--mono)}
 <main class="wrap">
 <div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
 <div class="tbar">
-  <span class="t1">F&amp;O SNIPER</span>
+  <span class="t1">SNIPER</span>
   <span><b id="und">NIFTY</b> weekly options</span>
-  <span>mode <b id="mode">PAPER</b></span>
-  <span>desk <b id="deskMeta">—</b></span>
-  <span>cycle <b class="num" id="seq">—</b></span>
-  <span>last <b class="num" id="cyTs">—</b></span>
-  <span id="wsState" class="off">stream <b>connecting</b></span>
-  <span class="note">Agents watch the tape · when they all agree one paper order fires with a stop and a target · not investment advice</span>
+  <span><b id="mode">PAPER</b></span>
+  <span><b id="deskMeta">—</b></span>
+  <span><b class="num" id="cyTs">—</b></span>
+  <span id="wsState" class="off"><b>connecting</b></span>
 </div>
 <div class="page">
 
   <section class="panel">
-    <div class="phd">Agent desk · drag agents in, they vote, the gate fires<span class="r" id="boardMeta">loading…</span></div>
+    <div class="phd">Agents<span class="r" id="boardMeta">loading…</span></div>
     <div class="desk">
       <div class="shelf" id="shelf">
-        <div class="hint">Agents. Drag one onto the desk (or press +). Each watches one thing on the 3-min tape and votes long, short or neutral.</div>
+        <div class="hint">drag onto the desk, or +</div>
         <div class="list" id="plist"></div>
       </div>
       <div class="canvas" id="canvas">
@@ -188,11 +189,11 @@ table.dense td.num{font-family:var(--mono)}
 
   <div class="row2">
     <div>
-      <section class="panel"><div class="phd">Live chart · <span id="chartTf">3-min</span> candles · VWAP · EMA 9/21 · orders on the chart<span class="r" id="chartMeta">—</span><div class="tfs" id="tfs"><button data-tf="1">1m</button><button data-tf="3" aria-pressed="true">3m</button><button data-tf="5">5m</button></div></div>
+      <section class="panel"><div class="phd">Chart · <span id="chartTf">3-min</span><span class="r" id="chartMeta">—</span><div class="tfs" id="tfs"><button data-tf="1">1m</button><button data-tf="3" aria-pressed="true">3m</button><button data-tf="5">5m</button></div></div>
         <div class="chartbox" id="chart"><div class="nolw" id="nolw">Waiting for bars…</div></div>
         <div class="legend"><span><i style="background:#f5b301"></i>VWAP</span><span><i style="background:#3aa9ff"></i>EMA 9</span><span><i style="background:#c084fc"></i>EMA 21</span><span><i style="background:#e6ecf2"></i>entry</span><span><i style="background:#ff4d4d"></i>stop</span><span><i style="background:#1fc46a"></i>target</span><span><i style="background:#6b7887"></i>PDH / PDL</span><span>▲▼ fills</span></div>
       </section>
-      <section class="panel"><div class="phd">Signal log<span class="r"><span id="logCount">0</span> lines</span></div><div class="stream" id="stream"></div></section>
+      <section class="panel logp" id="logp"><div class="phd" id="logHd" title="every vote change, gate state and order, in the agents' own words · click to open">Log<span class="last" id="logLast"></span><span class="r"><span id="logCount">0</span></span></div><div class="stream" id="stream"></div></section>
     </div>
     <div>
       <section class="panel"><div class="phd">Risk<span class="r" id="p5">flat</span></div><div class="risk" id="risk"></div></section>
@@ -233,12 +234,13 @@ table.dense td.num{font-family:var(--mono)}
   function latest(pred){return dlist().filter(pred||function(){return true}).sort(function(a,b){return (b.ts||'').localeCompare(a.ts||'')})[0]}
   function byName(){var m={};if(sig)sig.signals.forEach(function(s){m[s.name]=s});return m}
   function voteCls(v){return v>0?'v1':v<0?'vm1':'v0'}
-  function voteTxt(v){return v>0?'+1 long':v<0?'−1 short':'0 neutral'}
+  function voteTxt(v){return v>0?'▲ long':v<0?'▼ short':'· neutral'}
 
   /* ---- signal log --------------------------------------------------------------------------------- */
   var stream=$('#stream'),count=0,lastNote={};
   function say(agent,msg,t,hot){var d=document.createElement('div');d.innerHTML='<span class="t">'+esc(t||new Date().toTimeString().slice(0,8))+'</span><span class="a '+esc(agent)+'">'+esc(agent)+'</span><span class="'+(hot?'hot':'')+'">'+esc(msg)+'</span>';
-    stream.appendChild(d);while(stream.children.length>400)stream.removeChild(stream.firstChild);stream.scrollTop=stream.scrollHeight;$('#logCount').textContent=++count}
+    stream.appendChild(d);while(stream.children.length>400)stream.removeChild(stream.firstChild);stream.scrollTop=stream.scrollHeight;$('#logCount').textContent=++count;$('#logLast').textContent=agent+' · '+msg}
+  $('#logHd').addEventListener('click',function(){$('#logp').classList.toggle('open');stream.scrollTop=stream.scrollHeight});
   function note(agent,msg,t,hot){if(lastNote[agent]===msg)return;lastNote[agent]=msg;say(agent,msg,t,hot)}
 
   /* ---- config: which agents sit on the desk ------------------------------------------------------ */
@@ -248,7 +250,7 @@ table.dense td.num{font-family:var(--mono)}
   function removeMon(n){if(!cfg)return;var m=cfg.monitors.filter(function(x){return x!==n});if(!m.length){DD.toast('Keep at least one agent on the desk');return}saveConfig(m,cfg.required!=null&&cfg.required<=m.length?cfg.required:null)}
   function renderPalette(){if(!cfg)return;var live=byName();
     $('#plist').innerHTML=cfg.available.map(function(a){var on=cfg.monitors.indexOf(a.name)>=0,s=live[a.name];
-      return '<div class="pit'+(on?' on':'')+'" draggable="'+(on?'false':'true')+'" data-n="'+esc(a.name)+'" title="'+esc(a.desc)+'">'+(ICON[a.icon]||'')+'<span><b>'+esc(a.label)+'</b><small>'+(on?'on the desk':s?esc(s.reading):esc(a.desc))+'</small></span>'+(on?'<span class="lamp '+(s?voteCls(s.vote):'')+'"></span>':'<button class="add" data-add="'+esc(a.name)+'">+ add</button>')+'</div>'}).join('');
+      return '<div class="pit'+(on?' on':'')+'" draggable="'+(on?'false':'true')+'" data-n="'+esc(a.name)+'" title="'+esc(a.desc)+'">'+(ICON[a.icon]||'')+'<span><b>'+esc(a.label)+'</b>'+(on&&s?'<small>'+esc(s.reading)+'</small>':'')+'</span>'+(on?'<span class="lamp '+(s?voteCls(s.vote):'')+'"></span>':'<button class="add" data-add="'+esc(a.name)+'">+</button>')+'</div>'}).join('');
     $('#deskMeta').textContent=cfg.monitors.length+' agents · needs '+(cfg.required||cfg.monitors.length)}
   $('#plist').addEventListener('click',function(e){var b=e.target.closest('button[data-add]');if(b)addMon(b.dataset.add)});
   $('#plist').addEventListener('dragstart',function(e){var p=e.target.closest('.pit');if(!p||p.classList.contains('on'))return;e.dataTransfer.setData('text/plain','add:'+p.dataset.n);e.dataTransfer.effectAllowed='move';p.classList.add('dragging')});
@@ -263,22 +265,21 @@ table.dense td.num{font-family:var(--mono)}
   $('#mons').addEventListener('click',function(e){var x=e.target.closest('button[data-rm]');if(x)removeMon(x.dataset.rm)});
 
   /* ---- canvas: monitor nodes → gate → order ------------------------------------------------------- */
-  function monNode(a){return '<div class="node mon" data-n="'+esc(a.name)+'" draggable="true"><div class="nh">'+(ICON[a.icon]||'')+esc(a.label)+'<span class="ms num" style="margin-left:auto;font-weight:400;color:var(--ink-3)"></span><button class="x" data-rm="'+esc(a.name)+'" title="Remove from the desk">×</button></div><div class="nb"><div class="vote v0"><span class="lamp"></span><span class="vt">waiting</span></div><div class="read">—</div><div class="why">'+esc(a.desc)+'</div></div></div>'}
+  function monNode(a){return '<div class="node mon" data-n="'+esc(a.name)+'" draggable="true" title="'+esc(a.desc)+'"><div class="nh">'+(ICON[a.icon]||'')+esc(a.label)+'<button class="x" data-rm="'+esc(a.name)+'" title="Remove from the desk">×</button></div><div class="nb"><div class="vote v0"><span class="lamp"></span><span class="vt">waiting</span><span class="read">—</span></div></div></div>'}
   function renderCanvas(){if(!cfg)return;var av={};cfg.available.forEach(function(a){av[a.name]=a});
     $('#mons').innerHTML=cfg.monitors.map(function(n){return av[n]?monNode(av[n]):''}).join('');
     renderGate();renderOrder();updateNodes();drawEdges()}
   function renderGate(){if(!cfg)return;var n=cfg.monitors.length,req=cfg.required||n;var opts=['<option value="all"'+(cfg.required==null?' selected':'')+'>all</option>'];for(var i=1;i<n;i++)opts.push('<option value="'+i+'"'+(cfg.required===i?' selected':'')+'>'+i+'</option>');
     $('#gate').innerHTML='<div class="nh">'+ICON.gate+'Confluence gate</div><div class="nb"><div class="big num" id="gAgree">— / '+n+'</div><div class="dir NONE" id="gDir">waiting for votes</div><div class="votes" id="gVotes">'+cfg.monitors.map(function(){return '<i></i>'}).join('')+'</div>'+
-      '<div class="rule">fire when <select id="req">'+opts.join('')+'</select> of '+n+' agree, none against · window '+esc((cfg.window||[]).join('–'))+' IST · cooldown '+cfg.cooldown_min+' min</div><div class="st" id="gSt">waiting</div><div class="why" id="gWhy"></div></div>';
+      '<div class="rule">needs <select id="req" title="how many agents must agree, with none against · trades only '+esc((cfg.window||[]).join('–'))+' IST · '+cfg.cooldown_min+' min between shots">'+opts.join('')+'</select> of '+n+'</div><div class="st" id="gSt">waiting</div></div>';
     $('#req').addEventListener('change',function(){saveConfig(cfg.monitors,this.value==='all'?null:+this.value)});$('#gAgree').title='needs '+req+' of '+n}
   function updateNodes(){if(!sig)return;var live=byName();
-    cfg&&cfg.monitors.forEach(function(n){var el=$('.mon[data-n="'+n+'"]'),s=live[n];if(!el||!s)return;var v=el.querySelector('.vote');v.className='vote '+voteCls(s.vote);el.querySelector('.vt').textContent=voteTxt(s.vote);el.querySelector('.read').textContent=s.reading;el.querySelector('.why').textContent=s.why;el.querySelector('.why').title=s.why});
+    cfg&&cfg.monitors.forEach(function(n){var el=$('.mon[data-n="'+n+'"]'),s=live[n];if(!el||!s)return;var v=el.querySelector('.vote');v.className='vote '+voteCls(s.vote);el.querySelector('.vt').textContent=voteTxt(s.vote);el.querySelector('.read').textContent=s.reading;el.title=s.why});
     var n=sig.active.length,g=$('#gate');$('#gAgree').textContent=sig.agree+' / '+n;var dir=$('#gDir');dir.className='dir '+sig.direction;dir.textContent=sig.direction==='NONE'?(sig.agree?'leaning, not enough':'no agreement'):sig.direction+(sig.ready?' · all conditions met':'');
     $('#gVotes').innerHTML=sig.active.map(function(m){var s=live[m];return '<i class="'+(s?voteCls(s.vote):'')+'" title="'+esc(m)+'"></i>'}).join('');
     var st=$('#gSt');var fired=lastTrig&&lastTrig.zone.source==='confluence'&&sig.ts&&hhmmss(lastTrig.ts)===hhmmss(sig.ts);
-    st.className='st '+(fired?'fired':sig.ready?(sig.blocked?'blocked':'ready'):'');st.textContent=fired?'FIRED '+hhmmss(lastTrig.ts).slice(0,5):sig.ready?(sig.blocked?'ready but blocked: '+sig.blocked:'READY · firing'):'watching';
-    g.className='node gate'+(sig.ready&&!sig.blocked?' ready':'');$('#gWhy').textContent=sig.why;
-    if(cfg){cfg.monitors.forEach(function(n){var el=$('.mon[data-n="'+n+'"]');if(el&&el.querySelector('.ms'))el.querySelector('.ms').textContent=''})}
+    st.className='st '+(fired?'fired':sig.ready?(sig.blocked?'blocked':'ready'):'');st.textContent=fired?'FIRED '+hhmmss(lastTrig.ts).slice(0,5):sig.ready?(sig.blocked?'blocked · '+sig.blocked:'READY · firing'):'watching';st.title=sig.why;
+    g.className='node gate'+(sig.ready&&!sig.blocked?' ready':'');
     renderPalette();drawEdges()}
   function drawEdges(){var flow=$('#flow'),svg=$('#edges'),gate=$('#gate'),ord=$('#order');if(!flow||!svg||!gate||!ord)return;var fr=flow.getBoundingClientRect();if(!fr.width)return;
     svg.setAttribute('viewBox','0 0 '+fr.width+' '+fr.height);var live=byName(),paths='';
@@ -295,12 +296,13 @@ table.dense td.num{font-family:var(--mono)}
   function stateCls(s){return {executed:'open',rejected:'closed',held:'upcoming',vetoed:'closed',expired:'closed',approved:'open',awaiting_approval:'upcoming'}[s]||''}
   function shortSym(s){return String(s).replace(/^NIFTY\s+\S+\s+/,'')}
   function renderOrder(){var d=latest(function(x){return x.trade.source==='confluence'})||latest();var el=$('#order');
-    if(!d){var a=sig&&sig.atr?sig.atr:null;el.innerHTML='<div class="nh">'+ICON.order+'Order · paper</div><div class="nb"><div class="hd"><b>no order</b><span>fires when the gate is ready</span></div><div class="lv"><div><span>entry</span><b>'+(snap?fmt(snap.spot,0):'—')+'</b></div><div class="stop"><span>stop</span><b>'+(a?'≈ '+fmt(Math.max(1.5*a,(snap?snap.spot:0)*0.001),0)+' pts':'1.5 × ATR')+'</b></div><div class="tgt"><span>target</span><b>'+(a?'≈ '+fmt(2*Math.max(1.5*a,(snap?snap.spot:0)*0.001),0)+' pts':'2 × stop')+'</b></div></div><div class="meta">Long agreement buys a <b>bull call spread</b>, short agreement a <b>bear put spread</b> (defined risk, two lots). Stop and target sit on the index itself and the exec agent exits on them. Risk can still veto on margin, drawdown or Greeks.</div></div>';return}
+    el.title='Long agreement buys a bull call spread, short agreement a bear put spread: defined risk, two lots. Stop 1.5 ATR and target 2× on the index itself. Risk can still veto on margin, drawdown or Greeks. Paper only.';
+    if(!d){var a=sig&&sig.atr?sig.atr:null;el.innerHTML='<div class="nh">'+ICON.order+'Order · paper</div><div class="nb"><div class="hd"><b>no order</b><span>when the gate is ready</span></div><div class="lv"><div><span>entry</span><b>'+(snap?fmt(snap.spot,0):'—')+'</b></div><div class="stop"><span>stop</span><b>'+(a?'≈ '+fmt(Math.max(1.5*a,(snap?snap.spot:0)*0.001),0)+' pts':'1.5 × ATR')+'</b></div><div class="tgt"><span>target</span><b>'+(a?'≈ '+fmt(2*Math.max(1.5*a,(snap?snap.spot:0)*0.001),0)+' pts':'2 × stop')+'</b></div></div></div>';return}
     var t=d.trade,r=d.risk;threshold=d.threshold||threshold;var dir=t.spot_dir||(t.structure.indexOf('bull')===0||t.structure.indexOf('short_put')===0?'LONG':'SHORT');
     el.innerHTML='<div class="nh">'+ICON.order+'Order · '+esc(d.id)+' · '+esc(t.source)+'</div><div class="nb"><div class="hd"><b class="'+dir+'">'+dir+'</b><span>'+esc(reg(t.structure))+' · conf '+t.confidence.toFixed(2)+' · '+hhmmss(d.ts).slice(0,5)+' IST</span></div>'+
       '<div class="lv"><div><span>entry</span><b>'+(t.spot_entry!=null?fmt(t.spot_entry,0):'—')+'</b></div><div class="stop"><span>stop</span><b>'+(t.spot_stop!=null?fmt(t.spot_stop,0):(t.stop!=null?fmt(t.stop)+' prem':'—'))+'</b></div><div class="tgt"><span>target</span><b>'+(t.spot_target!=null?fmt(t.spot_target,0):(t.target!=null?fmt(t.target)+' prem':'—'))+'</b></div></div>'+
       '<div class="legs">'+t.legs.map(function(l){return '<div class="'+l.side.toLowerCase()+'"><span class="side">'+esc(l.side)+'</span><span>'+l.lots+'× '+esc(shortSym(l.symbol))+'</span><span>@ '+fmt(l.limit)+'</span></div>'}).join('')+'</div>'+
-      '<div class="meta">'+esc(t.why)+(r.reasons.length?' <b style="color:var(--bad)">veto:</b> '+esc(r.reasons.join('; ')):'')+'<br>max loss <b>'+rupee(r.max_loss)+'</b> · margin <b>'+rupee(r.margin)+'</b> · valid until '+hhmmss(t.valid_until).slice(0,5)+'</div>'+
+      '<div class="meta" title="'+esc(t.why)+'">'+(r.reasons.length?'<b style="color:var(--bad)">veto:</b> '+esc(r.reasons.join('; '))+'<br>':'')+'max loss <b>'+rupee(r.max_loss)+'</b> · margin <b>'+rupee(r.margin)+'</b> · until '+hhmmss(t.valid_until).slice(0,5)+'</div>'+
       (d.state==='awaiting_approval'?'<div class="act"><button class="btn go" data-act="approve" data-id="'+esc(d.id)+'">Approve · paper fill</button><button class="btn no" data-act="reject" data-id="'+esc(d.id)+'">Reject</button></div>':'<div class="act"><span class="pill '+stateCls(d.state)+'">'+esc(d.state.replace('_',' '))+'</span></div>')+'</div>';
     drawEdges()}
   $('#order').addEventListener('click',function(e){var b=e.target.closest('button[data-act]');if(!b)return;post('/decisions/'+b.dataset.id+'/'+b.dataset.act).then(function(d){renderDecision(d);DD.toast(b.dataset.act==='approve'?'Approved · paper fill':'Rejected')})});
@@ -364,12 +366,12 @@ table.dense td.num{font-family:var(--mono)}
     regime:function(r){regime=r},chain:function(c){stats=c},
     trigger:function(t){lastTrig=t;say(t.zone.source==='confluence'?'confluence':'sniper','FIRED '+(t.zone.source==='confluence'?t.zone.direction==='UP'?'LONG':'SHORT':t.zone.id.replace(/_/g,' '))+' at '+fmt(t.spot,0)+' · '+t.why,hhmmss(t.ts),true);updateNodes();scheduleChart()},
     decision:renderDecision,orders:renderOrders,
-    cycle:function(c){$('#seq').textContent=fmt(c.seq,0);$('#cyTs').textContent=hhmmss(c.ts)+' IST';var ok=c.agents.filter(function(a){return a.ok}).length;$('#boardMeta').textContent='cycle '+fmt(c.seq,0)+' · '+hhmmss(c.ts)+' IST · '+ok+'/'+c.agents.length+' agents ok · '+c.ms.toFixed(0)+' ms';
-      c.agents.forEach(function(a){if(!a.ok)note(a.name,'ERROR '+(a.error||''),hhmmss(c.ts),true);var el=$('.mon[data-n="'+a.name+'"]');if(el&&el.querySelector('.ms'))el.querySelector('.ms').textContent=a.ms.toFixed(a.ms<10?1:0)+' ms'});pulse()}};
+    cycle:function(c){$('#cyTs').textContent=hhmmss(c.ts)+' IST';var ok=c.agents.filter(function(a){return a.ok}).length;$('#boardMeta').textContent=hhmmss(c.ts)+' IST · '+ok+'/'+c.agents.length+' agents';
+      c.agents.forEach(function(a){if(!a.ok)note(a.name,'ERROR '+(a.error||''),hhmmss(c.ts),true)});pulse()}};
   function connect(){var ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/stream');
-    ws.onopen=function(){var w=$('#wsState');w.className='live';w.innerHTML='stream <b>live</b>'};
+    ws.onopen=function(){var w=$('#wsState');w.className='live';w.innerHTML='<b>live</b>'};
     ws.onmessage=function(ev){try{var m=JSON.parse(ev.data);var h=handlers[m.topic];if(h)h(m.data)}catch(e){}};
-    ws.onclose=function(){var w=$('#wsState');w.className='off';w.innerHTML='stream <b>reconnecting</b>';setTimeout(connect,3000)}}
+    ws.onclose=function(){var w=$('#wsState');w.className='off';w.innerHTML='<b>reconnecting</b>';setTimeout(connect,3000)}}
   get('/limits').then(function(l){limits=l}).catch(function(){});
   loadConfig().then(connect);
   DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});

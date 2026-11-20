@@ -1,6 +1,6 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-18, third pass (local launch: six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed on every kept page, one-click `tools/serve.cmd`). Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-19 (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
@@ -62,6 +62,18 @@ The user asked for less content and a very clean design before launch. Decisions
   row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
   boxes and radar controls wrap. The design skill records the "less is the rule" principle.
 
+## Sniper rebuilt on the shape of the top agentic repos (19 Nov 2026)
+
+The user reported pages "broken" and the Sniper "too much text, complex". A render of every page through Chrome's DevTools
+protocol (console errors, uncaught exceptions, failed requests, sideways overflow, light and dark themes) found nothing broken at
+runtime except a missing favicon, now served as `/static/favicon.svg` and at `/favicon.ico`. The complaint was the prose. The
+`docs/UX_REVIEW.md` section "Agentic trading repos" compares TradingAgents, ai-hedge-fund, Vibe-Trading and the rest; the Sniper page
+now follows their screen shape: one line per agent (name · vote · reading, the sentence in a tooltip), a gate that shows `agree / n`
+and one word of status, an order card with numbers and two buttons, the chart, risk and positions, and a one-line log that opens on
+click. The status bar lost its slogan, the title bars their explanations, the shelf its paragraph, the theme select is hidden on the
+always-dark terminal. Mechanics unchanged: drag or + to add agents, the `needs k of n` rule, approvals, kill switch, stream. The
+harness replays a recorded stream (`WS_REPLAY`) through every handler with zero errors.
+
 ## What exists (all on the shared design system, three themes, Home · Watchlist · Heatmap · News · Agents · Sniper; four pages parked)
 
 | page | route | what it does | data today |
@@ -72,7 +84,7 @@ The user asked for less content and a very clean design before launch. Decisions
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
 | IPO | `/ipo`, `/ipo/<slug>` | list with summary chips (open, upcoming, closed, listed in gain / loss, avg listing gain), board filter, tabs Open / Upcoming / Closed / Listed / Performance / Tracked with Groww-style columns; performance tracker per year and board (issue price, listing day close, listing gain, current price, profit / loss, CSV export); detail page per issue: facts, six-step timeline, IPO agent (rules v0: demand, growth, valuation, issue structure, news), about, financials table + bars, strengths / risks, objectives, subscription by category, issue details, key ratios, people, wire mentions | fictional example issues flagged `example`; `data/ipo.json` in the documented schema replaces them; current price for real listings via quotes |
 | Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals via Yahoo when `DD_QUOTES=yahoo` |
-| Sniper | `/sniper` | dark trading terminal built as a **pipeline canvas** (Databricks-style, left to right): a left palette of monitor agents with simple icons (Volume RVOL, MA/VWAP, RSI, Trend, Options PCR, Levels) that the user drags onto the desk (or presses +), each node showing its live vote (+1 / 0 / −1), reading and one-line reason; curved edges coloured by vote flow into the **confluence gate** (big `agree / n`, vote bar, rule selector `all | k of n`, status watching / ready / blocked / fired) and on to the **order node** (direction, structure, entry / stop / target on the index, legs, Approve/Reject). Below: a lightweight-charts candle chart (1/3/5-min, VWAP, EMA 9/21, volume, PDH/PDL, the live order's entry/stop/target lines and fill arrows) with a signal log, plus risk, positions and orders today. Config is `GET/POST /sniper/config` (persisted to `data/sniper.json`). `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`). | synthetic feed only so far; the Upstox feed is written but has never run on a real session |
+| Sniper | `/sniper` | dark trading terminal built as a **pipeline canvas** (left to right): a shelf of monitor agents (Volume RVOL, MA/VWAP, RSI, Trend, Options PCR, Levels) the user drags onto the desk or adds with +; each node is one line (name · ▲ long / ▼ short / · neutral · reading; the reason is the tooltip); curved edges coloured by vote flow into the **confluence gate** (`agree / n`, direction, vote bar, `needs k of n`, one word of status) and on to the **order card** (direction, structure, confidence, entry / stop / target on the index, legs, max loss, margin, Approve / Reject). Below: a lightweight-charts candle chart (1/3/5-min, VWAP, EMA 9/21, volume, PDH/PDL, the live order's lines and fill arrows), risk, positions, orders today, and a one-line log that opens on click. Config is `GET/POST /sniper/config` (persisted to `data/sniper.json`). `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`). | synthetic feed only so far; the Upstox feed is written but has never run on a real session |
 | Global | `/global` | dotted world map with the key indices placed by city, region tabs (World, United States, Europe, China & Hong Kong, Japan & Asia, India), index cards for the region, then index futures, commodities, forex, bonds and crypto cards; every card opens the analysis page | Yahoo quotes for all world keys |
 | Investors | `/investors` | cards for well-known investors (style, vehicle, since, holdings count, valued total, today's average move, top holdings with logos); open a card for the full holdings table (stake, market cap, value, LTP, today), row → analysis; sort by value, move or count | seed list with approximate stakes until a shareholding feed fills `data/investors.json` |
 | Forex | `/forex` | INR crosses, world majors, a colour map of pairs, currency-strength meter, all pairs table; every pair links to its chart | Yahoo, delayed |
@@ -148,7 +160,7 @@ must not be sold as predictive until it beats its own table. That table is now t
 6. **LLM behind the same endpoints:** news impact analyser, "why" text, assistant. Needs a key; interfaces are isolated (`Analyzer`, `DeskAssistant`). Add a per-IP rate limit on `/chat` and `/agent/chat` first.
 7. **Alerts:** Telegram on verdict flips, new bad-impact story on a watchlist stock, sniper decisions, kill switch.
 8. **Accounts (UX round 3):** single-user login first (roadmap day 20), then per-user watchlists; retire the owner lock on watchlist writes.
-9. **Sniper follow-ups:** more monitor agents (OI change, order-flow imbalance, news impact), a `thought` field from each agent, several desks per user, backtest a desk over recorded days.
+9. **Sniper follow-ups, in the order the top repos suggest:** a bull-versus-bear debate step before the order (needs a language model behind `Analyzer`), per-agent accuracy badges from past votes (the AI-score track record is the pattern), a one-page report per decision from the journal; then more monitor agents (OI change, order-flow imbalance, news impact), several desks per user, backtest a desk over recorded days.
 10. **Data feeds that need a licence or a scraper:** BSE quarterly shareholding (fills `data/investors.json` and the ownership agent), IPO calendar (Trendlyne / Tickertape / TrueData, or SEBI + BSE fetcher into `data/ipo.json`; GMP stays out, user decision), earnings dates and FII/DII flows into the `data/*.json` schemas.
 11. Radar trails toggle, compare two stocks on the council; phone pass for the parked pages and the Sniper terminal (the kept pages are done).
 
