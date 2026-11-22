@@ -29,6 +29,7 @@ WEB = ROOT / "web"
 PAGES = WEB / "pages"
 PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html", "/ipo": "ipo.html",
                "/ipo/{slug}": "ipo_detail.html", "/forex": "forex.html", "/global": "global.html", "/investors": "investors.html", "/desk": "agents.html", "/sniper": "sniper.html",  # noqa: E501
+               "/research": "research.html",
                "/analysis": "analysis.html", "/beta": "beta.html", "/legal": "legal.html"}
 
 
@@ -36,6 +37,11 @@ class AgentChatIn(BaseModel):
     symbol: str
     mode: str = "fundamental"
     messages: list[dict] = []
+
+
+class ResearchIn(BaseModel):
+    query: str = ""
+    preset: str = "investment_committee"
 
 
 class ChatIn(BaseModel):
@@ -440,6 +446,31 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.post("/agent/chat")
     async def agent_chat(body: AgentChatIn):
         return JSONResponse(await asyncio.to_thread(markets.agent.reply, body.symbol, body.mode, body.messages))
+
+    # ---- research teams (swarm presets): start a run, poll it, list past runs ---------------
+    @app.get("/research/presets")
+    async def research_presets():
+        return JSONResponse(markets.research.presets())
+
+    @app.post("/research/run")
+    async def research_run(body: ResearchIn):
+        try:
+            return JSONResponse(await asyncio.to_thread(markets.research.start, body.query, body.preset))
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except RuntimeError as exc:
+            raise HTTPException(429, str(exc)) from exc
+
+    @app.get("/research/run/{run_id}")
+    async def research_get(run_id: str):
+        out = markets.research.get(run_id)
+        if out is None:
+            raise HTTPException(404, "unknown run")
+        return JSONResponse(out)
+
+    @app.get("/research/runs")
+    async def research_runs(limit: int = 12):
+        return JSONResponse(markets.research.history(max(1, min(40, limit))))
 
     @app.get("/markets/watchlist/presets")
     async def m_watchlist_presets():

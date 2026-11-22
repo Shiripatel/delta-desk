@@ -17,6 +17,7 @@ from deltadesk.markets.council import Council, SyntheticBars, chart_bars
 from deltadesk.markets.fundamentals import YahooFundamentals
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.quotes import QuoteProvider, SyntheticQuotes
+from deltadesk.markets.research import Research
 from deltadesk.markets.track import TrackRecord
 from deltadesk.markets.watchlist import Watchlist, presets
 
@@ -34,6 +35,7 @@ class MarketsService:
             self.council.fundamentals = self.funda.council_summary
         self.assistant = DeskAssistant(self)
         self.agent = AgentChat(self)
+        self.research = Research(self, self.agent.llm)
         self._wl_stats: dict[str, tuple[float, dict]] = {}
         self.watchlist = watchlist or Watchlist()
         self.news = news or NewsService()

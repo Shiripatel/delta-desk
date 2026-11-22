@@ -1,12 +1,12 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-19 (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-21 (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
-uv run pytest -q                                   # 63 tests
+uv run pytest -q                                   # 66 tests
 tools\serve.cmd                                    # or: set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120 ; then http://127.0.0.1:8000/
 ```
 
@@ -51,7 +51,7 @@ Two things only the user can do, both unblockers:
 
 The user asked for less content and a very clean design before launch. Decisions:
 
-* **Nav is six links:** Home · Watchlist · Heatmap · News · Agents · Sniper. The same on every page and in the phone More sheet.
+* **Nav is seven links since 21 Nov:** Home · Watchlist · Heatmap · News · Agents · Research · Sniper. The same on every page and in the phone More sheet.
 * **Parked, not deleted:** IPO (fictional issues), Forex, Global and Investors (seed stakes). Their routes and APIs still work and carry
   the six-link nav, but nothing links to them. Each comes back with one nav line the day a real feed fills its data file.
 * **Home is five things:** one hero line with the three sentiment boxes, the radar with its picks and breadth, the top 10, the track
@@ -61,6 +61,33 @@ The user asked for less content and a very clean design before launch. Decisions
   `--header-h` left constant so the measurement cannot feed back), the tablet header keeps brand and status on row one and the nav on
   row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
   boxes and radar controls wrap. The design skill records the "less is the rule" principle.
+
+## Research teams (21 Nov 2026)
+
+The user liked how HKUDS/Vibe-Trading (MIT) does research and asked for a page that copies it. `/research` is a port of its swarm,
+not a paste (their stack is React and a Python agent runtime with its own data loaders): a preset names agents and tasks, tasks form a
+graph through `depends_on`, each round runs the tasks whose inputs are ready, every agent calls named tools and hands its report
+downstream. First preset, as theirs: **Investment Committee** (bull_advocate and bear_advocate in parallel → risk_officer →
+portfolio_manager), with their required-output sections per agent.
+
+* `deltadesk/markets/research.py`: `PRESETS`, `layers`, `Research` (start, get, history; runs on a thread, polled every 1.5 s),
+  seven tools on the desk's own read model (`get_market_data`, `technical_indicators`, `get_financial_statements`, `get_stock_news`,
+  `risk_metrics`: realised vol, 1-day 95 % historical VaR and CVaR, max drawdown from a year of daily closes, `peer_comparison`,
+  `council_vote`). Every number in the decision is rules: bull and bear points carry weights (high 2, medium 1); net ≥ +2 is long,
+  ≤ −2 avoid, else wait; stop distance is the larger of 5 % and a 10-session 95 % move; size cap makes a stop-out cost 1 %, capped
+  at 10 %; target is twice the stop. With a language-model key each agent's prose is written from its DATA block; the numbers do
+  not change. Finished runs persist to `data/research.json` (`DD_RESEARCH_STORE`), last 40.
+* Routes: `GET /research/presets`, `POST /research/run {query, preset}`, `GET /research/run/{id}`, `GET /research/runs`. Public; a
+  repeat for the same stock inside ten minutes reuses the run, at most three runs at once (429). Add the per-IP rate limit before a
+  paid key, as for the chats.
+* Page (`web/pages/research.html`), in the shape of their chat: one question, the composer, three example cards; then the team
+  card: title · status · n/4 agents · round, a round stepper, the decision as five numbers, their agent table (Agent, Status, Tool,
+  Time, Output), one closed fold per agent with its tool calls and report, and recent runs. Sentences live in tooltips.
+* Not ported: backtests, the other 29 presets, options pricing and hedges, file upload, streaming, DCF. A new preset is a `PRESETS`
+  entry plus a compose function per new agent. The decision is rules v0 with no track record; it must be scored walk-forward like
+  the AI score before it is called anything more (fits next-up item 1).
+* Nav is now seven links (Research sits between Agents and Sniper) on every page and in the phone More sheet.
+* Tests: `tests/test_research.py` (graph rounds, risk maths, a full run, persistence, routes). Live check on Yahoo: HDFCBANK in 4.6 s.
 
 ## Sniper rebuilt on the shape of the top agentic repos (19 Nov 2026)
 
@@ -84,6 +111,7 @@ harness replays a recorded stream (`WS_REPLAY`) through every handler with zero 
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
 | IPO | `/ipo`, `/ipo/<slug>` | list with summary chips (open, upcoming, closed, listed in gain / loss, avg listing gain), board filter, tabs Open / Upcoming / Closed / Listed / Performance / Tracked with Groww-style columns; performance tracker per year and board (issue price, listing day close, listing gain, current price, profit / loss, CSV export); detail page per issue: facts, six-step timeline, IPO agent (rules v0: demand, growth, valuation, issue structure, news), about, financials table + bars, strengths / risks, objectives, subscription by category, issue details, key ratios, people, wire mentions | fictional example issues flagged `example`; `data/ipo.json` in the documented schema replaces them; current price for real listings via quotes |
 | Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals via Yahoo when `DD_QUOTES=yahoo` |
+| Research | `/research` | research teams: one stock in, four agents (bull, bear, risk officer, portfolio manager) run as a task graph with visible tool calls and return one typed decision (long / wait / avoid, confidence, size cap, stop, target) and a report per agent | desk read model on Yahoo; rules v0, prose by a language model when a key is set |
 | Sniper | `/sniper` | dark trading terminal built as a **pipeline canvas** (left to right): a shelf of monitor agents (Volume RVOL, MA/VWAP, RSI, Trend, Options PCR, Levels) the user drags onto the desk or adds with +; each node is one line (name · ▲ long / ▼ short / · neutral · reading; the reason is the tooltip); curved edges coloured by vote flow into the **confluence gate** (`agree / n`, direction, vote bar, `needs k of n`, one word of status) and on to the **order card** (direction, structure, confidence, entry / stop / target on the index, legs, max loss, margin, Approve / Reject). Below: a lightweight-charts candle chart (1/3/5-min, VWAP, EMA 9/21, volume, PDH/PDL, the live order's lines and fill arrows), risk, positions, orders today, and a one-line log that opens on click. Config is `GET/POST /sniper/config` (persisted to `data/sniper.json`). `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`). | synthetic feed only so far; the Upstox feed is written but has never run on a real session |
 | Global | `/global` | dotted world map with the key indices placed by city, region tabs (World, United States, Europe, China & Hong Kong, Japan & Asia, India), index cards for the region, then index futures, commodities, forex, bonds and crypto cards; every card opens the analysis page | Yahoo quotes for all world keys |
 | Investors | `/investors` | cards for well-known investors (style, vehicle, since, holdings count, valued total, today's average move, top holdings with logos); open a card for the full holdings table (stake, market cap, value, LTP, today), row → analysis; sort by value, move or count | seed list with approximate stakes until a shareholding feed fills `data/investors.json` |

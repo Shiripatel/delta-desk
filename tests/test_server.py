@@ -19,6 +19,7 @@ def _client():
 
     d = Path(tempfile.mkdtemp())
     os.environ["DD_SNIPER_CFG"] = str(d / "sniper.json")      # the sniper desk config must not touch the repo's data/
+    os.environ["DD_RESEARCH_STORE"] = str(d / "research.json")
     s = Settings(feed="synthetic", cycle_seconds=30, _env_file=None)
     from deltadesk.markets.service import MarketsService
     from deltadesk.markets.watchlist import Watchlist as WL
@@ -89,10 +90,10 @@ def test_pages_and_assets():
         g = c.get("/markets/global").json()
         assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
         assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
-        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
+        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/research", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
             body = c.get(page).text
             nav = body[body.index('<nav class="nav">'):body.index("</nav>")]
-            for h in ("/", "/watchlist", "/heatmap", "/news", "/desk", "/sniper"):
+            for h in ("/", "/watchlist", "/heatmap", "/news", "/desk", "/research", "/sniper"):
                 assert 'href="' + h + '"' in nav, (page, h)
             for h in ("/ipo", "/forex", "/global", "/investors"):          # parked pages: reachable by URL, out of the nav
                 assert 'href="' + h + '"' not in nav, (page, h)
