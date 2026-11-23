@@ -72,7 +72,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 <section class="hero">
   <div class="left">
     <h1>LLM agents scan the index. <em>Buy zone</em>, hold, sell: today.</h1>
-    <p>Every stock scored 1 to 10 by a transparent rule. Not advice.</p>
+    <p>Rules model v0 · not advice</p>
   </div>
   <div>
     <div class="eyebrow">Market sentiment · <span id="zoneIdx">NIFTY 50</span> · today</div>
@@ -107,7 +107,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
 <section id="ranking">
   <div class="sec-head"><h2>top 10 · <span id="rkIdx">NIFTY 50</span></h2><span class="meta" id="aiMeta">—</span></div>
   <div class="tbl-wrap"><table class="ai">
-    <thead id="aiHead"><tr><th class="num">rank</th><th>company</th><th>sector</th><th class="num"><button data-k="win_rate">past win rate<br><small>10d · last 3M</small></button></th><th class="num"><button data-k="score" data-dir="desc">AI score</button></th><th class="num"><button data-k="forecast_3m">forecast 3M</button></th><th class="num"><button data-k="ret_3m">past 3M</button></th><th>chart · 3M</th><th class="num"><button data-k="risk">low risk</button></th><th class="num"><button data-k="weight">wt %</button></th></tr></thead>
+    <thead id="aiHead"><tr><th class="num">rank</th><th>company</th><th>sector</th><th class="num"><button data-k="win_rate" title="How often the called direction was right ten sessions later, over the last three months.">past win rate<br><small>10d · last 3M</small></button></th><th class="num"><button data-k="score" data-dir="desc" title="1 to 10 from momentum over 3 months, 1 month and 2 weeks, trend quality and drawdown. Rules model v0.">AI score</button></th><th class="num"><button data-k="forecast_3m" title="A momentum-continuation estimate to compare stocks, not a promise.">forecast 3M</button></th><th class="num"><button data-k="ret_3m">past 3M</button></th><th>chart · 3M</th><th class="num"><button data-k="risk" title="1 to 10 from volatility; 10 is the calmest.">low risk</button></th><th class="num"><button data-k="weight">wt %</button></th></tr></thead>
     <tbody id="aiBody"></tbody>
   </table></div>
   <button class="more" id="more">show all</button>
@@ -120,12 +120,6 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
     <tbody id="trBody"><tr><td colspan="6" class="muted">scoring every past bar…</td></tr></tbody>
   </table></div>
   <div class="track-line" id="trLine"></div>
-  <div class="note" id="trNote">Every past bar is scored the way it would be today, then compared with what the price did next. Nothing here is investment advice.</div>
-</section>
-
-<section>
-  <div class="sec-head"><h2>how the score works</h2><span class="meta">rules model v0 · <a href="/desk" style="text-decoration:underline">agent council</a> · <a href="/sniper" style="text-decoration:underline">F&amp;O sniper</a></span></div>
-  <div class="note" id="aiNote">AI score 1–10: momentum over 3 months, 1 month and 2 weeks, plus how clean the trend is, minus a penalty for deep drawdowns. Past win rate: how often the direction it called was right ten sessions later, over the last three months. Forecast 3M: a momentum-continuation estimate, a number to compare stocks, not a promise. Low risk 1–10 from volatility, 10 the calmest. The track record above is how the rule did on the past year. Nothing here is investment advice.</div>
 </section>
 
 </main>
@@ -147,7 +141,7 @@ h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent)
   var radar=DDAI.radar({svg:'rdSvg',box:'rdBox',tip:'rdTip',play:'rdPlay',scrub:'rdScrub',day:'rdDay',meta:'rdMeta',picks:'rdPicks',index:index,days:5,trails:true,
     onFrame:function(f,i,d){zones(f);$('#asof').textContent='as of '+(f.asof||'—')+(i===d.frames.length-1?' · latest session':' · replaying session '+(i+1)+' of '+d.frames.length)+' · history: '+d.source}});
   var rank=DDAI.ranking({head:'aiHead',body:'aiBody',meta:'aiMeta',index:index,limit:limit});
-  var track=DDAI.track({head:'trHead',body:'trBody',meta:'trMeta',note:'trNote',headline:'trLine',index:index});
+  var track=DDAI.track({head:'trHead',body:'trBody',meta:'trMeta',headline:'trLine',index:index});
   function loadAll(){$('#rkIdx').textContent=names[index];$('#trIdx').textContent=names[index];radar.load(index,mode);rank.load(index,limit,mode);track.load(index,mode);breadth()}
   $('#rdMode').addEventListener('click',function(e){var b=e.target.closest('button[data-mode]');if(!b)return;mode=b.dataset.mode;Array.prototype.forEach.call(document.querySelectorAll('#rdMode button'),function(x){x.setAttribute('aria-pressed',String(x===b))});loadAll()});
   $('#tabs').addEventListener('click',function(e){var b=e.target.closest('button[data-ix]');if(!b)return;index=b.dataset.ix;

@@ -18,9 +18,7 @@
   /* beta pill in the header, standard footer on every page */
   if(status&&!document.getElementById('betaLink')&&location.pathname!=='/beta'){var b=document.createElement('a');b.id='betaLink';b.href='/beta';b.className='beta';b.textContent='Join beta';status.insertBefore(b,status.firstChild)}
   var foot=document.querySelector('footer .wrap');
-  if(foot){var y=new Date().getFullYear();foot.className='wrap legal';foot.innerHTML='<div class="l1"><b>✢ Delta Desk</b> · beta · an agentic desk for Indian markets. Paper trading only. Nothing here is investment advice.</div>'+
-    '<div class="l2">Delta Desk is not a SEBI-registered investment adviser, research analyst or broker. Every score, verdict, forecast and impact call is the output of a transparent rules model (v0) for information and education only. Equity and F&amp;O trading carries risk of loss; a large majority of individual F&amp;O traders lose money. Quotes are delayed about 15 minutes unless marked live. Data: Yahoo Finance, TradingView, NSE Indices, public RSS feeds; logos belong to their owners.</div>'+
-    '<div class="l3"><span>© '+y+' Delta Desk. All rights reserved.</span><span><a href="/legal#disclaimer">Disclaimer</a><a href="/legal#risk">Risk disclosure</a><a href="/legal#terms">Terms</a><a href="/legal#privacy">Privacy</a><a href="/legal#data">Data sources</a><a href="/legal#contact">Contact</a><a href="/beta">Beta &amp; alerts</a></span></div>'}
+  if(foot){var y=new Date().getFullYear();foot.className='wrap legal';foot.innerHTML='<div class="l3"><span><b>✢ Delta Desk</b> · beta · paper trading only. Nothing here is investment advice. © '+y+'</span><span><a href="/legal">Legal</a><a href="/legal#risk">Risk</a><a href="/legal#data">Data</a><a href="/beta">Beta</a></span></div>'}
 })();
 
 /* Global search (Ctrl K or /), the mobile bottom bar and its More sheet. Injected on every page. */

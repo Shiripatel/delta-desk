@@ -60,7 +60,7 @@
 .spark{width:100%;height:70px;display:block}
 .spark path.l{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linejoin:round}
 .spark path.a{fill:var(--ink);opacity:.06}
-.legend{display:flex;flex-direction:column;gap:6px;font-size:11.5px;color:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:14px;font-size:11.5px;color:var(--ink-2)}
 .legend i{display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:8px;vertical-align:3px}
 .legend i.g{background:var(--good)}.legend i.r{background:var(--bad)}.legend i.n{background:var(--ink-3)}.legend i.w{height:7px;background:var(--line-2)}
 /* table */
@@ -68,13 +68,7 @@
 .ev{font-size:11px;color:var(--ink-3)}
 .wchip{display:inline-block;min-width:44px;height:6px;background:var(--fill-2);border-radius:1px;position:relative;vertical-align:middle;margin-right:6px}
 .wchip i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:1px}
-.how{display:grid;grid-template-columns:repeat(3,1fr)}
-.how div{padding:16px 20px;border-right:1px solid var(--line)}
-.how div:last-child{border-right:0}
-.how b{display:block;font:600 14px/1.2 var(--sans);margin-bottom:6px}
-.how b::before{content:"✢ ";color:var(--accent-deep)}
-.how span{font-size:12px;color:var(--ink-2)}
-@media (max-width:1000px){.ctl,.flowgrid{grid-template-columns:1fr}.flowgrid .left{border-right:0;border-bottom:1px solid var(--line)}.how{grid-template-columns:1fr}}
+@media (max-width:1000px){.ctl,.flowgrid{grid-template-columns:1fr}.flowgrid .left{border-right:0;border-bottom:1px solid var(--line)}}
 </style>
 </head>
 <body>
@@ -90,7 +84,7 @@
 <div class="ticker" id="ticker"><span class="src">loading indices…</span></div>
 
 <section>
-  <div class="sec-head"><h2>agent council · <span id="symName">—</span></h2><span class="meta">ten agents read one stock at one horizon and feed a verdict · <a href="/sniper" style="text-decoration:underline">F&amp;O sniper desk</a></span></div>
+  <div class="sec-head"><h2>agent council · <span id="symName">—</span></h2><span class="meta">10 agents · rules model v0</span></div>
   <div class="ctl">
     <div class="search"><input id="q" placeholder="stock · type to search, e.g. HDFCBANK, Reliance, Titan" autocomplete="off"><div class="sug" id="sug"></div></div>
     <div class="hz" id="hz"></div>
@@ -110,10 +104,7 @@
       <div id="chg" class="muted">—</div>
       <svg class="spark" id="spark" viewBox="0 0 300 70" role="img" aria-label="price path over the selected window"></svg>
       <div class="muted" id="barsMeta" style="font-size:11px">—</div>
-      <div class="block"><h3>reading the picture</h3>
-        <div class="legend"><span><i class="g"></i>agent votes up</span><span><i class="r"></i>agent votes down</span><span><i class="n"></i>neutral or unsure</span><span><i class="w"></i>line thickness = weight at this horizon</span><span>dashed box = agent has no data for this stock</span></div>
-      </div>
-      <div class="block"><h3>sources</h3><div id="sources" class="muted" style="font-size:11.5px">—</div></div>
+      <div class="legend"><span><i class="g"></i>up</span><span><i class="r"></i>down</span><span><i class="n"></i>neutral</span><span title="Line thickness is the agent's weight at this horizon. A dashed box means no data."><i class="w"></i>weight</span></div>
     </div>
   </div>
 </section>
@@ -124,17 +115,8 @@
     <thead><tr><th>agent</th><th>group</th><th>reading</th><th class="num">signal</th><th class="num">confidence</th><th class="num">weight</th><th>evidence</th></tr></thead>
     <tbody id="votes"></tbody>
   </table></div>
-  <div class="note" id="note">—</div>
 </section>
 
-<section>
-  <div class="sec-head"><h2>how the council works</h2><span class="meta">rules model v0</span></div>
-  <div class="how">
-    <div><b>Narrow agents</b><span>Each agent looks at one thing: trend, momentum, MACD, volume, volatility, levels, valuation, growth, quality, ownership. It returns a vote from −1 to +1, a confidence, and the numbers it saw.</span></div>
-    <div><b>Horizon sets the weights</b><span>At 15 minutes the technical agents carry 95 % of the vote. At 10 years the fundamental agents carry 85 %. Slide the horizon and watch the lines thicken and thin.</span></div>
-    <div><b>Verdict, not a black box</b><span>The verdict is the weighted vote. Every input is in the table below it, so a strange call can always be traced to the agent that made it.</span></div>
-  </div>
-</section>
 </main>
 
 <footer><div class="wrap"><div id="foot">Delta Desk · agents · rules model v0. Nothing here is investment advice.</div><div>DD.AGENTS.0S2</div></div></footer>
@@ -180,10 +162,9 @@
     $('#flow').innerHTML=s;
     var b=d.bars;$('#last').textContent=b.last!=null?fmt(b.last):'—';$('#chg').innerHTML=b.change_pct!=null?'<span class="'+cls(b.change_pct)+'">'+pct(b.change_pct)+'</span> over the window':'no bars';
     $('#barsMeta').textContent=b.n_bars+' bars · '+b.interval+' interval · range '+b.range+' · bars: '+d.sources.bars;spark(b.spark||[]);
-    $('#sources').innerHTML='bars: '+esc(d.sources.bars)+'<br>fundamentals: '+esc(d.sources.fundamentals);
     $('#votes').innerHTML=d.agents.map(function(a){var c=sigCls(a);var ev=Object.keys(a.evidence).map(function(k){return k+' '+a.evidence[k]}).join(' · ');
       return '<tr'+(a.available?'':' class="muted"')+'><td><b>'+esc(a.name)+'</b></td><td class="muted">'+esc(a.group)+'</td><td>'+esc(a.reading)+'</td><td class="num sig '+(c==='g'?'up':c==='r'?'dn':'')+'">'+(a.available?(a.signal>0?'+':'')+a.signal.toFixed(2):'—')+'</td><td class="num">'+(a.available?Math.round(a.confidence*100)+' %':'—')+'</td><td class="num"><span class="wchip"><i style="width:'+Math.round(a.horizon_weight*100*2.5)+'%"></i></span>'+Math.round(a.horizon_weight*100)+' %</td><td class="ev">'+esc(ev)+'</td></tr>'}).join('');
-    $('#tblMeta').textContent=d.agents.filter(function(a){return a.available}).length+' of '+d.agents.length+' agents have data · verdict '+v.stance+' '+(v.score>0?'+':'')+v.score.toFixed(2);$('#note').textContent=d.note;
+    $('#tblMeta').textContent=d.agents.filter(function(a){return a.available}).length+' of '+d.agents.length+' agents have data · verdict '+v.stance+' '+(v.score>0?'+':'')+v.score.toFixed(2);$('#tblMeta').title=d.note||'';
     location.hash='#'+d.symbol+'/'+d.horizon}
   function spark(pts){var el=$('#spark');if(!pts||pts.length<2){el.innerHTML='';return}var W=300,H=70,lo=Math.min.apply(null,pts),hi=Math.max.apply(null,pts),rg=hi-lo||1;
     var xy=pts.map(function(p,i){return [(i/(pts.length-1))*(W-2)+1,H-4-((p-lo)/rg)*(H-10)]});var d=xy.map(function(q,i){return (i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)}).join(' ');

@@ -178,11 +178,11 @@ tbody tr:hover td{background:var(--fill)}
 /* ---- beta pill + legal footer ---- */
 .status a.beta{padding:0 14px;background:var(--accent);color:#1E1E1E;border-radius:999px;font-weight:600;font-size:11.5px}
 .status a.beta:hover{background:var(--accent-deep);color:#fff}
-footer .wrap.legal{display:block;padding:20px 20px 26px;font-size:11px;color:var(--ink-3)}
+footer .wrap.legal{display:block;padding:14px 20px 16px;font-size:11px;color:var(--ink-3)}
 footer .legal .l1{font-size:12px;color:var(--ink-2);margin-bottom:8px}
 footer .legal .l1 b{color:var(--ink);font-weight:500}
 footer .legal .l2{max-width:110ch;line-height:1.55;margin-bottom:12px}
-footer .legal .l3{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+footer .legal .l3{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}footer .legal .l3 b{color:var(--ink-2);font-weight:500}
 footer .legal .l3 a{margin-left:14px;text-decoration:underline;text-underline-offset:2px}
 footer .legal .l3 a:hover{color:var(--ink)}
 

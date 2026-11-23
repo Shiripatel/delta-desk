@@ -1,6 +1,6 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-21 (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-22 (first cleanup pass: text cut on every nav page, one-line footer; Sniper kept, to be redesigned). 21 Nov: (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
@@ -61,6 +61,22 @@ The user asked for less content and a very clean design before launch. Decisions
   `--header-h` left constant so the measurement cannot feed back), the tablet header keeps brand and status on row one and the nav on
   row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
   boxes and radar controls wrap. The design skill records the "less is the rule" principle.
+
+## Text cut, first cleanup pass (22 Nov 2026)
+
+The user called the site text heavy, with duplicate and redundant content, and the Research page "not agentic AI based". They first
+asked to delete Sniper, then withdrew it: **Sniper stays and will be redesigned** (not touched this session).
+
+Cut, with the sentences moved to tooltips: the footer is one line on every page (the legal paragraph lives only on `/legal`); Home
+lost "how the score works" and the track-record note (column tooltips carry them); Agents lost "how the council works", the note,
+"sources" and the long legend (one-line legend); News lost its bottom note and intro paragraphs; Heatmap its lead paragraph;
+Watchlist its welcome paragraph; Research its repeated card label. Visible words: Home 185 to 102, Agents 123 to 44.
+
+Open, waiting on the user (structural, not started): (a) four agent surfaces overlap: Agents council, Research committee, the
+Watchlist agent chat and the News "ask the desk" chat; proposal is one Research page that shows the council inside it, and one
+chat; (b) Research is rules v0 because no language-model key is set, and even with a key the model only writes prose; a real
+agentic version means the model picks tools and argues, which needs a key (Groq free tier) first; (c) the parked pages (IPO, IPO
+detail, Forex, Global, Investors: five files on sample data) can be deleted.
 
 ## Research teams (21 Nov 2026)
 

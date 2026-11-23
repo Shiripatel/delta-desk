@@ -129,7 +129,7 @@
       <div class="right"><a class="btn" id="openAn" href="/analysis">Open analysis →</a><button class="btn" id="cremove">Remove</button></div>
     </div>
     <div class="modes" id="modes" hidden><div class="pills"><button data-mode="fundamental" aria-pressed="true">Fundamental agent</button><button data-mode="technical">Technical agent</button></div><span class="model" id="model">model: —</span></div>
-    <div class="chat" id="chat"><div class="welcome"><b>Pick a stock on the left</b>The Fundamental agent reads the filings, ratios and peers; the Technical agent reads the chart, indicators and levels. Both answer from Delta Desk's own numbers for that stock.</div></div>
+    <div class="chat" id="chat"><div class="welcome"><b>Pick a stock</b></div></div>
     <div class="chips" id="chips" hidden></div>
     <div class="ask" id="ask" hidden><input id="ain" placeholder="Ask about this stock…" autocomplete="off"><button id="send">Send</button></div>
     <div class="cnote" id="cnote" hidden>Answers are generated from Delta Desk data for this stock. Not investment advice.</div>
@@ -204,7 +204,7 @@
   function select(key){sel=key;try{localStorage.setItem('dd.wl.sel',key)}catch(e){}renderList();renderCentre()}
   function renderCentre(){var r=rows().filter(function(x){return x.key===sel})[0];var on=!!r;
     ['chead','modes','chips','ask','cnote'].forEach(function(id){$('#'+id).hidden=!on});
-    if(!on){$('#chat').innerHTML='<div class="welcome"><b>Pick a stock on the left</b>The Fundamental agent reads the filings, ratios and peers; the Technical agent reads the chart, indicators and levels. Both answer from Delta Desk’s own numbers for that stock.</div>';return}
+    if(!on){$('#chat').innerHTML='<div class="welcome"><b>Pick a stock</b></div>';return}
     var q=r.quote||{},d=dec(r);$('#clogo').innerHTML=window.DDUI?window.DDUI.logo(r.key,r.name):'';$('#cname').textContent=r.name;$('#csub').textContent=r.key+(r.sector?' · '+r.sector:'')+' · '+r.kind;
     $('#cpx').innerHTML=(q.ltp!=null?fmt(q.ltp,d):'—')+'<small class="'+cls(q.change_pct||0)+'">'+pct(q.change_pct)+'</small>';$('#openAn').href='/analysis#'+encodeURIComponent(r.key)+'/3m/'+mode;
     $$('#modes button[data-mode]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.mode===mode))});

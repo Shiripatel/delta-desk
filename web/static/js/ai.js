@@ -101,11 +101,11 @@ window.DDAI=(function(){
       var rows=(data.zones||[]).map(function(z){return '<tr><td><i class="zdot '+band(z.hi)+'"></i>'+esc(z.label)+'</td><td class="num muted">'+fmt(z.n,0)+' · '+fmt(z.share,0)+' %</td>'+hs.map(function(h){return cell(z.h[String(h)],data.base[String(h)])}).join('')+'</tr>'});
       rows.push('<tr class="base"><td>every window · base rate</td><td class="num muted">'+fmt(data.windows||0,0)+'</td>'+hs.map(function(h){return cell(data.base[String(h)],null)}).join('')+'</tr>');
       body.innerHTML=rows.join('');
-      if(meta)meta.textContent=(data.stocks||0)+' stocks · '+(data.from||'—')+' to '+(data.to||'—')+' · '+(data.mode||'short')+' term · every bar scored as it would be today · history: '+data.source;
+      if(meta)meta.textContent=(data.stocks||0)+' stocks · '+(data.from||'—')+' to '+(data.to||'—')+' · '+(data.mode||'short')+' term';if(line)line.title=data.note||'';
       if(line)line.textContent=data.headline||'';
       if(note)note.textContent=data.note||'';
       if(o.onData)o.onData(data)}
-    function load(ix,md){if(ix!=null)index=ix;if(md!=null)mode=md;if(meta)meta.textContent='scoring every past bar… (first run fetches a year of history per symbol)';
+    function load(ix,md){if(ix!=null)index=ix;if(md!=null)mode=md;if(meta)meta.textContent='scoring…';
       return get('/markets/track?index='+encodeURIComponent(index)+'&mode='+mode).then(function(d){data=d;render()}).catch(function(e){if(meta)meta.textContent='failed: '+e;body.innerHTML='<tr><td colspan="6" class="muted">track record unavailable</td></tr>'})}
     return {load:load,refresh:render,data:function(){return data}};
   }

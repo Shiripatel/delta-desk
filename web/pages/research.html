@@ -140,7 +140,7 @@ td.tool{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--
   $('#ex').addEventListener('click',function(e){var b=e.target.closest('button[data-q]');if(b){$('#q').value=b.dataset.q;start(b.dataset.q)}});
   $('#past').addEventListener('click',function(e){var b=e.target.closest('button[data-id]');if(b)get('/research/run/'+b.dataset.id).then(show).catch(function(){})});
   get('/research/presets').then(function(p){$('#model').textContent=p.model;
-    $('#ex').innerHTML=p.examples.map(function(x){return '<button type="button" data-q="'+esc(x.query)+'" title="'+esc(x.desc)+'"><small>'+esc(x.category)+'</small><b>'+esc(x.title)+'</b></button>'}).join('')}).catch(function(){});
+    $('#ex').innerHTML=p.examples.map(function(x){return '<button type="button" data-q="'+esc(x.query)+'" title="'+esc(x.desc)+'"><b>'+esc(x.title)+'</b></button>'}).join('')}).catch(function(){});
   var id=(location.hash||'').slice(1);if(/^[a-f0-9]{12}$/.test(id))get('/research/run/'+id).then(show).catch(function(){});
   history();
   DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});
