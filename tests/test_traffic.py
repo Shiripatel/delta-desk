@@ -5,7 +5,7 @@ def test_traffic_log_and_summary(tmp_path):
     t = Traffic(tmp_path / "t.jsonl", salt="s")
     t.record("/", "1.2.3.4", "Mozilla/5.0 (iPhone)", "https://twitter.com/x")
     t.record("/", "1.2.3.4", "Mozilla/5.0 (iPhone)", "")
-    t.record("/ipo/meridian", "5.6.7.8", "Mozilla/5.0 (Windows)", "https://www.google.com/")
+    t.record("/research", "5.6.7.8", "Mozilla/5.0 (Windows)", "https://www.google.com/")
     t.record("/static/css/design.css", "5.6.7.8", "x", "")          # not a page: ignored
     t.record("/markets/ai", "5.6.7.8", "x", "")                      # api: ignored
     s = t.summary()

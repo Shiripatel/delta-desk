@@ -1,12 +1,12 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-22 (first cleanup pass: text cut on every nav page, one-line footer; Sniper kept, to be redesigned). 21 Nov: (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-22 (second pass: Agents merged into Research, IPO deleted, News chat removed, Research agentic behind a Groq key, Sniper on the site theme, six-link nav; first cleanup pass: text cut on every nav page, one-line footer; Sniper kept, to be redesigned). 21 Nov: (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
-uv run pytest -q                                   # 66 tests
+uv run pytest -q                                   # 64 tests
 tools\serve.cmd                                    # or: set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120 ; then http://127.0.0.1:8000/
 ```
 
@@ -51,8 +51,8 @@ Two things only the user can do, both unblockers:
 
 The user asked for less content and a very clean design before launch. Decisions:
 
-* **Nav is seven links since 21 Nov:** Home · Watchlist · Heatmap · News · Agents · Research · Sniper. The same on every page and in the phone More sheet.
-* **Parked, not deleted:** IPO (fictional issues), Forex, Global and Investors (seed stakes). Their routes and APIs still work and carry
+* **Nav is six links since 22 Nov:** Home · Watchlist · Heatmap · News · Research · Sniper. The same on every page and in the phone More sheet.
+* **Parked, not deleted:** Forex, Global and Investors (seed stakes); IPO was deleted on 22 Nov. Their routes and APIs still work and carry
   the six-link nav, but nothing links to them. Each comes back with one nav line the day a real feed fills its data file.
 * **Home is five things:** one hero line with the three sentiment boxes, the radar with its picks and breadth, the top 10, the track
   record, and one explanatory note. Gone: the eyebrow and paragraph, "biggest moves over the replay", the four-cell explainer.
@@ -61,6 +61,33 @@ The user asked for less content and a very clean design before launch. Decisions
   `--header-h` left constant so the measurement cannot feed back), the tablet header keeps brand and status on row one and the nav on
   row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
   boxes and radar controls wrap. The design skill records the "less is the rule" principle.
+
+## Merge, delete, real agents, one theme (22 Nov 2026, second pass)
+
+The user's calls, in order: keep Sniper; merge the overlapping agent screens and add Groq; delete the IPO page; one consistent
+theme and minimal pages.
+
+* **Nav is six links:** Home · Watchlist · Heatmap · News · Research · Sniper.
+* **Agents merged into Research.** `agents.html` is deleted, `/desk` redirects to `/research`. The council (ten rule agents,
+  horizon pills, one line per agent) is a closed fold under the agent reports on a run. `/research?q=SYMBOL` starts a run; the
+  analysis page and the News story panel link to it. `GET /markets/council` is unchanged.
+* **One chat.** The News "ask the desk" panel is gone; the Watchlist agent chat is the site's chat. `POST /chat` and
+  `DeskAssistant` stay API-only (no page uses them).
+* **IPO deleted:** both pages, `deltadesk/markets/ipo.py`, the three `/markets/ipo*` routes, the tests. Forex, Global and
+  Investors are still parked, not deleted.
+* **Research is agentic when a tool-calling model is configured** (`LLM.supports_tools`: Groq, OpenRouter, DeepSeek, OpenAI;
+  `LLM.chat_tools` with a wait-and-retry on 429). Each agent runs a loop (`Research._agentic`, at most six turns): the model
+  picks tools from all seven, reads the results and the upstream reports, writes its report and ends with a json judgement
+  (researchers: weighted points; risk officer: stance; portfolio manager: action and confidence). Desk rules stay as guard
+  rails in both modes: stop distance and size cap from volatility, target twice the stop, no long against an opposing risk
+  officer, confidence clamped to 5..95. A failed model call drops that one agent to rules and says so on its row
+  (`mode`, `note`). Each agent row shows an `AI` or `rules` tag. **Not yet run against a real model: no key is set on this
+  machine.** The user chose Groq; they add `GROQ_API_KEY=gsk_…` to `.env` (https://console.groq.com/keys) and restart. First
+  thing to check then: Groq's free-tier tokens-per-minute limit against four agents with tool results in context.
+* **Sniper wears the site theme** (it was the one always-dark page): the page-scoped dark tokens, square corners, teal bars
+  and mono numerals are gone; the chart reads its colours from the theme tokens and repaints on a theme switch. Layout and
+  mechanics are unchanged; the user still wants it redesigned.
+* Tests: 64 (IPO tests removed, `test_agentic_run_model_judges_rules_guard` added with a scripted fake model).
 
 ## Text cut, first cleanup pass (22 Nov 2026)
 
@@ -125,8 +152,6 @@ harness replays a recorded stream (`WS_REPLAY`) through every handler with zero 
 | Watchlist | `/watchlist` | Kite-style: narrow list on the left (symbol, LTP, day / week / month change, 52-week range bar, numbered list pager, search-to-add, presets, rename, delete) and the agent chat in the centre: pick a stock, choose Fundamental agent or Technical agent, ask; answers are grounded in the desk's own data for that stock, generated by a free language model when a key is set (Groq, Gemini, OpenRouter, Ollama) or composed by rules otherwise | stored server-side in `data/watchlist.json` (one list set for the whole site; edits are owner-only when `DD_OWNER_TOKEN` is set, until accounts) |
 | Heatmap | `/heatmap` | Finviz-style treemap: tiles sized by index weight, grouped by sector, coloured by day %, 1 month, 3 months or AI score; NIFTY 50 / 100 / NEXT 50 / BANK / FIN / MIDCAP SELECT / SENSEX; hover card, click → analysis; refreshes every 10 s | live quotes + ranking |
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
-| IPO | `/ipo`, `/ipo/<slug>` | list with summary chips (open, upcoming, closed, listed in gain / loss, avg listing gain), board filter, tabs Open / Upcoming / Closed / Listed / Performance / Tracked with Groww-style columns; performance tracker per year and board (issue price, listing day close, listing gain, current price, profit / loss, CSV export); detail page per issue: facts, six-step timeline, IPO agent (rules v0: demand, growth, valuation, issue structure, news), about, financials table + bars, strengths / risks, objectives, subscription by category, issue details, key ratios, people, wire mentions | fictional example issues flagged `example`; `data/ipo.json` in the documented schema replaces them; current price for real listings via quotes |
-| Agents | `/desk` | agent council: 10 agents (6 technical, 4 fundamental) vote on one stock at one horizon (15m → 10y); weights shift with horizon; flow picture + every vote in a table | Yahoo bars per horizon; fundamentals via Yahoo when `DD_QUOTES=yahoo` |
 | Research | `/research` | research teams: one stock in, four agents (bull, bear, risk officer, portfolio manager) run as a task graph with visible tool calls and return one typed decision (long / wait / avoid, confidence, size cap, stop, target) and a report per agent | desk read model on Yahoo; rules v0, prose by a language model when a key is set |
 | Sniper | `/sniper` | dark trading terminal built as a **pipeline canvas** (left to right): a shelf of monitor agents (Volume RVOL, MA/VWAP, RSI, Trend, Options PCR, Levels) the user drags onto the desk or adds with +; each node is one line (name · ▲ long / ▼ short / · neutral · reading; the reason is the tooltip); curved edges coloured by vote flow into the **confluence gate** (`agree / n`, direction, vote bar, `needs k of n`, one word of status) and on to the **order card** (direction, structure, confidence, entry / stop / target on the index, legs, max loss, margin, Approve / Reject). Below: a lightweight-charts candle chart (1/3/5-min, VWAP, EMA 9/21, volume, PDH/PDL, the live order's lines and fill arrows), risk, positions, orders today, and a one-line log that opens on click. Config is `GET/POST /sniper/config` (persisted to `data/sniper.json`). `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`). | synthetic feed only so far; the Upstox feed is written but has never run on a real session |
 | Global | `/global` | dotted world map with the key indices placed by city, region tabs (World, United States, Europe, China & Hong Kong, Japan & Asia, India), index cards for the region, then index futures, commodities, forex, bonds and crypto cards; every card opens the analysis page | Yahoo quotes for all world keys |

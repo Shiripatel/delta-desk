@@ -1,7 +1,7 @@
 """Research teams: the task graph, the risk maths, a full Investment Committee run and its routes (synthetic data, no network)."""
 import time
 
-from deltadesk.markets.llm import LLM
+from deltadesk.markets.llm import LLM, LLMError
 from deltadesk.markets.research import PRESETS, Research, layers, risk_numbers
 from deltadesk.markets.service import MarketsService
 from tests.test_server import _client
@@ -50,3 +50,38 @@ def test_research_routes():
             time.sleep(0.1)
         assert run["status"] == "completed" and run["decision"]["risk_stance"] in ("support", "conditional support", "oppose")
         assert c.get("/research/runs").json()[0]["id"] == run["id"] and c.get("/research/run/nope").status_code == 404
+
+
+class _FakeLLM:
+    """A scripted tool-calling model: each agent calls tools on its first turn and answers with its judgement on the next."""
+    provider, model, available, supports_tools = "fake", "m", True, True
+    PLAN = {"Bull-side": (["get_market_data", "nope"], '**Bull thesis bullets**\n- Price above average\n```json\n{"points": [{"text": "Momentum +9 %", "weight": 2}]}\n```'),  # noqa: E501
+            "Bear-side": (["risk_metrics"], '**Bear risk bullets**\n- Rich\n```json\n{"points": [{"text": "P/E 40", "weight": 1}]}\n```'),
+            "Chief Risk": (["peer_comparison"], '**Risk review conclusion**\n- Oppose\n```json\n{"stance": "oppose"}\n```'),
+            "Portfolio": None}
+
+    def label(self):
+        return "fake · m"
+
+    def chat(self, system, messages, max_tokens=700, temperature=0.2):
+        raise LLMError("fake 500: down")
+
+    def chat_tools(self, messages, tools, max_tokens=900, temperature=0.2, choice="auto"):
+        role = next(k for k in self.PLAN if k in messages[0]["content"])
+        if role == "Portfolio":
+            raise LLMError("fake 500: down")
+        names, final = self.PLAN[role]
+        if not any(m["role"] == "tool" for m in messages):
+            return {"content": None, "tool_calls": [{"id": f"c{i}", "function": {"name": n, "arguments": "{}"}} for i, n in enumerate(names)]}  # noqa: E501
+        return {"content": final, "tool_calls": []}
+
+
+def test_agentic_run_model_judges_rules_guard(tmp_path):
+    run = Research(MarketsService(), _FakeLLM(), tmp_path / "r.json").start("HDFCBANK", wait=True)
+    by = {a["id"]: a for a in run["agents"]}
+    assert run["status"] == "completed" and run["agentic"] and [by[k]["mode"] for k in by] == ["model", "model", "model", "rules"]
+    assert [s["tool"] for s in by["bull_advocate"]["steps"]] == ["get_market_data"]            # only what the model asked for
+    assert by["bull_advocate"]["output"] == "1 bull points · score 2" and "```" not in by["bull_advocate"]["report"]
+    assert by["risk_officer"]["output"].startswith("oppose · cap 0.0 %")                       # the model's stance, the desk's sizing
+    assert "rules used" in by["portfolio_manager"]["note"] and by["portfolio_manager"]["report"].startswith("**PM decision statement**")
+    assert run["decision"]["action"] == "avoid" and run["decision"]["size_pct"] == 0.0

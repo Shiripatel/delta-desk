@@ -51,15 +51,19 @@ td.tool{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--
 .rep .body p{margin:12px 0 4px}.rep .body ul{margin:0;padding-left:18px}.rep .body li{margin:0 0 3px}
 .calls{display:grid;grid-template-columns:auto auto 1fr;gap:4px 14px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--fill);font:400 11.5px var(--mono);color:var(--ink-2)}
 .calls .ms{text-align:right;color:var(--ink-3)}.calls .bad{color:var(--bad)}
+.votes{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px 16px;margin-top:12px;font-size:12.5px;align-items:baseline}
+.votes b{font-weight:600}.votes .rd{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.votes .w{color:var(--ink-3);font-size:11.5px}
+.mode{margin-left:6px;padding:1px 6px;border:1px solid var(--line-2);border-radius:999px;font:400 10.5px var(--sans);color:var(--ink-3)}
+.mode.model{color:var(--s1);border-color:var(--s1)}
 .past{display:flex;gap:8px;flex-wrap:wrap;padding:12px 20px}
 .past button{display:inline-flex;gap:8px;align-items:center}
-@media (max-width:760px){.hero{padding:22px 16px 16px}.hero h1{font-size:22px}.dec{grid-template-columns:repeat(2,1fr)}.dec div{border-bottom:1px solid var(--line)}.calls{grid-template-columns:1fr auto}.calls .pv{grid-column:1/-1;color:var(--ink-3)}.rep summary{flex-wrap:wrap}.rep summary span{margin-left:0;text-align:left}}
+@media (max-width:760px){.hero{padding:22px 16px 16px}.hero h1{font-size:22px}.dec{grid-template-columns:repeat(2,1fr)}.dec div{border-bottom:1px solid var(--line)}.calls{grid-template-columns:1fr auto}.calls .pv{grid-column:1/-1;color:var(--ink-3)}.votes{grid-template-columns:auto auto auto}.votes .rd{display:none}.rep summary{flex-wrap:wrap}.rep summary span{margin-left:0;text-align:left}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">RESEARCH</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/desk">Agents</a><a href="/research" aria-current="page">Research</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/research" aria-current="page">Research</a><a href="/sniper">Sniper</a></nav>
   <div class="status"><span class="clock num" id="clock">—</span></div>
 </div></header>
 
@@ -84,10 +88,14 @@ td.tool{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--
     <tbody id="agents"></tbody>
   </table></div>
   <div class="rep" id="rep"></div>
+  <div class="rep"><details id="council"><summary>Council<span id="cnSum">—</span></summary><div class="body">
+    <div class="pills" id="cnHz"></div>
+    <div class="votes" id="cnVotes"></div>
+  </div></details></div>
 </section>
 
 <section id="pastSec" hidden>
-  <div class="sec-head"><h2>Recent runs</h2><span class="meta" id="model" title="Every number in a decision is computed by rules; a language model, when a key is set, only writes the prose.">—</span></div>
+  <div class="sec-head"><h2>Recent runs</h2><span class="meta" id="model" title="With a language model each agent picks its tools and makes its own call; stop, size cap and target stay desk rules. Without one, rules do it all.">—</span></div>
   <div class="past" id="past"></div>
 </section>
 </main>
@@ -115,22 +123,31 @@ td.tool{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--
 
   function render(){var r=run;if(!r)return;$('#run').hidden=false;
     $('#rTitle').innerHTML=esc(r.title)+' · <a href="/analysis#'+encodeURIComponent(r.target)+'/3m/fundamental" style="text-decoration:underline">'+esc(r.target)+'</a> · '+esc(r.name);
-    $('#rMeta').textContent=r.status+' · '+r.done+'/'+r.agents.length+' agents · round '+Math.max(1,r.round)+' of '+r.rounds+' · '+secs(r.elapsed_s)+(r.error?' · '+r.error:'');
+    $('#rMeta').textContent=(r.model||'')+' · '+r.status+' · '+r.done+'/'+r.agents.length+' agents · round '+Math.max(1,r.round)+' of '+r.rounds+' · '+secs(r.elapsed_s)+(r.error?' · '+r.error:'');
     var s='';for(var i=1;i<=r.rounds;i++){s+='<i class="'+(r.status==='completed'||i<r.round?'on':i===r.round?'now':'')+'"></i>'}$('#steps').innerHTML=s;
     var d=r.decision;$('#dec').hidden=!d;
     if(d){$('#dec').innerHTML='<div title="Bull score '+d.bull_score+' against bear score '+d.bear_score+'. A long needs +2 or better."><small>Decision</small><b class="'+esc(d.action)+'">'+esc(d.action)+'</b></div>'+
-      '<div title="Rules v0, not calibrated against outcomes yet."><small>Confidence</small><b class="num">'+d.confidence+' %</b></div>'+
-      '<div title="Sized so a stop-out costs about 1 % of the portfolio, capped at 10 %."><small>Size cap</small><b class="num">'+Number(d.size_pct).toFixed(1)+' %</b></div>'+
-      '<div title="The larger of 5 % and a 10-session 95 % move."><small>Stop</small><b class="num">'+sign(d.stop_pct)+' %</b></div>'+
+      '<div title="Not calibrated against outcomes yet."><small>Confidence</small><b class="num">'+d.confidence+' %</b></div>'+
+      '<div title="A desk rule: sized so a stop-out costs about 1 % of the portfolio, capped at 10 %."><small>Size cap</small><b class="num">'+Number(d.size_pct).toFixed(1)+' %</b></div>'+
+      '<div title="A desk rule: the larger of 5 % and a 10-session 95 % move."><small>Stop</small><b class="num">'+sign(d.stop_pct)+' %</b></div>'+
       '<div title="Twice the stop distance, over '+esc(d.horizon)+'."><small>Target</small><b class="num">'+sign(d.target_pct)+' %</b></div>'}
-    $('#agents').innerHTML=r.agents.map(function(a){return '<tr title="'+esc(TIP[a.id]||'')+'"><td><b>'+esc(a.id)+'</b><span class="role">'+esc(a.role)+'</span></td><td><span class="st '+esc(a.status)+'">'+esc(a.status)+'</span></td><td class="tool">'+esc(a.tool||(a.steps.length?a.steps.length+' calls':'—'))+'</td><td class="num">'+secs(a.elapsed_s)+'</td><td class="out'+(a.error?' dn':'')+'" title="'+esc(a.output)+'">'+esc(a.output||'—')+'</td></tr>'}).join('');
+    $('#agents').innerHTML=r.agents.map(function(a){return '<tr title="'+esc(TIP[a.id]||'')+'"><td><b>'+esc(a.id)+'</b>'+(a.mode?'<span class="mode '+esc(a.mode)+'" title="'+esc(a.note||(a.mode==='model'?'The language model chose the tools and made this call.':'Composed by fixed rules.'))+'">'+(a.mode==='model'?'AI':'rules')+'</span>':'')+'<span class="role">'+esc(a.role)+'</span></td><td><span class="st '+esc(a.status)+'">'+esc(a.status)+'</span></td><td class="tool">'+esc(a.tool||(a.steps.length?a.steps.length+' calls':'—'))+'</td><td class="num">'+secs(a.elapsed_s)+'</td><td class="out'+(a.error?' dn':'')+'" title="'+esc(a.output)+'">'+esc(a.output||'—')+'</td></tr>'}).join('');
     var order=r.agents.slice().reverse();
     $('#rep').innerHTML=order.filter(function(a){return a.report||a.steps.length}).map(function(a,i){var open=!!openSet[a.id];
       return '<details data-a="'+esc(a.id)+'"'+(open?' open':'')+'><summary>'+esc(a.role)+'<span>'+esc(a.output)+'</span></summary><div class="body"><div class="calls">'+a.steps.map(function(t){return '<span'+(t.status==='error'?' class="bad"':'')+'>'+esc(t.tool)+'</span><span class="ms">'+(t.elapsed_ms==null?'…':t.elapsed_ms+' ms')+'</span><span class="pv">'+esc(t.preview)+'</span>'}).join('')+'</div>'+md(a.report)+'</div></details>'}).join('')}
   $('#rep').addEventListener('toggle',function(e){var d=e.target;if(d.dataset&&d.dataset.a)openSet[d.dataset.a]=d.open},true);
 
+  var HZ=[['15m','15m'],['1h','1h'],['1d','1d'],['1w','1w'],['1mo','1m'],['3mo','3m'],['1y','1y'],['3y','3y'],['10y','10y']],cn={sym:'',hz:'3mo'};
+  function council(sym,hz){if(sym===cn.sym&&hz===cn.hz)return;cn.sym=sym;cn.hz=hz;
+    $('#cnHz').innerHTML=HZ.map(function(h){return '<button type="button" data-h="'+h[0]+'" aria-pressed="'+(h[0]===hz)+'">'+h[1]+'</button>'}).join('');$('#cnSum').textContent='…';
+    get('/markets/council?symbol='+encodeURIComponent(sym)+'&horizon='+hz).then(function(d){if(d.symbol!==cn.sym||d.horizon!==cn.hz)return;var v=d.verdict;
+      $('#cnSum').innerHTML='<b class="'+(v.stance==='buy'?'up':v.stance==='sell'?'dn':'')+'">'+esc(v.stance)+' '+sign(v.score,2)+'</b> · 10 rule agents · '+esc(d.horizon_label);$('#cnSum').title=d.note||'';
+      $('#cnVotes').innerHTML=d.agents.map(function(a){var ev=Object.keys(a.evidence||{}).map(function(k){return k+' '+a.evidence[k]}).join(' · ');
+        return '<b title="'+esc(a.group)+'">'+esc(a.name)+'</b><span class="rd" title="'+esc(ev)+'">'+esc(a.reading)+'</span><span class="num '+(!a.available?'muted':a.signal>0.1?'up':a.signal<-0.1?'dn':'')+'">'+(a.available?sign(a.signal,2):'—')+'</span><span class="num w" title="weight at this horizon">'+Math.round(a.horizon_weight*100)+' %</span>'}).join('')}).catch(function(){$('#cnSum').textContent='unavailable'})}
+  $('#cnHz').addEventListener('click',function(e){var b=e.target.closest('button[data-h]');if(b&&run)council(run.target,b.dataset.h)});
+
   function poll(){clearTimeout(timer);if(!run)return;get('/research/run/'+run.id).then(function(r){run=r;render();if(r.status==='running'||r.status==='pending'){timer=setTimeout(poll,1500)}else{history()}}).catch(function(){timer=setTimeout(poll,3000)})}
-  function show(r){run=r;openSet={};try{window.history.replaceState(null,'','#'+r.id)}catch(e){}render();poll()}
+  function show(r){run=r;openSet={};council(r.target,'3mo');try{window.history.replaceState(null,'','#'+r.id)}catch(e){}render();poll()}
   function start(query){query=(query||'').trim();if(!query||busy)return;busy=true;$('#go').disabled=true;$('#err').textContent='';
     post('/research/run',{query:query,preset:'investment_committee'}).then(show).catch(function(e){$('#err').textContent=String(e.message||e)}).then(function(){busy=false;$('#go').disabled=false})}
   function history(){get('/research/runs').then(function(rows){$('#pastSec').hidden=!rows.length;
@@ -141,6 +158,7 @@ td.tool{white-space:nowrap;font-family:var(--mono);font-size:11.5px;color:var(--
   $('#past').addEventListener('click',function(e){var b=e.target.closest('button[data-id]');if(b)get('/research/run/'+b.dataset.id).then(show).catch(function(){})});
   get('/research/presets').then(function(p){$('#model').textContent=p.model;
     $('#ex').innerHTML=p.examples.map(function(x){return '<button type="button" data-q="'+esc(x.query)+'" title="'+esc(x.desc)+'"><b>'+esc(x.title)+'</b></button>'}).join('')}).catch(function(){});
+  var q0=new URLSearchParams(location.search).get('q');if(q0){$('#q').value=q0;start(q0)}
   var id=(location.hash||'').slice(1);if(/^[a-f0-9]{12}$/.test(id))get('/research/run/'+id).then(show).catch(function(){});
   history();
   DD.ticker({endpoint:'/markets/indices',order:['NIFTY50','BANKNIFTY','FINNIFTY','SENSEX','INDIAVIX'],every:10000});

@@ -65,7 +65,7 @@ def test_pages_and_assets():
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
         chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
         assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
-        assert c.get("/ipo").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/js/nav.js").headers["cache-control"]
+        assert c.get("/news").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/js/nav.js").headers["cache-control"]
         import os as _os
         _os.environ["DD_ADMIN_TOKEN"] = "t0k"
         assert c.get("/admin/traffic").status_code == 401
@@ -90,12 +90,12 @@ def test_pages_and_assets():
         g = c.get("/markets/global").json()
         assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
         assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
-        for page in ("/", "/news", "/ipo", "/forex", "/desk", "/research", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
+        for page in ("/", "/news", "/forex", "/research", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
             body = c.get(page).text
             nav = body[body.index('<nav class="nav">'):body.index("</nav>")]
-            for h in ("/", "/watchlist", "/heatmap", "/news", "/desk", "/research", "/sniper"):
+            for h in ("/", "/watchlist", "/heatmap", "/news", "/research", "/sniper"):
                 assert 'href="' + h + '"' in nav, (page, h)
-            for h in ("/ipo", "/forex", "/global", "/investors"):          # parked pages: reachable by URL, out of the nav
+            for h in ("/desk", "/ipo", "/forex", "/global", "/investors"):   # merged, deleted or parked: out of the nav
                 assert 'href="' + h + '"' not in nav, (page, h)
         wl = c.get("/watchlist").text
         assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
@@ -115,20 +115,10 @@ def test_pages_and_assets():
         pl = c.post("/markets/watchlist/preset/BANKNIFTY").json()
         assert pl["loaded"] == "NIFTY BANK" and len(pl["lists"]["NIFTY BANK"]) > 5 and pl["max_symbols"] == 50
         assert c.post("/markets/watchlist/preset/NOPE").status_code == 409
-        ipo = c.get("/ipo").text
-        assert 'id="body"' in ipo and 'class="pills"' in ipo and 'id="perfBody"' in ipo
-        det = c.get("/ipo/meridian").text
-        assert 'id="timeline"' in det and 'id="agent"' in det and 'id="fin"' in det
-        lst = c.get("/markets/ipo").json()
-        assert lst["stats"]["open"] >= 0 and {"slug", "status", "min_investment"} <= set(lst["entries"][0])
-        d = c.get("/markets/ipo/" + lst["entries"][0]["slug"]).json()
-        assert d["agent"]["model"] == "rules v0" and len(d["agent"]["checks"]) == 5 and len(d["timeline"]) == 6
-        assert c.get("/markets/ipo/nope").status_code == 404
-        perf = c.get("/markets/ipo-performance").json()
-        assert perf["summary"]["count"] == len(perf["rows"]) and "avg_listing_gain" in perf["summary"]
+        assert c.get("/ipo").status_code == 404 and c.get("/markets/ipo").status_code == 404
         assert 'href="/markets"' not in home and "rdMovers" not in home and 'class="how"' not in home
-        desk = c.get("/desk").text
-        assert 'id="flow"' in desk and "/static/css/design.css" in desk and "wlPane" not in desk
+        desk = c.get("/desk", follow_redirects=False)
+        assert desk.status_code == 307 and desk.headers["location"] == "/research"
         sn = c.get("/sniper").text
         assert 'id="shelf"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="edges"' in sn
         cfg = c.get("/sniper/config").json()

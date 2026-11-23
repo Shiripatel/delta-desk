@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -33,6 +34,7 @@ class LLMError(RuntimeError):
 class LLM:
     def __init__(self, provider: str | None = None, timeout: float = 45.0) -> None:
         self.timeout = timeout
+        self.retry_wait = 8.0   # seconds before the first retry after a rate limit
         want = (provider or os.environ.get("DD_LLM") or "auto").lower()
         self.provider, self.model = self._pick(want)
 
@@ -83,6 +85,35 @@ class LLM:
             return out["choices"][0]["message"]["content"]
         except (KeyError, IndexError) as exc:
             raise LLMError(f"{self.provider}: unexpected reply {str(out)[:200]}") from exc
+
+    @property
+    def supports_tools(self) -> bool:
+        """Tool calling goes through the OpenAI-style providers (Groq, OpenRouter, DeepSeek, OpenAI)."""
+        return self.provider in OPENAI_STYLE
+
+    def chat_tools(self, messages: list[dict], tools: list[dict], max_tokens: int = 900, temperature: float = 0.2, choice: str = "auto") -> dict:  # noqa: E501
+        """One step of a tool-calling loop. messages is the full OpenAI-style list (system first). Returns the assistant
+        message: {"content": str | None, "tool_calls": [{"id", "function": {"name", "arguments"}}]}. A rate limit is waited out."""
+        if not self.supports_tools:
+            raise LLMError("provider has no tool calling")
+        url, env_key = OPENAI_STYLE[self.provider]
+        body = {"model": self.model, "temperature": temperature, "max_tokens": max_tokens, "messages": messages}
+        if tools:
+            body.update({"tools": tools, "tool_choice": choice})
+        extra = {"Authorization": f"Bearer {os.environ.get(env_key, '')}"}
+        for attempt in range(3):
+            try:
+                out = self._post(url, body, extra)
+                break
+            except LLMError as exc:
+                if " 429" not in str(exc) or attempt == 2:
+                    raise
+                time.sleep(self.retry_wait * (attempt + 1))
+        try:
+            msg = out["choices"][0]["message"]
+        except (KeyError, IndexError) as exc:
+            raise LLMError(f"{self.provider}: unexpected reply {str(out)[:200]}") from exc
+        return {"content": msg.get("content"), "tool_calls": msg.get("tool_calls") or []}
 
     def _gemini(self, system: str, messages: list[dict], max_tokens: int, temperature: float) -> str:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={os.environ.get('GEMINI_API_KEY', '')}"  # noqa: E501

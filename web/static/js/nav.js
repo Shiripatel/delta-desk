@@ -55,7 +55,7 @@
     bar.innerHTML='<a href="/"'+cur('/')+'>'+ICON.home+'Home</a><a href="/watchlist"'+cur('/watchlist')+'>'+ICON.star+'Watchlist</a><button type="button" id="ddBottomSearch">'+ICON.search+'Search</button><a href="/news"'+cur('/news')+'>'+ICON.news+'News</a><button type="button" id="ddMore">'+ICON.more+'More</button>';
     document.body.appendChild(bar);bar.querySelector('#ddBottomSearch').addEventListener('click',open);
     var bg=document.createElement('div');bg.className='sheet-bg';var sh=document.createElement('div');sh.className='sheet';sh.setAttribute('role','menu');
-    sh.innerHTML=[['/heatmap','Heatmap'],['/desk','Agents'],['/research','Research'],['/sniper','Sniper'],['/beta','Beta & alerts'],['/legal','Legal']].map(function(x){return '<a href="'+x[0]+'"'+cur(x[0])+'>'+x[1]+'</a>'}).join('');
+    sh.innerHTML=[['/heatmap','Heatmap'],['/research','Research'],['/sniper','Sniper'],['/beta','Beta & alerts'],['/legal','Legal']].map(function(x){return '<a href="'+x[0]+'"'+cur(x[0])+'>'+x[1]+'</a>'}).join('');
     document.body.appendChild(bg);document.body.appendChild(sh);
     function toggle(on){sh.classList.toggle('open',on);bg.classList.toggle('open',on)}
     bar.querySelector('#ddMore').addEventListener('click',function(){toggle(!sh.classList.contains('open'))});bg.addEventListener('click',function(){toggle(false)})}

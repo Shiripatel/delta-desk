@@ -11,28 +11,23 @@
 <script>try{var t=localStorage.getItem('dd.theme');if(t==='dark')t='ink';if(t==='paper'||t==='midnight')t='mist';if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="stylesheet" href="/static/css/design.css">
 <style>
-/* The trading terminal is always dark, whatever the site theme: sharp edges, teal title bars, dense numbers. */
-body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;--line:#1b2531;--line-2:#28374a;--fill:#121a23;--fill-2:#182331;--thead:#0f2a30;
-  --good:#1fc46a;--bad:#ff4d4d;--warn:#f5b301;--s1:#3aa9ff;--s2:#ff8a3d;--accent:#2dd4bf;--accent-deep:#14b8a6;--teal:#0e7079;--teal-2:#0a5058;--teal-ink:#e9fdff;
-  background:var(--bg);color:var(--ink)}
-.card,.btn,.pill,.tbl-wrap,.toast{border-radius:0}
+/* The terminal wears the site theme; --teal names are kept as aliases for the title bars. */
+body{--teal:var(--thead);--teal-2:var(--fill-2);--teal-ink:var(--ink)}
 .wrap{border-inline-color:var(--line)}
-.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.tbar{display:flex;align-items:center;border-bottom:1px solid var(--line);background:#0c1218;font-size:11px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
+.tbar{display:flex;align-items:center;border-bottom:1px solid var(--line);background:var(--fill);font-size:11px;color:var(--ink-2);overflow-x:auto;scrollbar-width:none}
 .tbar > span{padding:7px 12px;border-right:1px solid var(--line);white-space:nowrap}
-.tbar .t1{font:600 11px var(--sans);letter-spacing:.1em;color:var(--teal-ink);background:var(--teal)}
+.tbar .t1{font:600 12px var(--sans);color:var(--teal-ink);background:var(--teal)}
 .tbar b{color:var(--ink);font-weight:500}
 .tbar .note{margin-left:auto;border-right:0;border-left:1px solid var(--line);color:var(--ink-3)}
 .tbar .live b{color:var(--good)}.tbar .off b{color:var(--warn)}
-.status select{display:none}
 .panel{background:var(--card);border:1px solid var(--line-2);min-width:0}
-.phd{display:flex;align-items:center;gap:10px;padding:5px 10px;background:var(--teal);color:var(--teal-ink);font:600 10.5px/1.2 var(--sans);letter-spacing:.1em;text-transform:uppercase}
-.phd .r{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;color:#bfeef2;font-family:var(--mono);font-size:10.5px}
+.phd{display:flex;align-items:center;gap:10px;padding:5px 10px;background:var(--teal);color:var(--teal-ink);font:600 12.5px/1.3 var(--sans);border-bottom:1px solid var(--line-2)}
+.phd .r{margin-left:auto;font-weight:400;letter-spacing:.02em;text-transform:none;color:var(--ink-2);font-family:var(--mono);font-size:10.5px}
 .page{padding:8px 8px 20px;display:grid;gap:8px}
 .ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:0 0 16px}
 /* desk: palette + canvas */
 .desk{display:grid;grid-template-columns:210px 1fr}
-.shelf{border-right:1px solid var(--line-2);background:#0c1218}
+.shelf{border-right:1px solid var(--line-2);background:var(--fill)}
 .shelf .hint{padding:6px 10px;font:600 10px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line)}
 .pit{display:grid;grid-template-columns:16px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);cursor:grab;color:var(--ink-2);user-select:none}
 .pit:hover{background:var(--fill)}
@@ -55,7 +50,7 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 #edges.flow path.v1,#edges.flow path.vm1,#edges.flow path.gate{stroke-dasharray:6 5;animation:dash .7s linear infinite}
 @keyframes dash{to{stroke-dashoffset:-22}}
 .col{display:grid;gap:10px;min-width:0;position:relative;z-index:1}
-.node{background:#0c1218;border:1px solid var(--line-2);min-width:0;position:relative}
+.node{background:var(--fill);border:1px solid var(--line-2);min-width:0;position:relative}
 .node .nh{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--line);font:600 11px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
 .node .nh .x{margin-left:auto;background:none;border:0;color:var(--ink-3);cursor:pointer;font-size:13px;line-height:1;padding:0 2px}
 .node .nh .x:hover{color:var(--bad)}
@@ -101,7 +96,7 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .ord .meta b{color:var(--ink-2);font-weight:500}
 .act{display:flex;gap:6px;margin-top:10px}
 .act .btn{flex:1;padding:8px 10px;font:600 11px var(--sans);letter-spacing:.08em;text-transform:uppercase}
-.act .go{background:var(--good);border-color:var(--good);color:#04130a}
+.act .go{background:var(--good);border-color:var(--good);color:#fff}
 .act .no{border-color:var(--bad);color:var(--bad)}
 .act .no:hover{background:var(--bad);color:#fff}
 .pnl.up{color:var(--good)}.pnl.dn{color:var(--bad)}
@@ -114,10 +109,10 @@ body{--bg:#0a0e13;--card:#0f151c;--ink:#e6ecf2;--ink-2:#a6b2c0;--ink-3:#6b7887;-
 .legend{display:flex;gap:14px;flex-wrap:wrap;padding:5px 10px;border-top:1px solid var(--line);font:400 10.5px var(--mono);color:var(--ink-3)}
 .legend i{display:inline-block;width:10px;height:2px;vertical-align:middle;margin-right:5px}
 .tfs{display:flex;margin-left:auto}
-.tfs button{background:none;border:0;border-left:1px solid #2a6b72;color:#bfeef2;font:500 10.5px var(--mono);padding:0 8px;height:18px;cursor:pointer}
+.tfs button{background:none;border:0;border-left:1px solid var(--line-2);color:var(--ink-2);font:500 10.5px var(--mono);padding:0 8px;height:18px;cursor:pointer}
 .tfs button[aria-pressed="true"]{background:var(--teal-2);color:var(--teal-ink)}
 table.dense{font-size:11px}
-table.dense th{padding:5px 8px;font:600 9.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#bfeef2;background:var(--thead);border-bottom:1px solid var(--line-2)}
+table.dense th{padding:5px 8px;font:600 9.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);background:var(--thead);border-bottom:1px solid var(--line-2)}
 table.dense td{padding:4px 8px;border-bottom:1px solid var(--line);font-family:var(--sans)}
 table.dense td.num{font-family:var(--mono)}
 .risk{display:grid;grid-template-columns:1fr 1fr}
@@ -134,11 +129,11 @@ table.dense td.num{font-family:var(--mono)}
 /* log */
 .logp .phd{cursor:pointer}
 .logp .stream{display:none}.logp.open .stream{display:block}
-.logp .last{font-weight:400;letter-spacing:0;text-transform:none;color:#bfeef2;font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
+.logp .last{font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink-2);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw}
 .stream{height:150px;overflow:auto;font:400 11px/1.45 var(--mono)}
 .stream div{display:grid;grid-template-columns:62px 72px 1fr;gap:10px;padding:2px 10px;border-bottom:1px solid var(--line)}
 .stream .t{color:var(--ink-3)}.stream .a{font-weight:500;color:var(--ink-2)}
-.stream .a.volume{color:var(--s1)}.stream .a.ma_vwap{color:#c084fc}.stream .a.rsi{color:#67e8f9}.stream .a.trend{color:#f0abfc}.stream .a.options{color:#a3e635}.stream .a.levels{color:#fb923c}.stream .a.confluence{color:var(--accent)}.stream .a.risk{color:var(--bad)}.stream .a.exec{color:var(--good)}.stream .a.sniper{color:var(--warn)}
+.stream .a.volume{color:var(--s1)}.stream .a.ma_vwap{color:var(--s2)}.stream .a.rsi{color:var(--ink-2)}.stream .a.trend{color:var(--ink-2)}.stream .a.options{color:var(--ink-2)}.stream .a.levels{color:var(--ink-2)}.stream .a.confluence{color:var(--accent)}.stream .a.risk{color:var(--bad)}.stream .a.exec{color:var(--good)}.stream .a.sniper{color:var(--warn)}
 .stream .hot{color:var(--ink)}
 .kill{border:1px solid var(--bad);color:var(--bad)}
 @media (max-width:1100px){.row2{grid-template-columns:1fr}.flow{grid-template-columns:1fr 60px 1fr 60px 1fr}}
@@ -148,7 +143,7 @@ table.dense td.num{font-family:var(--mono)}
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b></div>
-  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/desk">Agents</a><a href="/research">Research</a><a href="/sniper" aria-current="page">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/research">Research</a><a href="/sniper" aria-current="page">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
     <button class="kill" id="kill" title="Flatten every position and disarm all zones">✕ kill switch</button>
@@ -191,7 +186,7 @@ table.dense td.num{font-family:var(--mono)}
     <div>
       <section class="panel"><div class="phd">Chart · <span id="chartTf">3-min</span><span class="r" id="chartMeta">—</span><div class="tfs" id="tfs"><button data-tf="1">1m</button><button data-tf="3" aria-pressed="true">3m</button><button data-tf="5">5m</button></div></div>
         <div class="chartbox" id="chart"><div class="nolw" id="nolw">Waiting for bars…</div></div>
-        <div class="legend"><span><i style="background:#f5b301"></i>VWAP</span><span><i style="background:#3aa9ff"></i>EMA 9</span><span><i style="background:#c084fc"></i>EMA 21</span><span><i style="background:#e6ecf2"></i>entry</span><span><i style="background:#ff4d4d"></i>stop</span><span><i style="background:#1fc46a"></i>target</span><span><i style="background:#6b7887"></i>PDH / PDL</span><span>▲▼ fills</span></div>
+        <div class="legend"><span><i style="background:var(--warn)"></i>VWAP</span><span><i style="background:var(--s1)"></i>EMA 9</span><span><i style="background:var(--s2)"></i>EMA 21</span><span><i style="background:var(--ink)"></i>entry</span><span><i style="background:var(--bad)"></i>stop</span><span><i style="background:var(--good)"></i>target</span><span><i style="background:var(--ink-3)"></i>PDH / PDL</span><span>▲▼ fills</span></div>
       </section>
       <section class="panel logp" id="logp"><div class="phd" id="logHd" title="every vote change, gate state and order, in the agents' own words · click to open">Log<span class="last" id="logLast"></span><span class="r"><span id="logCount">0</span></span></div><div class="stream" id="stream"></div></section>
     </div>
@@ -330,12 +325,16 @@ table.dense td.num{font-family:var(--mono)}
   function emaSeries(bars,p){var k=2/(p+1),e=null;return bars.map(function(b){e=e==null?b.close:b.close*k+e*(1-k);return {time:b.time,value:e}})}
   function vwapSeries(bars1m,m){var num=0,den=0,n=0,out={};bars1m.forEach(function(b){var tp=(b.high+b.low+b.close)/3,v=b.volume||0;num+=tp*v;den+=v;n++;var slot=Math.floor(new Date(b.ts).getTime()/60000/m)*m*60+19800;out[slot]=den>0?num/den:null});
     return Object.keys(out).map(function(k){return {time:+k,value:out[k]}}).filter(function(x){return x.value!=null}).sort(function(a,b){return a.time-b.time})}
+  var TC={};function tcol(){var cs=getComputedStyle(document.body);['card','ink','ink-3','line','line-2','good','bad','warn','s1','s2','accent-deep'].forEach(function(k){TC[k]=cs.getPropertyValue('--'+k).trim()||'#888'})}
+  function paint(){tcol();if(!chart)return;chart.applyOptions({layout:{background:{type:'solid',color:TC.card},textColor:TC['ink-3']},grid:{vertLines:{color:TC.line},horzLines:{color:TC.line}},rightPriceScale:{borderColor:TC['line-2']},timeScale:{borderColor:TC['line-2']}});
+    candles.applyOptions({upColor:TC.good,downColor:TC.bad,wickUpColor:TC.good,wickDownColor:TC.bad});vwapS.applyOptions({color:TC.warn});e9S.applyOptions({color:TC.s1});e21S.applyOptions({color:TC.s2})}
+  tcol();new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
   function build(){if(built||!LW)return;built=true;$('#nolw').remove();
-    chart=LW.createChart($('#chart'),{autoSize:true,layout:{background:{type:'solid',color:'#0f151c'},textColor:'#6b7887',fontFamily:'JetBrains Mono, ui-monospace, monospace',fontSize:10},grid:{vertLines:{color:'#141c26'},horzLines:{color:'#141c26'}},rightPriceScale:{borderColor:'#28374a'},timeScale:{borderColor:'#28374a',timeVisible:true,secondsVisible:false,rightOffset:4},crosshair:{mode:0}});
-    candles=chart.addCandlestickSeries({upColor:'#1fc46a',downColor:'#ff4d4d',borderVisible:false,wickUpColor:'#1fc46a',wickDownColor:'#ff4d4d',priceLineVisible:true,lastValueVisible:true});
-    vwapS=chart.addLineSeries({color:'#f5b301',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-    e9S=chart.addLineSeries({color:'#3aa9ff',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-    e21S=chart.addLineSeries({color:'#c084fc',lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    chart=LW.createChart($('#chart'),{autoSize:true,layout:{background:{type:'solid',color:TC.card},textColor:TC['ink-3'],fontSize:10},grid:{vertLines:{color:TC.line},horzLines:{color:TC.line}},rightPriceScale:{borderColor:TC['line-2']},timeScale:{borderColor:TC['line-2'],timeVisible:true,secondsVisible:false,rightOffset:4},crosshair:{mode:0}});
+    candles=chart.addCandlestickSeries({upColor:TC.good,downColor:TC.bad,borderVisible:false,wickUpColor:TC.good,wickDownColor:TC.bad,priceLineVisible:true,lastValueVisible:true});
+    vwapS=chart.addLineSeries({color:TC.warn,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    e9S=chart.addLineSeries({color:TC.s1,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    e21S=chart.addLineSeries({color:TC.s2,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
     volS=chart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'vol',priceLineVisible:false,lastValueVisible:false});chart.priceScale('vol').applyOptions({scaleMargins:{top:0.84,bottom:0}})}
   function scheduleChart(){if(chartTimer)return;chartTimer=setTimeout(function(){chartTimer=null;updateChart()},400)}
   function updateChart(){if(!snap)return;build();if(!built)return;var all=(snap.prev_bars_1m||[]).concat(snap.bars_1m||[]);var bars=resample(all,tf);if(bars.length<2)return;
@@ -344,11 +343,11 @@ table.dense td.num{font-family:var(--mono)}
     e9S.setData(emaSeries(bars,9));e21S.setData(emaSeries(bars,21));vwapS.setData(vwapSeries(snap.bars_1m||[],tf));
     lines.forEach(function(l){candles.removePriceLine(l)});lines=[];
     function pl(price,color,title,style,w){lines.push(candles.createPriceLine({price:price,color:color,lineWidth:w||1,lineStyle:style==null?2:style,axisLabelVisible:true,title:title}))}
-    if(plan){pl(plan.pdh,'#6b7887','PDH',3);pl(plan.pdl,'#6b7887','PDL',3)}
+    if(plan){pl(plan.pdh,TC['ink-3'],'PDH',3);pl(plan.pdl,TC['ink-3'],'PDL',3)}
     var d=latest(function(x){return x.trade.spot_entry!=null&&x.state!=='rejected'&&x.state!=='expired'&&x.state!=='vetoed'});
-    if(d){pl(d.trade.spot_entry,'#e6ecf2','ENTRY '+d.id,0,1);pl(d.trade.spot_stop,'#ff4d4d','STOP',0,1);pl(d.trade.spot_target,'#1fc46a','TARGET',0,1)}
-    var marks=[];if(orders)(orders.fills_today||[]).forEach(function(f){var buy=f.side==='BUY';marks.push({time:tsec(f.ts),position:buy?'belowBar':'aboveBar',color:buy?'#1fc46a':'#ff4d4d',shape:buy?'arrowUp':'arrowDown',text:f.side+' '+shortSym(f.symbol)+' @'+fmt(f.price)})});
-    if(lastTrig)marks.push({time:tsec(lastTrig.ts),position:'inBar',color:'#2dd4bf',shape:'circle',text:'FIRE'});
+    if(d){pl(d.trade.spot_entry,TC.ink,'ENTRY '+d.id,0,1);pl(d.trade.spot_stop,TC.bad,'STOP',0,1);pl(d.trade.spot_target,TC.good,'TARGET',0,1)}
+    var marks=[];if(orders)(orders.fills_today||[]).forEach(function(f){var buy=f.side==='BUY';marks.push({time:tsec(f.ts),position:buy?'belowBar':'aboveBar',color:buy?TC.good:TC.bad,shape:buy?'arrowUp':'arrowDown',text:f.side+' '+shortSym(f.symbol)+' @'+fmt(f.price)})});
+    if(lastTrig)marks.push({time:tsec(lastTrig.ts),position:'inBar',color:TC['accent-deep'],shape:'circle',text:'FIRE'});
     marks.sort(function(a,b){return a.time-b.time});var slot=tf*60;marks.forEach(function(m){m.time=Math.floor((m.time-19800)/slot)*slot+19800});candles.setMarkers(marks);
     if(firstFit){firstFit=false;chart.timeScale().setVisibleLogicalRange({from:Math.max(0,bars.length-110),to:bars.length+4})}
     var l=bars[bars.length-1];$('#chartMeta').textContent=bars.length+' bars · last '+fmt(l.close)+' · '+hhmmss(snap.ts)+' IST'}

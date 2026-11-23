@@ -6,16 +6,22 @@ are ready, every agent calls named tools and its report is handed to the tasks d
 their Investment Committee: a bull-side and a bear-side researcher work in parallel, the chief risk officer
 reviews both, the portfolio manager rules. Required outputs per agent follow that preset.
 
-What differs here: the tools read Delta Desk's own read model (bars, technicals, filings, peers, wire, council),
-and every number in the decision (stance, size cap, stop, target, confidence) is computed by rules so it is the
-same with or without a language model. With a model configured (llm.py) each agent's prose is written by the
-model from its DATA block; without one the same sections are composed by rules. Rules model v0, not advice.
+What differs here: the tools read Delta Desk's own read model (bars, technicals, filings, peers, wire, council).
+
+Two modes. With a tool-calling language model configured (llm.py: Groq, OpenRouter, DeepSeek, OpenAI) each agent is
+a real agent: the model chooses which tools to call, reads the results and the upstream reports, writes its report
+and returns its own judgement (the researchers their weighted points, the risk officer a stance, the portfolio
+manager the action and a confidence). The desk keeps the guard rails as rules in both modes: stop distance and size
+cap come from realised volatility, the target is twice the stop, and a long is refused when the risk officer
+opposes. Without a model, or when a model call fails, the same agent is composed by rules (rules model v0).
+Nothing here is calibrated against outcomes yet. Not advice.
 """
 from __future__ import annotations
 
 import json
 import math
 import os
+import re
 import threading
 import time
 import uuid
@@ -67,6 +73,32 @@ SYSTEM = (
     "FORMAT: markdown. One bold label per section (e.g. **Bull thesis bullets**) followed by 1 to 4 short bullets, each under 22 words. "
     "No headings, no preamble, no closing line. Under 220 words."
 )
+AGENT_SYSTEM = (
+    "You are the {role} on Delta Desk's investment committee, researching {name} ({target}, {sector}) on the Indian market. {brief}\n"
+    "You have tools that read the desk's data for this stock. Decide which you need and call them before you answer; "
+    "call a tool once, never guess a number. Use only numbers the tools or the upstream reports gave you; if something is missing, say so.\n"  # noqa: E501
+    "{rule}\n"
+    "FINAL ANSWER FORMAT: markdown, one bold label per section followed by 1 to 4 short bullets, each under 22 words, under 220 words in all. "  # noqa: E501
+    "Then end with one fenced json block, exactly this shape: ```json\n{out}\n```"
+)
+OUT = {"bull_advocate": '{"points": [{"text": "evidence with its number", "weight": 2}]}',
+       "bear_advocate": '{"points": [{"text": "risk with its number", "weight": 2}]}',
+       "risk_officer": '{"stance": "support" | "conditional support" | "oppose"}',
+       "portfolio_manager": '{"action": "long" | "wait" | "avoid", "confidence": 0-100}'}
+RULE = {"bull_advocate": "In the json, list up to 6 points for the long case: weight 2 for strong evidence, 1 for moderate. Do not pad; weak cases get few points.",  # noqa: E501
+        "bear_advocate": "In the json, list up to 6 points against owning it: weight 2 for a serious risk, 1 for a moderate one. Do not pad.",  # noqa: E501
+        "risk_officer": "Sizing is fixed by the desk and must be stated, not changed: stop distance is the larger of 5 % and 1.65 x daily volatility x sqrt(10); "  # noqa: E501
+                        "size cap is the smaller of 10 % and 100 / stop distance, and zero if you oppose. Your judgement is the stance.",
+        "portfolio_manager": "The size cap, stop and target come from the risk review and are final. Your judgement is the action and how confident you are (0-100). "  # noqa: E501
+                             "You cannot go long if the risk officer opposes."}
+TOOL_DESC = {"get_market_data": "Price now, 1m / 3m / 1y returns, 50- and 200-day averages, 52-week range.",
+             "technical_indicators": "Daily technical read: overall verdict, moving averages, RSI, ADX, MACD, verdict per timeframe.",
+             "get_financial_statements": "Filings snapshot: P/E, P/B, EV/EBITDA, ROE, ROCE, debt, margins, 3-year growth, pros and cons.",
+             "get_stock_news": "Latest headlines tagged to this stock with a good / bad / no-impact call each.",
+             "risk_metrics": "Realised volatility, 1-day 95 % VaR and CVaR, max drawdown, worst day, distance from the high.",
+             "peer_comparison": "Sector peers and their median P/E.",
+             "council_vote": "The desk's ten rule agents voting on this stock at a 3-month horizon: stance and score."}
+MAX_TURNS = 6
 LAYERS_MAX = 8
 MAX_ACTIVE = 3
 KEEP = 40
@@ -129,7 +161,7 @@ class Research:
         return {"presets": [{"name": k, "title": p["title"], "description": p["description"],
                              "agents": [{"id": a["id"], "role": a["role"]} for a in p["agents"]], "rounds": len(layers(p["tasks"]))}
                             for k, p in PRESETS.items()],
-                "examples": EXAMPLES, "model": self.llm.label(), "llm": self.llm.available}
+                "examples": EXAMPLES, "model": self.llm.label(), "llm": self.llm.available, "agentic": self.llm.supports_tools}
 
     def resolve(self, query: str) -> str | None:
         q = (query or "").strip()
@@ -161,9 +193,9 @@ class Research:
             task_of = {t["agent_id"]: t["id"] for t in p["tasks"]}
             run = {"id": uuid.uuid4().hex[:12], "preset": preset, "title": p["title"], "query": query.strip()[:200], "target": sym, "name": name,  # noqa: E501
                    "sector": sector, "status": "pending", "round": 0, "rounds": len(layers(p["tasks"])), "created": now, "finished": None,
-                   "model": self.llm.label(), "decision": None, "report": "", "error": "",
+                   "model": self.llm.label(), "agentic": self.llm.supports_tools, "decision": None, "report": "", "error": "",
                    "agents": [{"id": a["id"], "role": a["role"], "task": task_of[a["id"]], "status": "waiting", "tool": "", "started": None,
-                               "elapsed_s": None, "steps": [], "output": "", "report": "", "error": ""} for a in p["agents"]]}
+                               "elapsed_s": None, "steps": [], "output": "", "report": "", "error": "", "mode": "", "note": ""} for a in p["agents"]]}  # noqa: E501
             self._runs[run["id"]] = run
         if wait:
             self._execute(run)
@@ -211,10 +243,21 @@ class Research:
                     spec = agents[task["agent_id"]]
                     st["status"], st["started"] = "running", time.time()
                     try:
-                        data = {t: self._tool(run["target"], t, st, memo, memo_lock) for t in spec["tools"]}
                         upstream = {d: results[d] for d in task["depends_on"]}
-                        res = COMPOSE[spec["id"]](run, data, upstream)
-                        res["text"] = self._write(spec, run, data, upstream, res)
+                        data, text, over = None, "", {}
+                        if self.llm.supports_tools:
+                            try:
+                                data, text, over = self._agentic(spec, run, st, upstream, memo, memo_lock)
+                            except (LLMError, ValueError) as exc:   # the agent falls back to rules and says so on its row
+                                data, st["note"] = None, f"model call failed, rules used: {exc}"[:200]
+                        st["mode"] = "rules" if data is None else "model"
+                        called = {s["tool"] for s in st["steps"]}
+                        data = data or {}
+                        for t in spec["tools"]:   # what the guard-rail rules need; a step only when the rules agent fetches it first
+                            if t not in data:
+                                data[t] = self._tool(run["target"], t, None if t in called or st["mode"] == "model" else st, memo, memo_lock)  # noqa: E501
+                        res = COMPOSE[spec["id"]](run, data, upstream, over)
+                        res["text"] = text or self._write(spec, run, data, upstream, res)
                         results[task["id"]] = res
                         st["report"], st["output"], st["status"] = res["text"], res["line"], "done"
                     except Exception as exc:  # noqa: BLE001 - one agent failing is shown on its row, the run reports it
@@ -234,10 +277,45 @@ class Research:
         run["finished"] = time.time()
         self._save()
 
-    def _tool(self, sym: str, tool: str, st: dict, memo: dict, memo_lock: threading.Lock) -> dict:
+    def _agentic(self, spec: dict, run: dict, st: dict, upstream: dict, memo: dict, memo_lock: threading.Lock) -> tuple[dict, str, dict]:
+        """The model drives: it picks tools, reads what they return, then writes the report and its judgement."""
+        schemas = [{"type": "function", "function": {"name": k, "description": v, "parameters": {"type": "object", "properties": {}}}}
+                   for k, v in TOOL_DESC.items()]
+        ask = f"Research {run['name']} ({run['target']}) and report to the committee."
+        for k, v in upstream.items():
+            ask += f"\n\nUPSTREAM {k} ({v['line']}):\n{v['text'][:1500]}\nCOMPUTED: {json.dumps(v.get('computed', {}), default=str)[:900]}"
+        msgs: list[dict] = [{"role": "system", "content": AGENT_SYSTEM.format(role=spec["role"], brief=spec["brief"], name=run["name"], target=run["target"],  # noqa: E501
+                                                                           sector=run["sector"] or "no sector", rule=RULE[spec["id"]], out=OUT[spec["id"]])},  # noqa: E501
+                            {"role": "user", "content": ask}]
+        data: dict[str, dict] = {}
+        for turn in range(MAX_TURNS):
+            last = turn == MAX_TURNS - 1
+            m = self.llm.chat_tools(msgs, schemas, choice="none" if last else "auto")
+            calls = [] if last else m["tool_calls"]
+            if not calls:
+                text = (m["content"] or "").strip()
+                if not data and turn == 0:   # an answer with no evidence is not research
+                    msgs += [{"role": "assistant", "content": text or "…"}, {"role": "user", "content": "Call the tools you need first, then answer."}]  # noqa: E501
+                    continue
+                if not text:
+                    raise ValueError("the model returned no report")
+                return data, *_split(text)
+            msgs.append({"role": "assistant", "content": m["content"] or "", "tool_calls": calls})
+            for c in calls:
+                name = (c.get("function") or {}).get("name", "")
+                if name in TOOLS:
+                    hit = data[name] = self._tool(run["target"], name, st, memo, memo_lock)
+                    content = json.dumps({k: v for k, v in hit.items() if k != "preview"}, ensure_ascii=False, default=str)[:2500]
+                else:
+                    content = json.dumps({"error": f"unknown tool {name}", "tools": list(TOOLS)})
+                msgs.append({"role": "tool", "tool_call_id": c.get("id", ""), "content": content})
+        raise ValueError("the model did not finish")
+
+    def _tool(self, sym: str, tool: str, st: dict | None, memo: dict, memo_lock: threading.Lock) -> dict:
         step = {"tool": tool, "status": "running", "elapsed_ms": None, "preview": ""}
-        st["steps"].append(step)
-        st["tool"] = tool
+        if st is not None:
+            st["steps"].append(step)
+            st["tool"] = tool
         t0 = time.time()
         try:
             with memo_lock:
@@ -358,6 +436,34 @@ TOOLS = {"get_market_data": t_market, "technical_indicators": t_technicals, "get
          "risk_metrics": t_risk, "peer_comparison": t_peers, "council_vote": t_council}
 
 
+def _split(text: str) -> tuple[str, dict]:
+    """A model answer is prose followed by one json block: return the prose and the parsed judgement ({} if unreadable)."""
+    m = list(re.finditer(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.S))
+    raw, cut = (m[-1].group(1), m[-1].start()) if m else (None, None)
+    if raw is None:
+        i = text.rfind("\n{")
+        raw, cut = (text[i + 1:], i) if i >= 0 else (None, None)
+    try:
+        over = json.loads(raw) if raw else {}
+    except ValueError:
+        over = {}
+    if not isinstance(over, dict):
+        over = {}
+    return (text[:cut].strip() if cut is not None and over else text), over
+
+
+def _model_points(over: dict | None) -> list[dict] | None:
+    raw = (over or {}).get("points")
+    if not isinstance(raw, list):
+        return None
+    out = []
+    for p in raw[:6]:
+        if isinstance(p, dict) and str(p.get("text", "")).strip():
+            w = 2 if str(p.get("weight")) in ("2", "high") else 1
+            out.append({"text": str(p["text"]).strip()[:200], "weight": w, "confidence": "high" if w > 1 else "medium"})
+    return out
+
+
 # ---- agents: rules compose the points, the numbers and the fallback prose ----------------------------------
 def _points(data: dict, side: str) -> list[dict]:
     """Evidence for one side, each point with the weight the committee gives it (high 2, medium 1)."""
@@ -413,8 +519,9 @@ def _bullets(pts: list[dict], key: str = "confidence") -> str:
     return "\n".join(f"- {p['text']} ({p[key]})" for p in pts) or "- Nothing in the data argues this side."
 
 
-def bull(run: dict, data: dict, up: dict) -> dict:
-    pts = _points(data, "bull")
+def bull(run: dict, data: dict, up: dict, over: dict | None = None) -> dict:
+    mine = _model_points(over)
+    pts = _points(data, "bull") if mine is None else mine
     mk, ta, fs, nw = (data.get(k) or {} for k in ("get_market_data", "technical_indicators", "get_financial_statements", "get_stock_news"))
     score = sum(p["weight"] for p in pts)
     text = (f"**Bull thesis bullets**\n{_bullets(pts)}\n\n"
@@ -428,12 +535,13 @@ def bull(run: dict, data: dict, up: dict) -> dict:
             "line": f"{len(pts)} bull points · score {score}"}
 
 
-def bear(run: dict, data: dict, up: dict) -> dict:
-    pts = _points(data, "bear")
+def bear(run: dict, data: dict, up: dict, over: dict | None = None) -> dict:
+    mine = _model_points(over)
+    pts = _points(data, "bear") if mine is None else mine
     rk, mk, ta, fs = (data.get(k) or {} for k in ("risk_metrics", "get_market_data", "technical_indicators", "get_financial_statements"))
-    if rk.get("available") and rk["max_drawdown_pct"] <= -25:
+    if mine is None and rk.get("available") and rk["max_drawdown_pct"] <= -25:
         pts.append({"text": f"Max drawdown {rk['max_drawdown_pct']} % inside the sample", "weight": 1, "confidence": "medium"})
-    if rk.get("available") and rk["vol_annual_pct"] >= 40:
+    if mine is None and rk.get("available") and rk["vol_annual_pct"] >= 40:
         pts.append({"text": f"Realised volatility {rk['vol_annual_pct']} % a year", "weight": 1, "confidence": "medium"})
     for p in pts:
         p["severity"] = p["confidence"]
@@ -451,12 +559,15 @@ def bear(run: dict, data: dict, up: dict) -> dict:
             "line": f"{len(pts)} bear points · score {score}"}
 
 
-def risk_officer(run: dict, data: dict, up: dict) -> dict:
+def risk_officer(run: dict, data: dict, up: dict, over: dict | None = None) -> dict:
     b, s = up["task-bull"], up["task-bear"]
     rk, pe = data.get("risk_metrics") or {}, data.get("peer_comparison") or {}
     net = b["score"] - s["score"]
     vol = rk.get("vol_annual_pct")
     stance = "oppose" if net <= -2 else "support" if net >= 2 and (vol or 0) < 40 else "conditional support"
+    said = str((over or {}).get("stance", "")).strip().lower()
+    if said in ("support", "conditional support", "oppose"):   # the model's judgement; sizing below stays a rule
+        stance = said
     # stop distance: the larger of 5 % and a 10-session 95 % move; size so a stop-out costs 1 % of the portfolio, capped at 10 %
     dist = max(5.0, 1.65 * (rk.get("vol_daily_pct") or 1.5) * math.sqrt(10))
     cap = 0.0 if stance == "oppose" else round(min(10.0, 100.0 / dist), 1)
@@ -483,13 +594,20 @@ def risk_officer(run: dict, data: dict, up: dict) -> dict:
                          "net": net, "risk": {k: v for k, v in rk.items() if k != "preview"}}}
 
 
-def portfolio_manager(run: dict, data: dict, up: dict) -> dict:
+def portfolio_manager(run: dict, data: dict, up: dict, over: dict | None = None) -> dict:
     r = up["task-risk"]["computed"]
     cn = data.get("council_vote") or {}
     net, stance = r["net"], r["stance"]
     action = "avoid" if stance == "oppose" or net <= -2 else "long" if net >= 2 else "wait"
+    said = str((over or {}).get("action", "")).strip().lower()
+    if said in ("long", "wait", "avoid"):   # the model's call; a long against the risk office is refused
+        action = "wait" if said == "long" and stance == "oppose" else said
     agree = cn.get("available") and {"long": "buy", "avoid": "sell", "wait": "hold"}[action] == cn.get("stance")
     conf = int(max(35, min(85, 50 + 6 * abs(net) + (8 if agree else -6 if cn.get("available") else 0))))
+    try:
+        conf = int(max(5, min(95, float((over or {})["confidence"]))))
+    except (KeyError, TypeError, ValueError):
+        pass
     entry = (r.get("risk") or {}).get("last")
     decision = {"action": action, "confidence": conf, "risk_stance": stance, "size_pct": r["size_cap_pct"] if action == "long" else 0.0,
                 "stop_pct": -r["stop_distance_pct"], "target_pct": round(2 * r["stop_distance_pct"], 1), "horizon": "3 months",

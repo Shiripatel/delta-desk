@@ -1,5 +1,5 @@
 """Read model for the markets page: quotes across asset classes, screener, heat-map stats, watchlists,
-calendars, institutional flows, IPOs and news."""
+calendars, institutional flows and news."""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -8,8 +8,8 @@ from datetime import date
 
 from deltadesk.markets import calendar as cal
 from deltadesk.markets import investors as inv
-from deltadesk.markets import ipo, universe
 from deltadesk.markets import technicals as ta
+from deltadesk.markets import universe
 from deltadesk.markets.agent_chat import AgentChat
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
 from deltadesk.markets.chat import DeskAssistant
@@ -339,20 +339,7 @@ class MarketsService:
                 "sections": [{"name": n, "items": [item(k) for k in ks]} for n, ks in universe.GLOBAL_SECTIONS],
                 "source": self.quotes.name, "delay_min": getattr(self.quotes, "delay_min", 0)}
 
-    # ---- calendars, flows, ipo, news ---------------------------------------------------------
-    def ipos(self) -> dict:
-        return ipo.load(quotes=self.quotes.quotes)
-
-    def ipo_detail(self, slug: str) -> dict | None:
-        try:
-            heads = [{"title": h.get("title", ""), "description": h.get("description", ""), "impact": h.get("impact")} for h in self.news.feed(limit=400)["entries"]]  # noqa: E501
-        except Exception:  # noqa: BLE001 - news is optional for the agent
-            heads = []
-        return ipo.detail(slug, quotes=self.quotes.quotes, headlines=heads)
-
-    def ipo_performance(self, year: int | None = None, segment: str | None = None) -> dict:
-        return ipo.performance(year, segment or None, quotes=self.quotes.quotes)
-
+    # ---- calendars, flows, news ---------------------------------------------------------
     @staticmethod
     def calendar() -> dict:
         return cal.financial_calendar()

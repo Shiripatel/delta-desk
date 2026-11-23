@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
-PAGE_PATHS = {"/", "/watchlist", "/heatmap", "/news", "/ipo", "/forex", "/global", "/desk", "/sniper", "/analysis", "/beta", "/legal"}
+PAGE_PATHS = {"/", "/watchlist", "/heatmap", "/news", "/forex", "/global", "/research", "/sniper", "/analysis", "/beta", "/legal"}
 
 
 class Traffic:
@@ -30,7 +30,7 @@ class Traffic:
 
     @staticmethod
     def is_page(path: str) -> bool:
-        return path in PAGE_PATHS or path.startswith("/ipo/")
+        return path in PAGE_PATHS
 
     def visitor(self, ip: str, ua: str) -> str:
         day = date.today().isoformat()
@@ -39,7 +39,7 @@ class Traffic:
     def record(self, path: str, ip: str, ua: str, ref: str = "") -> None:
         if not self.is_page(path):
             return
-        row = {"ts": round(time.time(), 3), "path": "/ipo/…" if path.startswith("/ipo/") else path, "visitor": self.visitor(ip, ua),
+        row = {"ts": round(time.time(), 3), "path": path, "visitor": self.visitor(ip, ua),
                "ref": _host(ref), "ua": _family(ua)}
         with self._lock:
             self.path.parent.mkdir(parents=True, exist_ok=True)

@@ -151,7 +151,7 @@ tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight
 <body>
 <header class="top"><div class="wrap">
   <div class="brand"><span aria-hidden="true">✢</span><b>Delta Desk</b><span class="tag">ANALYSIS</span></div>
-  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/desk">Agents</a><a href="/research">Research</a><a href="/sniper">Sniper</a></nav>
+  <nav class="nav"><a href="/">Home</a><a href="/watchlist">Watchlist</a><a href="/heatmap">Heatmap</a><a href="/news">News</a><a href="/research">Research</a><a href="/sniper">Sniper</a></nav>
   <div class="status">
     <span class="clock num" id="clock">—</span>
   </div>
@@ -230,7 +230,7 @@ tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight
     </div>
     <div class="card"><h3>Pivot points <span id="pivMeta"></span></h3><div class="tbl-wrap flush"><table class="st"><thead><tr><th>Name</th><th class="num">S3</th><th class="num">S2</th><th class="num">S1</th><th class="num">Pivot</th><th class="num">R1</th><th class="num">R2</th><th class="num">R3</th></tr></thead><tbody id="pivBody"></tbody></table></div></div>
     <div class="grid2">
-      <div class="card"><h3>AI score and council <span id="cMeta"></span></h3><div class="council" id="councilBox"><span class="note">loading…</span></div><div class="sees" id="sees"></div><div class="note">AI score is the rules model v0 on the ranking; the council is ten agents weighted by horizon. <a href="/desk" id="lnCouncil" style="text-decoration:underline">Full council →</a></div></div>
+      <div class="card"><h3>AI score and council <span id="cMeta"></span></h3><div class="council" id="councilBox"><span class="note">loading…</span></div><div class="sees" id="sees"></div><div class="note"><a href="/research" id="lnCouncil" style="text-decoration:underline">Research this stock →</a></div></div>
       <div class="card"><h3>Latest headlines <span id="newsMeta"></span></h3><div class="nl" id="newsList"><div class="note">loading…</div></div></div>
     </div>
     <div class="note">Indicators, moving averages and pivots are computed by Delta Desk from the same bars as the chart. Rules, not advice.</div>
@@ -291,7 +291,7 @@ tr.me td{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight
       '<div>Council '+(v?'<span class="stance '+(v.stance==='buy'?'buy':v.stance==='sell'?'sell':'hold')+'">'+esc(v.stance)+'</span><span>'+(v.confidence*100).toFixed(0)+' % · '+esc(council.horizon_label)+'</span>':'<span class="muted">loading</span>')+'<a href="/desk#'+esc(state.symbol)+'/1d">agents →</a></div>'+
       '<div>Technicals '+(t?'<span class="stance '+vk(t.overall)+'">'+esc(t.overall)+'</span><span>'+esc(ta.label)+'</span>':'<span class="muted">loading</span>')+'</div>'}
   function loadAi(){get('/markets/ai?limit=500&mode=short').then(function(d){aiRow=(d.entries||[]).filter(function(e){return e.symbol===state.symbol})[0]||null;renderVerdicts();renderCouncilBox()}).catch(function(){renderVerdicts()})}
-  function loadCouncil(){get('/markets/council?symbol='+encodeURIComponent(state.symbol)+'&horizon=1d').then(function(c){council=c;renderVerdicts();renderCouncilBox()}).catch(function(){council=null;renderVerdicts();renderCouncilBox()})}
+  function loadCouncil(){var ln=document.getElementById('lnCouncil');if(ln)ln.href='/research?q='+encodeURIComponent(state.symbol);get('/markets/council?symbol='+encodeURIComponent(state.symbol)+'&horizon=1d').then(function(c){council=c;renderVerdicts();renderCouncilBox()}).catch(function(){council=null;renderVerdicts();renderCouncilBox()})}
   function renderCouncilBox(){var r=aiRow||{},v=council&&council.verdict;
     $('#councilBox').innerHTML='<div class="k">'+(r.score!=null?ring(r.score,10,r.score>=7?'good':r.score<=3?'bad':'warn'):'<span class="muted">—</span>')+'<span>AI score<br><b>'+(r.score!=null?r.score+' / 10':'not ranked')+'</b></span></div>'+
       '<div class="k"><span>Past win rate<br><b>'+(r.win_rate!=null?fmt(r.win_rate,1)+' %':'—')+'</b></span></div><div class="k"><span>Forecast 3M<br><b class="'+cls(r.forecast_3m||0)+'">'+pct(r.forecast_3m)+'</b></span></div>'+

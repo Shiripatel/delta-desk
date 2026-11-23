@@ -1,5 +1,5 @@
 """FastAPI surface: desk state, decisions, approve / reject, kill switch, WebSocket stream, and the
-markets read model (quotes across asset classes, screener, heat map, watchlists, calendars, flows, IPOs, news)."""
+markets read model (quotes across asset classes, screener, heat map, watchlists, calendars, flows, news)."""
 from __future__ import annotations
 
 import asyncio
@@ -27,8 +27,8 @@ from deltadesk.server.warm import Warmer
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 PAGES = WEB / "pages"
-PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html", "/ipo": "ipo.html",
-               "/ipo/{slug}": "ipo_detail.html", "/forex": "forex.html", "/global": "global.html", "/investors": "investors.html", "/desk": "agents.html", "/sniper": "sniper.html",  # noqa: E501
+PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html",
+               "/forex": "forex.html", "/global": "global.html", "/investors": "investors.html", "/sniper": "sniper.html",  # noqa: E501
                "/research": "research.html",
                "/analysis": "analysis.html", "/beta": "beta.html", "/legal": "legal.html"}
 
@@ -178,7 +178,7 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
 
     # ---- pages ----------------------------------------------------------------------------
     def _page(name: str):
-        async def handler(slug: str = "") -> FileResponse:   # slug only matters for /ipo/{slug}; the page reads it from the URL
+        async def handler() -> FileResponse:
             return FileResponse(PAGES / name)
         return handler
 
@@ -210,6 +210,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         resp = RedirectResponse("/", status_code=303)
         resp.delete_cookie(OWNER_COOKIE)
         return resp
+
+    @app.get("/desk")
+    async def desk_page():   # the council now lives inside the Research page
+        return RedirectResponse("/research", status_code=307)
 
     @app.get("/chart")
     async def chart_page():
@@ -567,21 +571,6 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/flows")
     async def m_flows():
         return JSONResponse(markets.flows())
-
-    @app.get("/markets/ipo")
-    async def m_ipo():
-        return JSONResponse(await asyncio.to_thread(markets.ipos))
-
-    @app.get("/markets/ipo-performance")
-    async def m_ipo_perf(year: int | None = None, segment: str = ""):
-        return JSONResponse(await asyncio.to_thread(markets.ipo_performance, year, segment))
-
-    @app.get("/markets/ipo/{slug}")
-    async def m_ipo_detail(slug: str):
-        out = await asyncio.to_thread(markets.ipo_detail, slug)
-        if out is None:
-            raise HTTPException(404, f"unknown ipo {slug}")
-        return JSONResponse(out)
 
     @app.post("/markets/refresh-constituents", dependencies=OWNER)
     async def m_refresh():
