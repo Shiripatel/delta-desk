@@ -1,9 +1,9 @@
 # Delta Desk
 
 An agentic desk for Indian markets, built for retail: an AI radar and ranking over NSE indices, a
-watchlist, a sector heatmap, a news wire with impact calls, IPO tracking with an IPO agent, a global
-market map, a stock analysis page (fundamental and technical), an agent council, and a sniper-style
-F&O desk that runs a typed, risk-checked pipeline in paper mode. Nothing here is investment advice.
+sector heatmap, a news wire with impact calls, a stock analysis page (fundamental and technical), research
+teams of agents (bull, bear, risk officer, portfolio manager, with the agent council inside), and a
+sniper-style F&O desk that runs a typed, risk-checked pipeline in paper mode. Nothing here is investment advice.
 
 Status: private beta, paper trading only. Source is published to read and follow, all rights reserved (see LICENSE).
 
@@ -19,7 +19,7 @@ deltadesk/            Python package
   feeds/              synthetic market, Kite and Upstox adapters
   auth/               Upstox login and token cache
   markets/            read model behind the pages: universe, quotes and bars, AI ranking and radar, council,
-                      news wire and desk assistant, IPO, fundamentals, technicals, investors, watchlist,
+                      research teams, news wire, fundamentals, technicals, watchlist,
                       agent chat and language-model providers, logos
   server/             FastAPI app (page table, JSON API, WebSocket stream), traffic log (traffic.py)
   beta.py             waitlist, alert rules, WhatsApp / Telegram notifiers
@@ -36,8 +36,8 @@ tools/                page_harness.js: runtime smoke test for page scripts again
 .claude/skills/       the design system skill every page follows
 ```
 
-Pages and routes: `/` home (radar + ranking), `/watchlist`, `/heatmap`, `/news`, `/ipo` and `/ipo/<slug>`,
-`/forex`, `/global`, `/desk` (agent council), `/sniper`, `/analysis#SYMBOL/3m/<tab>`, `/beta`, `/legal`.
+Pages and routes: `/` home (radar + ranking), `/heatmap`, `/news`, `/research` (research teams and the
+agent council), `/sniper`, `/analysis#SYMBOL/3m/<tab>`, `/beta`, `/legal`; `/watchlist` is parked (no nav link).
 Every page shares the same header, nav, ticker, footer and design tokens; the page table lives in
 `deltadesk/server/app.py` (`PAGE_ROUTES`).
 
@@ -66,9 +66,9 @@ laptop, nothing is locked.
   cached twelve hours under `data/fundamentals/cache`.
 * News: public RSS feeds of Economic Times, Moneycontrol, Mint and Business Standard; impact calls are a
   lexicon rule (v0) with cues shown.
-* IPOs: `data/ipo.json` in the schema documented in `deltadesk/markets/ipo.py`; fictional example issues
-  until a feed is wired. Grey market premium is deliberately not modelled.
-* Everything labelled "AI" is a transparent rules model (v0) until it is calibrated.
+* Everything labelled "AI" is a transparent rules model (v0) until it is calibrated. The one exception is the
+  Research page when a tool-calling language-model key is set (for example `GROQ_API_KEY`): its agents then choose
+  their tools and make their own calls, inside fixed risk rules, and each row says which one did the thinking.
 
 ## Sniper (signal confluence)
 

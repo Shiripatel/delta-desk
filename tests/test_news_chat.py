@@ -1,9 +1,6 @@
 """News tagging, impact rule and the desk assistant, all offline."""
-from pathlib import Path
 
 from deltadesk.markets.news import Headline, LexiconAnalyzer, NewsService
-from deltadesk.markets.service import MarketsService
-from deltadesk.markets.watchlist import Watchlist
 
 
 class CannedNews(NewsService):
@@ -46,14 +43,3 @@ def test_lexicon_edge_cases():
     assert a.analyse(mk("Company wins order but shares fall on weak margin"))[0] in ("neutral", "bad")
     assert a.analyse(mk("Board meeting scheduled for Tuesday"))[0] == "neutral"
 
-
-def test_assistant_answers_from_desk_data(tmp_path: Path):
-    s = MarketsService(watchlist=Watchlist(tmp_path / "wl.json"), news=CannedNews())
-    r = s.assistant.answer("Is Reliance worth holding long term?")
-    assert r["symbol"] == "RELIANCE" and r["horizon"] == "1y"
-    assert "council says" in r["answer"] and "SEBI probe" in r["answer"] and any(x["kind"] == "council" for x in r["sources"])
-    hid = s.news.feed()["entries"][0]["id"]
-    r2 = s.assistant.answer("why is this news good or bad?", news_id=hid)
-    assert r2["symbol"] == "HDFCBANK" and "Impact call: good" in r2["answer"]
-    r3 = s.assistant.answer("what is the market doing?")
-    assert r3["symbol"] is None and "NIFTY 50" in r3["answer"]

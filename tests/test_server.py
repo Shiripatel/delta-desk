@@ -40,7 +40,6 @@ def test_pages_and_assets():
         dom = c.get("/markets/domains").json()
         assert dom["HDFCBANK"] == "hdfcbank.com" and len(dom) > 100
         assert c.get("/static/js/ui.js").status_code == 200 and "/static/js/ui.js" in home
-        assert 'id="fxmap"' in c.get("/forex").text and len(c.get("/markets/forex-market").json()["world"]) == 10   # parked, still served
         assert "waitlist" in c.get("/beta").text and "Risk disclosure" in c.get("/legal").text
         w = c.post("/waitlist", json={"name": "Test User", "email": "t@example.com", "phone": "+919999999999", "interests": ["ipo"], "whatsapp_ok": True}).json()  # noqa: E501
         assert w["ok"] and w["position"] >= 1 and c.get("/waitlist/stats").json()["total"] >= 1
@@ -63,8 +62,6 @@ def test_pages_and_assets():
         assert c.get("/markets/radar?index=BANKNIFTY&days=3&mode=long").json()["mode"] == "long"
         feed = c.get("/news/feed?impact=good&limit=5").json()
         assert "counts" in feed and feed["analyzer"].startswith("lexicon")
-        chat = c.post("/chat", json={"question": "what does the council say about HDFC Bank for the week?"}).json()
-        assert chat["symbol"] == "HDFCBANK" and chat["horizon"] == "1w" and "council says" in chat["answer"]
         assert c.get("/news").headers["cache-control"] == "no-cache" and "max-age" in c.get("/static/js/nav.js").headers["cache-control"]
         import os as _os
         _os.environ["DD_ADMIN_TOKEN"] = "t0k"
@@ -85,24 +82,16 @@ def test_pages_and_assets():
         assert ta["pivots"]["methods"][0]["name"] == "Classic" and ta["moving_averages"][-1]["period"] == 200
         pe = c.get("/markets/peers/HDFCBANK").json()
         assert pe["sector"] == "Financials" and pe["rows"][0]["self"] and len(pe["rows"]) > 3
-        gl = c.get("/global").text
-        assert 'id="map"' in gl and 'id="regions"' in gl
-        g = c.get("/markets/global").json()
-        assert [r["code"] for r in g["regions"]][:2] == ["world", "us"] and any(m["key"] == "HSI" and m["region"] == "cn" for m in g["markers"])  # noqa: E501
-        assert g["sections"][0]["name"] == "Index futures" and g["markers"][0]["quote"] is not None
-        for page in ("/", "/news", "/forex", "/research", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/global", "/heatmap", "/investors"):  # noqa: E501
+        for page in ("/", "/news", "/research", "/sniper", "/watchlist", "/analysis", "/beta", "/legal", "/heatmap"):
             body = c.get(page).text
             nav = body[body.index('<nav class="nav">'):body.index("</nav>")]
-            for h in ("/", "/watchlist", "/heatmap", "/news", "/research", "/sniper"):
+            for h in ("/", "/heatmap", "/news", "/research", "/sniper"):
                 assert 'href="' + h + '"' in nav, (page, h)
-            for h in ("/desk", "/ipo", "/forex", "/global", "/investors"):   # merged, deleted or parked: out of the nav
+            for h in ("/watchlist", "/desk", "/ipo", "/forex", "/global", "/investors"):   # parked, merged or deleted: out of the nav
                 assert 'href="' + h + '"' not in nav, (page, h)
         wl = c.get("/watchlist").text
-        assert 'id="preset"' in wl and 'href="/watchlist" aria-current="page"' in wl and 'href="/watchlist">Watchlist</a>' in home
+        assert 'id="preset"' in wl and 'href="/watchlist"' not in home   # parked: served by URL, no nav link
         assert c.get("/markets/watchlist/presets").json()[0]["code"] == "NIFTY50"
-        iv = c.get("/markets/investors").json()
-        assert iv["count"] >= 6 and iv["investors"][0]["holdings"] and "summary" in iv["investors"][0] and iv["investors"][0]["seed"]
-        assert 'id="grid"' in c.get("/investors").text
         st = c.get("/markets/watchlist/stats?symbols=HDFCBANK,RELIANCE").json()
         assert {"ret_1w", "ret_1m", "hi_52w", "lo_52w"} <= set(st["HDFCBANK"]) and st["HDFCBANK"]["hi_52w"] >= st["HDFCBANK"]["lo_52w"]
         assert c.get("/agent/model").json()["available"] is False
@@ -120,7 +109,7 @@ def test_pages_and_assets():
         desk = c.get("/desk", follow_redirects=False)
         assert desk.status_code == 307 and desk.headers["location"] == "/research"
         sn = c.get("/sniper").text
-        assert 'id="shelf"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="edges"' in sn
+        assert 'id="shelf"' in sn and 'id="gate"' in sn and 'id="order"' in sn and 'id="chart"' in sn and 'id="blotter"' in sn and 'id="kill"' not in sn and 'id="edges"' in sn  # noqa: E501
         cfg = c.get("/sniper/config").json()
         assert cfg["monitors"] == ["volume", "ma_vwap", "rsi", "trend"] and cfg["required"] is None and len(cfg["available"]) == 6
         assert {a["name"] for a in cfg["available"]} >= {"volume", "ma_vwap", "rsi", "trend", "options", "levels"}
@@ -165,7 +154,6 @@ def test_owner_lock():
             # reads, the waitlist and the chat stay public
             assert c.get("/markets/watchlist").status_code == 200 and c.get("/sniper/config").status_code == 200
             assert c.post("/waitlist", json={"name": "Visitor", "email": "v@example.com"}).json()["ok"]
-            assert c.post("/chat", json={"question": "hdfc bank today?"}).status_code == 200
             # header and query forms
             assert c.post("/kill", headers={"X-Owner-Token": "0wn3r-t0k3n"}).status_code == 200
             assert c.post("/kill", headers={"X-Owner-Token": "wrong"}).status_code == 401

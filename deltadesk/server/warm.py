@@ -36,7 +36,6 @@ class Warmer:
         m = self.m
         self._step("indices", m.indices)
         self._step("news", lambda: m.news.refresh())
-        self._step("global", m.global_market)
         try:
             keys = sorted({k for v in m.watchlist.lists.values() for k in v})
             self._step("watchlist quotes", lambda: m.quotes.quotes(keys))
@@ -59,7 +58,6 @@ class Warmer:
             self._step("watchlist stats", lambda: m.wl_stats(keys))
         except Exception:  # noqa: BLE001
             pass
-        self._step("investors", m.investors)
         for code in ("BANKNIFTY", "SENSEX"):
             self._step(f"track {code}", lambda c=code: m.ai_track(c, "short"))
         if getattr(m, "funda", None) is not None:

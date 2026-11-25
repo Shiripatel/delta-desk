@@ -1,12 +1,12 @@
 # Delta Desk — where we are (start here tomorrow)
 
-Updated: 2026-11-22 (second pass: Agents merged into Research, IPO deleted, News chat removed, Research agentic behind a Groq key, Sniper on the site theme, six-link nav; first cleanup pass: text cut on every nav page, one-line footer; Sniper kept, to be redesigned). 21 Nov: (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
+Updated: 2026-11-25 (Sniper blotter and live chart, kill switch off the page, Watchlist parked, unused pages / routes / modules deleted, five-link nav). 22 Nov: (second pass: Agents merged into Research, IPO deleted, News chat removed, Research agentic behind a Groq key, Sniper on the site theme, six-link nav; first cleanup pass: text cut on every nav page, one-line footer; Sniper kept, to be redesigned). 21 Nov: (Research page: a port of Vibe-Trading's Investment Committee swarm, at the user's request and as an exception to the page freeze; nav is seven links). 19 Nov: (Sniper rebuilt with one line per agent after a check of every page found no runtime breakage; agentic-repo review in docs/UX_REVIEW.md; favicon). 18 Nov: local launch with a six-page nav, IPO / Forex / Global / Investors parked, Home trimmed, phone layout fixed, one-click `tools/serve.cmd`. Earlier the same day: reevaluation, owner lock, calendar samples relative to today, the AI score's measured track record (which says the rule has no edge). Repo: https://github.com/Shiripatel/delta-desk · branch `main` · CI green.
 
 ## Resume in three commands
 
 ```
 cd C:\Users\shiri\Downloads\delta-desk
-uv run pytest -q                                   # 64 tests
+uv run pytest -q                                   # 56 tests
 tools\serve.cmd                                    # or: set DD_QUOTES=yahoo && uv run deltadesk serve --speed 120 ; then http://127.0.0.1:8000/
 ```
 
@@ -61,6 +61,28 @@ The user asked for less content and a very clean design before launch. Decisions
   `--header-h` left constant so the measurement cannot feed back), the tablet header keeps brand and status on row one and the nav on
   row two, the theme select hides on phones, News items go to two rows (time · source · impact, then the headline), Home's sentiment
   boxes and radar controls wrap. The design skill records the "less is the rule" principle.
+
+## Sniper blotter and live chart, Watchlist parked, dead code out (25 Nov 2026)
+
+The user's calls: the Sniper chart was not liked ("think like a real trading firm: timestamp, buy, sell, a generated table"),
+then "add live charting"; remove the kill switch; remove Watchlist for now; make the product consistent and remove unnecessary code.
+
+* **Nav is five links:** Home · Heatmap · News · Research · Sniper. Phone bottom bar: Home, Research, Search, News, More.
+* **Sniper, lower half:** a live chart panel (header carries the underlying, the live price and the day change; the last candle
+  ticks in place through `series.update`, a full `setData` only when the bar count or timeframe changes; VWAP and EMA are opt-in
+  toggles, off by default; fills are arrows stamped with their time, the call is a dot stamped `CALL hh:mm`) and under it the
+  **Blotter**: one table, newest first, of every call (decision) and every fill: time (IST, to the second), BUY / SELL, type,
+  instrument, qty, price, stop, target, confidence, status, why. It replaces the "Orders today" table. Calls are the rules
+  agents v0 and the header says so. The synthetic feed draws a sine-like day, so the chart looks artificial until Upstox runs.
+* **Kill switch is off the page.** `POST /kill` stays (owner-locked) and is still tested.
+* **Watchlist is parked:** no nav link, page and API still work at `/watchlist`; the analysis head and the search palette still
+  add to it. It holds the site's only chat (`/agent/chat`).
+* **Deleted as unused:** pages Forex, Global, Investors; `markets/investors.py`, `markets/calendar.py`, `DeskAssistant` (only
+  `find_symbol` and `find_horizon` remain in `markets/chat.py`); routes `/chat`, `/markets/forex-market`, `/markets/forex`,
+  `/markets/global`, `/markets/investors`, `/markets/options`, `/markets/futures`, `/markets/etf`, `/markets/screener`,
+  `/markets/earnings`, `/markets/flows`, `/markets/calendar`, `/markets/news`, `/markets/trending` and their service methods and
+  tests. Kept although no page uses them: the alerts routes (premium tier, Telegram notifier) and `/state`.
+* Pages left: home, heatmap, news, research, sniper, analysis, watchlist (parked), beta, legal. Tests: 56.
 
 ## Merge, delete, real agents, one theme (22 Nov 2026, second pass)
 
@@ -154,9 +176,6 @@ harness replays a recorded stream (`WS_REPLAY`) through every handler with zero 
 | News | `/news` | Bloomberg-style wire from 6 RSS feeds: time, source, headline, stock tags, impact call (good / bad / no impact, lexicon v0, cues shown), filters (impact, watchlist, picked stocks), AI generated summary panel, desk assistant chat (`POST /chat`) | live RSS; assistant answers from quote + council + headlines |
 | Research | `/research` | research teams: one stock in, four agents (bull, bear, risk officer, portfolio manager) run as a task graph with visible tool calls and return one typed decision (long / wait / avoid, confidence, size cap, stop, target) and a report per agent | desk read model on Yahoo; rules v0, prose by a language model when a key is set |
 | Sniper | `/sniper` | dark trading terminal built as a **pipeline canvas** (left to right): a shelf of monitor agents (Volume RVOL, MA/VWAP, RSI, Trend, Options PCR, Levels) the user drags onto the desk or adds with +; each node is one line (name · ▲ long / ▼ short / · neutral · reading; the reason is the tooltip); curved edges coloured by vote flow into the **confluence gate** (`agree / n`, direction, vote bar, `needs k of n`, one word of status) and on to the **order card** (direction, structure, confidence, entry / stop / target on the index, legs, max loss, margin, Approve / Reject). Below: a lightweight-charts candle chart (1/3/5-min, VWAP, EMA 9/21, volume, PDH/PDL, the live order's lines and fill arrows), risk, positions, orders today, and a one-line log that opens on click. Config is `GET/POST /sniper/config` (persisted to `data/sniper.json`). `tools/page_harness.js` replays a recorded stream (`WS_REPLAY`). | synthetic feed only so far; the Upstox feed is written but has never run on a real session |
-| Global | `/global` | dotted world map with the key indices placed by city, region tabs (World, United States, Europe, China & Hong Kong, Japan & Asia, India), index cards for the region, then index futures, commodities, forex, bonds and crypto cards; every card opens the analysis page | Yahoo quotes for all world keys |
-| Investors | `/investors` | cards for well-known investors (style, vehicle, since, holdings count, valued total, today's average move, top holdings with logos); open a card for the full holdings table (stake, market cap, value, LTP, today), row → analysis; sort by value, move or count | seed list with approximate stakes until a shareholding feed fills `data/investors.json` |
-| Forex | `/forex` | INR crosses, world majors, a colour map of pairs, currency-strength meter, all pairs table; every pair links to its chart | Yahoo, delayed |
 | Beta | `/beta` | one centred card: name, email, phone (optional, for WhatsApp); position on the list; live count; the alert-rules UI is off the page (API stays for the premium tier) | waitlist in Postgres when `DATABASE_URL` is set (Neon / Supabase free), else `data/waitlist.jsonl`; every sign-up also pinged to the owner's Telegram |
 | Legal | `/legal` | disclaimer, risk disclosure, terms, privacy, data sources, contact; the same footer is injected on every page | static |
 | Analysis | `/analysis#SYMBOL/3m/fundamental` | every stock, index, FX or commodity click lands here. Two tabs. **Fundamental**, laid out like a stock-analysis site: Overview (key stats, financial performance with chart, about, Delta Desk read, peers), Financials (income statement, balance sheet, cash flow, ratios; Annual / Quarterly / TTM; growth rows; per-row chart; CSV download), Statistics (18 groups incl. Altman Z and Piotroski F), Dividends (per FY, history, splits), History (price table), Profile. **Technical**, investing-style: chart, summary per timeframe, indicators, moving averages, pivots, AI score and council, headlines. Real filings via Yahoo fundamentals plus its dividend / split / monthly price events; cached 12 h. | four fiscal years and ~8 quarters from Yahoo; quarterly cash flows not published for India; no analyst estimates or business description (licensed data) |

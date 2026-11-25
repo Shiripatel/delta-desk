@@ -19,7 +19,7 @@ from collections import Counter, defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
-PAGE_PATHS = {"/", "/watchlist", "/heatmap", "/news", "/forex", "/global", "/research", "/sniper", "/analysis", "/beta", "/legal"}
+PAGE_PATHS = {"/", "/watchlist", "/heatmap", "/news", "/research", "/sniper", "/analysis", "/beta", "/legal"}
 
 
 class Traffic:

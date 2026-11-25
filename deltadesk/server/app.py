@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 PAGES = WEB / "pages"
 PAGE_ROUTES = {"/": "home.html", "/watchlist": "watchlist.html", "/heatmap": "heatmap.html", "/news": "news.html",
-               "/forex": "forex.html", "/global": "global.html", "/investors": "investors.html", "/sniper": "sniper.html",  # noqa: E501
+               "/sniper": "sniper.html",
                "/research": "research.html",
                "/analysis": "analysis.html", "/beta": "beta.html", "/legal": "legal.html"}
 
@@ -42,12 +42,6 @@ class AgentChatIn(BaseModel):
 class ResearchIn(BaseModel):
     query: str = ""
     preset: str = "investment_committee"
-
-
-class ChatIn(BaseModel):
-    question: str = ""
-    symbol: str | None = None
-    news_id: str | None = None
 
 
 class WaitlistIn(BaseModel):
@@ -223,10 +217,6 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     async def favicon():
         return FileResponse(WEB / "static" / "favicon.svg", media_type="image/svg+xml")
 
-    @app.get("/markets/forex-market")
-    async def m_forex_market():
-        return JSONResponse(await asyncio.to_thread(markets.forex_market))
-
     @app.post("/waitlist")
     async def waitlist_join(body: WaitlistIn):
         out = waitlist.join(body.name, body.email, body.phone, body.interests, body.experience, body.whatsapp_ok)
@@ -373,40 +363,11 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(404, f"unknown index {code}")
         return JSONResponse(out)
 
-    @app.get("/markets/options")
-    async def m_options():
-        """The desk's option chain: latest Snapshot and ChainStats from the pipeline (paper feed or broker)."""
-        snap, stats = pipeline.bus.latest.get("snapshot"), pipeline.bus.latest.get("chain")
-        if snap is None:
-            return JSONResponse({"ready": False, "note": "pipeline warming up"})
-        s = _dump(snap)
-        return JSONResponse({"ready": True, "underlying": s["underlying"], "ts": s["ts"], "spot": s["spot"], "fut": s["fut"],
-                            "vix": s["vix"], "expiry": s["expiry"], "atm": s["atm"], "chain": s["chain"],
-                            "stats": _dump(stats) if stats else None, "feed": pipeline.feed.name})
-
     @app.get("/markets/indicators")
     async def m_indicators():
         return JSONResponse(await asyncio.to_thread(markets.indicators))
 
-    @app.get("/markets/futures")
-    async def m_futures():
-        return JSONResponse(await asyncio.to_thread(markets.futures))
-
-    @app.get("/markets/etf")
-    async def m_etf():
-        return JSONResponse(await asyncio.to_thread(markets.etfs))
-
-    @app.get("/markets/forex")
-    async def m_forex():
-        return JSONResponse(await asyncio.to_thread(markets.forex))
-
     # ---- markets: tools --------------------------------------------------------------------
-    @app.get("/markets/screener")
-    async def m_screener(index: str | None = None, sector: str | None = None, chg_min: float | None = None,
-                         chg_max: float | None = None, px_min: float | None = None, px_max: float | None = None,
-                         sort: str = "change_pct", desc: bool = True, limit: int = 100):
-        return JSONResponse(await asyncio.to_thread(markets.screener, index, sector, chg_min, chg_max, px_min, px_max, sort, desc, limit))
-
     @app.get("/markets/search")
     async def m_search(q: str = ""):
         return JSONResponse(markets.search(q))
@@ -429,14 +390,6 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
     @app.get("/markets/peers/{symbol}")
     async def m_peers(symbol: str):
         return JSONResponse(await asyncio.to_thread(markets.peers, symbol))
-
-    @app.get("/markets/global")
-    async def m_global():
-        return JSONResponse(await asyncio.to_thread(markets.global_market))
-
-    @app.get("/markets/investors")
-    async def m_investors():
-        return JSONResponse(await asyncio.to_thread(markets.investors))
 
     @app.get("/markets/watchlist/stats")
     async def m_watchlist_stats(symbols: str = ""):
@@ -518,10 +471,6 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
             raise HTTPException(404, "unknown story")
         return JSONResponse(out)
 
-    @app.post("/chat")
-    async def chat(body: ChatIn):
-        return JSONResponse(await asyncio.to_thread(markets.assistant.answer, body.question, body.symbol, body.news_id))
-
     @app.get("/markets/council")
     async def m_council(symbol: str = "HDFCBANK", horizon: str = "1d"):
         return JSONResponse(await asyncio.to_thread(markets.council_run, symbol, horizon))
@@ -564,30 +513,10 @@ def create_app(pipeline: Pipeline, cycles: int | None = None, markets: MarketsSe
         markets.watchlist.remove(name, symbol.upper() if not symbol.startswith("FUT:") else symbol)
         return JSONResponse(markets.watchlists())
 
-    @app.get("/markets/earnings")
-    async def m_earnings():
-        return JSONResponse(markets.earnings())
-
-    @app.get("/markets/flows")
-    async def m_flows():
-        return JSONResponse(markets.flows())
-
     @app.post("/markets/refresh-constituents", dependencies=OWNER)
     async def m_refresh():
         done = await asyncio.to_thread(universe.refresh_from_nse)
         return JSONResponse({"refreshed": done})
 
     # ---- markets: news ---------------------------------------------------------------------
-    @app.get("/markets/news")
-    async def m_news(force: bool = False):
-        return JSONResponse(await asyncio.to_thread(markets.headlines, force))
-
-    @app.get("/markets/trending")
-    async def m_trending():
-        return JSONResponse(await asyncio.to_thread(markets.trending))
-
-    @app.get("/markets/calendar")
-    async def m_calendar():
-        return JSONResponse(markets.calendar())
-
     return app

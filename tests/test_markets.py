@@ -1,7 +1,5 @@
-from datetime import date
 from pathlib import Path
 
-from deltadesk.markets import calendar as cal
 from deltadesk.markets import universe
 from deltadesk.markets.news import NewsService
 from deltadesk.markets.service import MarketsService
@@ -35,18 +33,6 @@ def test_indices_and_constituents(tmp_path):
     assert s.index("NOPE") is None
 
 
-def test_other_asset_classes(tmp_path):
-    s = _svc(tmp_path)
-    futs = s.futures()                                   # today's near and next month; a fixed date goes stale once it expires
-    expected = [c["expiry"] for c in universe.futures_contracts(date.today())]
-    assert len(futs) == 8 and [f["expiry"] for f in futs] == expected and futs[0]["expiry"] < futs[1]["expiry"]
-    assert all(f["quote"] and f["basis"] is not None for f in futs)
-    etfs = s.etfs()
-    assert any(e["symbol"] == "NIFTYBEES" and e["quote"] for e in etfs)
-    fx = s.forex()
-    assert any(f["symbol"] == "USDINR" and 60 < f["quote"]["ltp"] < 120 for f in fx)
-
-
 def test_indicators_and_global_search(tmp_path):
     s = _svc(tmp_path)
     ind = s.indicators()
@@ -59,28 +45,6 @@ def test_indicators_and_global_search(tmp_path):
     assert s.known("US10Y")
     s.watchlist.add("My watchlist", "GOLD")
     assert any(r["key"] == "GOLD" and r["kind"] == "global" and r["quote"] for r in s.watchlists()["lists"]["My watchlist"])
-
-
-def test_forex_market_and_strength(tmp_path):
-    s = _svc(tmp_path)
-    fx = s.forex_market()
-    assert [p["key"] for p in fx["inr"]] == ["USDINR", "EURINR", "GBPINR", "JPYINR"] and len(fx["world"]) == 10
-    assert all(p["quote"] for p in fx["inr"] + fx["world"])
-    ccys = {m["ccy"] for m in fx["strength"]}
-    assert {"INR", "USD", "EUR", "GBP", "JPY", "CNY", "AUD", "CAD", "CHF"} <= ccys
-    assert fx["strength"] == sorted(fx["strength"], key=lambda m: -m["score"])
-    assert any(h["key"] == "EURUSD" and h["kind"] == "forex" for h in s.search("euro"))
-
-
-def test_screener(tmp_path):
-    s = _svc(tmp_path)
-    all_rows = s.screener()
-    assert all_rows["count"] >= 100
-    banks = s.screener(index="BANKNIFTY", sort="ltp", desc=False, limit=5)
-    assert banks["count"] == 12 and len(banks["entries"]) == 5
-    assert banks["entries"][0]["quote"]["ltp"] <= banks["entries"][-1]["quote"]["ltp"]
-    it = s.screener(sector="IT", chg_min=-100)
-    assert it["count"] > 0 and all(r["sector"] == "IT" for r in it["entries"])
 
 
 def test_watchlist_persists_and_quotes(tmp_path):
@@ -119,28 +83,6 @@ def test_watchlist_limits_and_presets(tmp_path):
     assert len(s.watchlist.lists) == 12
 
 
-def test_search_calendars_news(tmp_path):
-    s = _svc(tmp_path)
-    hits = s.search("hdfc")
-    assert hits and hits[0]["key"].startswith("HDFC")
-    assert any(h["kind"] == "index" for h in s.search("nifty"))
-    assert any(h["kind"] == "etf" for h in s.search("bees"))
-    c = s.calendar()
-    assert any(r.get("computed") and "NIFTY weekly" in r["title"] for r in c["entries"])
-    assert s.earnings()["entries"] and s.flows()["totals"]["days"] >= 1
-    news = s.headlines()
-    assert news["entries"] == [] and news["errors"]           # offline path keeps working
-    assert s.trending()["entries"] == []
-
-
-def test_expiry_rules_shift_for_holidays():
-    rows = cal.expiries(date(2026, 9, 18), holidays={date(2026, 9, 22)}, weeks=1)
-    dates = {r["title"]: r["date"] for r in rows}
-    assert dates["NIFTY weekly expiry"] == "2026-09-21"          # Tuesday holiday -> Monday
-    assert dates["SENSEX weekly expiry (BSE)"] == "2026-09-24"
-    assert any(r["date"] == "2026-09-29" and r["title"].startswith("Monthly") for r in rows)
-
-
 def test_nse_csv_parser_overrides_seed():
     text = "Company Name,Industry,Symbol,Series,ISIN Code\nTest Co,Widgets,TESTCO,EQ,INE000A01001\n"
     old = universe.INDICES["BANKNIFTY"].constituents
@@ -151,17 +93,3 @@ def test_nse_csv_parser_overrides_seed():
     finally:
         universe.INDICES["BANKNIFTY"].constituents = old
 
-
-def test_calendar_samples_track_today():
-    """Sample rows are dated relative to today, so they never expire and never move a real expiry."""
-    today = date(2026, 11, 18)
-    assert cal.quarter_label(today) == "Q2 FY27" and cal.quarter_label(date(2027, 1, 15)) == "Q3 FY27"
-    assert cal.quarter_label(date(2027, 4, 20)) == "Q4 FY27" and cal.quarter_label(date(2027, 7, 20)) == "Q1 FY28"
-    e = cal.earnings(today)["entries"]
-    assert len(e) == 3 and all(r["example"] and r["date"] > today.isoformat() and r["quarter"] == "Q2 FY27" for r in e)
-    assert all(date.fromisoformat(r["date"]).weekday() < 5 for r in e)
-    f = cal.flows(today)
-    assert f["totals"]["days"] == 5 and f["entries"][-1]["date"] == "2026-11-17" and f["entries"][0]["date"] == "2026-11-11"
-    c = cal.financial_calendar(today)["entries"]
-    assert all(r["date"] >= today.isoformat() for r in c) and not any(r.get("kind") == "holiday" for r in c)
-    assert any(r.get("computed") and "NIFTY weekly" in r["title"] for r in c)

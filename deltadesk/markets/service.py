@@ -6,13 +6,10 @@ from collections import defaultdict
 from dataclasses import asdict
 from datetime import date
 
-from deltadesk.markets import calendar as cal
-from deltadesk.markets import investors as inv
 from deltadesk.markets import technicals as ta
 from deltadesk.markets import universe
 from deltadesk.markets.agent_chat import AgentChat
 from deltadesk.markets.ai_rank import AiRanker, SyntheticHistory
-from deltadesk.markets.chat import DeskAssistant
 from deltadesk.markets.council import Council, SyntheticBars, chart_bars
 from deltadesk.markets.fundamentals import YahooFundamentals
 from deltadesk.markets.news import NewsService
@@ -33,7 +30,6 @@ class MarketsService:
         self.funda = fundamentals
         if self.funda is not None and self.council.fundamentals is None:
             self.council.fundamentals = self.funda.council_summary
-        self.assistant = DeskAssistant(self)
         self.agent = AgentChat(self)
         self.research = Research(self, self.agent.llm)
         self._wl_stats: dict[str, tuple[float, dict]] = {}
@@ -75,17 +71,6 @@ class MarketsService:
                 "gainers": ranked[:5], "losers": ranked[-5:][::-1]}
 
     # ---- other asset classes --------------------------------------------------------------
-    def futures(self, today: date | None = None) -> list[dict]:
-        cons = universe.futures_contracts(today or date.today())
-        q = self.quotes.quotes([c["key"] for c in cons] + [c["underlying"] for c in cons])
-        out = []
-        for c in cons:
-            fq, sq = q.get(c["key"]), q.get(c["underlying"])
-            basis = round(fq.ltp - sq.ltp, 2) if fq and sq else None
-            out.append({**c, "quote": fq.json() if fq else None, "spot": sq.ltp if sq else None, "basis": basis,
-                        "underlying_name": universe.INDICES[c["underlying"]].name})
-        return out
-
     def indicators(self) -> list[dict]:
         """India indices plus the global indicators people watch: rupee, gold, silver, crude, crypto, US yields, world indices."""
         keys = ["NIFTY50", "BANKNIFTY", "SENSEX", "INDIAVIX"] + list(universe.INDICATORS)
@@ -97,65 +82,6 @@ class MarketsService:
         for g in (universe.GLOBAL_BY_KEY[k] for k in universe.INDICATORS):
             out.append({"key": g[0], "name": g[1], "group": g[5], "unit": g[4], "decimals": g[3], "quote": q[g[0]].json() if g[0] in q else None})  # noqa: E501
         return out
-
-    def etfs(self) -> list[dict]:
-        q = self.quotes.quotes([e[0] for e in universe.ETFS])
-        return [{"symbol": s, "name": n, "tracks": t, "quote": q[s].json() if s in q else None} for s, n, t, _ in universe.ETFS]
-
-    def forex(self) -> list[dict]:
-        q = self.quotes.quotes([f[0] for f in universe.FX])
-        return [{"symbol": s, "name": n, "detail": d, "quote": q[s].json() if s in q else None} for s, n, d, _ in universe.FX]
-
-    def forex_market(self) -> dict:
-        """INR crosses, world majors, and a currency-strength meter (average day change of each currency vs the others)."""
-        inr_keys = [f[0] for f in universe.FX]
-        world_keys = [f[0] for f in universe.FX_WORLD]
-        q = self.quotes.quotes(inr_keys + world_keys + ["DXY"])
-        inr = [{"key": s, "name": n, "detail": d, "base": universe.FX_INR[s][0], "quote_ccy": "INR", "decimals": 4, "group": "inr",
-                "quote": q[s].json() if s in q else None} for s, n, d, _ in universe.FX]
-        world = [{"key": k, "name": n, "detail": f"{b}/{c}", "base": b, "quote_ccy": c, "decimals": d, "group": "world",
-                  "quote": q[k].json() if k in q else None} for k, n, _, d, b, c, _ in universe.FX_WORLD]
-        strength: dict[str, list[float]] = {}
-        for p in inr + world:
-            qq = p["quote"]
-            if not qq:
-                continue
-            strength.setdefault(p["base"], []).append(qq["change_pct"])
-            strength.setdefault(p["quote_ccy"], []).append(-qq["change_pct"])
-        meter = sorted(({"ccy": c, "score": round(sum(v) / len(v), 3), "pairs": len(v)} for c, v in strength.items()), key=lambda x: -x["score"])  # noqa: E501
-        dxy = q.get("DXY")
-        return {"inr": inr, "world": world, "strength": meter, "dxy": dxy.json() if dxy else None,
-                "note": "Strength is the average day change of a currency across the pairs shown, positive means it strengthened. Not advice."}  # noqa: E501
-
-    def screener(self, index: str | None = None, sector: str | None = None, chg_min: float | None = None,
-                 chg_max: float | None = None, px_min: float | None = None, px_max: float | None = None,
-                 sort: str = "change_pct", desc: bool = True, limit: int = 100) -> dict:
-        if index and index.upper() in universe.INDICES:
-            cons = {c.symbol: c for c in universe.INDICES[index.upper()].constituents}
-        else:
-            cons = universe.all_symbols()
-        q = self.quotes.quotes(list(cons))
-        rows = []
-        for s, c in cons.items():
-            qq = q.get(s)
-            if qq is None:
-                continue
-            if sector and c.sector.lower() != sector.lower():
-                continue
-            if chg_min is not None and qq.change_pct < chg_min:
-                continue
-            if chg_max is not None and qq.change_pct > chg_max:
-                continue
-            if px_min is not None and qq.ltp < px_min:
-                continue
-            if px_max is not None and qq.ltp > px_max:
-                continue
-            pos = round((qq.ltp - qq.low) / (qq.high - qq.low), 2) if qq.high > qq.low else 0.5
-            rows.append({**asdict(c), "quote": qq.json(), "range_pos": pos})
-        key = (lambda r: r["quote"].get(sort, 0)) if sort in ("change_pct", "ltp", "volume", "change") else (lambda r: r.get(sort, 0))
-        rows.sort(key=key, reverse=desc)
-        sectors = sorted({c.sector for c in universe.all_symbols().values()})
-        return {"count": len(rows), "entries": rows[:limit], "sectors": sectors, "indices": list(universe.INDICES)}
 
     # ---- search and watchlist ---------------------------------------------------------------
     def _name(self, k: str) -> tuple[str, str, str]:
@@ -219,20 +145,6 @@ class MarketsService:
             name, kind, sector = self._name(k)
             return {"key": k, "name": name, "kind": kind, "sector": sector, "quote": q[k].json() if k in q else None}
         return {"lists": {name: [row(k) for k in keys_] for name, keys_ in self.watchlist.lists.items()}, "max_symbols": 50, "max_lists": 12}  # noqa: E501
-
-    def investors(self) -> dict:
-        """Famous investors' portfolios valued with live quotes; market caps from the fundamentals provider when configured."""
-        def caps(keys: list[str]) -> dict:
-            if self.funda is None:
-                return {}
-            from concurrent.futures import ThreadPoolExecutor
-
-            def one(k: str) -> tuple[str, float | None]:
-                a = self.funda.analysis(k)
-                return k, ((a.get("snapshot") or {}).get("market_cap_cr") if a and not a.get("error") else None)
-            with ThreadPoolExecutor(max_workers=8) as ex:
-                return {k: v for k, v in ex.map(one, keys) if v}
-        return inv.load(quotes=self.quotes.quotes, market_caps=caps, names=self._name)
 
     def wl_stats(self, symbols: list[str]) -> dict:
         """Week and month change plus the 52-week range from daily bars; cached half an hour per symbol."""
@@ -317,41 +229,7 @@ class MarketsService:
                         "revenue_cagr_3y": sn.get("revenue_cagr_3y"), "eps_cagr_3y": sn.get("eps_cagr_3y"), "debt_equity": sn.get("debt_equity")})  # noqa: E501
         return {"symbol": symbol, "sector": me.sector, "rows": out, "valuation": self.funda is not None}
 
-    def global_market(self) -> dict:
-        """World map read model: key indices placed by city, grouped by region, plus futures, commodities, FX, bonds, crypto."""
-        keys = [m[0] for m in universe.WORLD_MAP] + [k for _, ks in universe.GLOBAL_SECTIONS for k in ks]
-        q = self.quotes.quotes(sorted(set(keys)))
-
-        def item(k: str) -> dict:
-            if k in universe.INDICES:
-                name, dec, unit = universe.INDICES[k].name, 2, "index"
-            elif k in universe.GLOBAL_BY_KEY:
-                g = universe.GLOBAL_BY_KEY[k]
-                name, dec, unit = g[1], g[3], g[4]
-            elif k in universe.FX_WORLD_BY_KEY:
-                f = universe.FX_WORLD_BY_KEY[k]
-                name, dec, unit = f[1], f[3], f"{f[4]}/{f[5]}"
-            else:
-                name, dec, unit = k, 2, ""
-            return {"key": k, "name": name, "decimals": dec, "unit": unit, "quote": q[k].json() if k in q else None}
-        markers = [{**item(m[0]), "city": m[1], "lat": m[2], "lon": m[3], "region": m[4]} for m in universe.WORLD_MAP]
-        return {"regions": [{"code": c, "name": n} for c, n in universe.REGIONS], "markers": markers,
-                "sections": [{"name": n, "items": [item(k) for k in ks]} for n, ks in universe.GLOBAL_SECTIONS],
-                "source": self.quotes.name, "delay_min": getattr(self.quotes, "delay_min", 0)}
-
     # ---- calendars, flows, news ---------------------------------------------------------
-    @staticmethod
-    def calendar() -> dict:
-        return cal.financial_calendar()
-
-    @staticmethod
-    def earnings() -> dict:
-        return cal.earnings()
-
-    @staticmethod
-    def flows() -> dict:
-        return cal.flows()
-
     def ai_rank(self, index: str | None = None, limit: int = 50, mode: str = "short") -> dict:
         return self.ai.rank(index, limit, mode)
 
@@ -366,9 +244,3 @@ class MarketsService:
 
     def council_run(self, symbol: str, horizon: str = "1d") -> dict:
         return self.council.run(symbol, horizon)
-
-    def headlines(self, force: bool = False) -> dict:
-        return self.news.headlines(force=force)
-
-    def trending(self) -> dict:
-        return self.news.trending()
